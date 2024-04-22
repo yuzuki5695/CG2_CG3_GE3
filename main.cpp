@@ -112,11 +112,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	);
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
 	ID3D12Debug1* debugController = nullptr;
-	if (SUCCEEDED(ID3D12DebugInterface(IID_PPV_ARGS(&debugController)))) {
-
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		//デバックレイヤーを有効化する
 		debugController->EnableDebugLayer();
 		//さらにGPU側でもチェックを行うようにする
@@ -191,38 +190,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(device != nullptr);
 	Log("Complete create D3D12Device!!!\n");	//初期化完了のログを出す
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
 	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 		//ヤバイエラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTIOM, true);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 		//エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		//警告時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-		//解放
-		infoQueue->Release();
 
 		//抑制するメッセージもID
-		ID3D12_MESSAGE_ID denyIds[] = {
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LTST_TYPE
+		D3D12_MESSAGE_ID denyIds[] = {
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
 		};
 		//抑制レベル
-		ID3D12_MESSAGE_SEVERITY severities[] = { ID3D12_MESSAGE_SEVERITY_INFO };
-		ID3D12_INFO_QUEUE_FILTER filter{};
+		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
+		D3D12_INFO_QUEUE_FILTER filter{};
 		filter.DenyList.NumIDs = _countof(denyIds);
 		filter.DenyList.pIDList = denyIds;
 		filter.DenyList.NumSeverities = _countof(severities);
 		filter.DenyList.pSeverityList = severities;
 		//指定したメッセージの表示を抑制
 		infoQueue->PushStorageFilter(&filter);
+		//解放
+		infoQueue->Release();
 	}
 
 #endif 
-
-
-
-
 
 
 	//コマンドキュー生成
@@ -294,14 +289,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
-
 	typedef struct D3D12_CPU_DESCRIPTOP_HANDLE {
 
 		SIZE_T ptr;
 
 	}; D3D12_CPU_DESCRIPTOP_HANDLE;
-
-
 
 	rtvHandles[0] = rtvStartHandle;
 	rtvHandles[1].ptr= rtvHandles[0].ptr+device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -317,9 +309,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hr = commandList->Close();
 	assert(SUCCEEDED(hr));
 
-
-
-
 	//CPUにコマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(1, commandLists);
@@ -330,14 +319,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator,nullptr);
 	assert(SUCCEEDED(hr));
-
-
-
-
-
-
-
-
 
 
 	MSG msg{};
