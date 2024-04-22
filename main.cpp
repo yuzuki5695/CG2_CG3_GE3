@@ -1,12 +1,13 @@
 #include <Windows.h>
-#pragma comment(lib,"d3d12.lib")
-#pragma comment(lib,"dxgi.lib")
 #include <cstdint>
 #include <string>
 #include <format>
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
+
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
 
 
 //クライアント領域のサイズ
@@ -120,7 +121,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		debugController->EnableDebugLayer();
 		//さらにGPU側でもチェックを行うようにする
 		debugController->SetEnableGPUBasedValidation(TRUE);
-     }
+	}
 #endif 
 
 
@@ -190,7 +191,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(device != nullptr);
 	Log("Complete create D3D12Device!!!\n");	//初期化完了のログを出す
 
-
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
 	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -200,6 +200,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		//警告時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		//解放
+		infoQueue->Release();
 
 		//抑制するメッセージもID
 		D3D12_MESSAGE_ID denyIds[] = {
@@ -212,14 +214,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		filter.DenyList.pIDList = denyIds;
 		filter.DenyList.NumSeverities = _countof(severities);
 		filter.DenyList.pSeverityList = severities;
+
 		//指定したメッセージの表示を抑制
 		infoQueue->PushStorageFilter(&filter);
-		//解放
-		infoQueue->Release();
+
 	}
-
 #endif 
-
 
 	//コマンドキュー生成
 	ID3D12CommandQueue* commandQueue = nullptr;
@@ -252,7 +252,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	//コマンドキュー、ウィンドハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue,hwnd,&swapChainDesc,nullptr,nullptr,reinterpret_cast<IDXGISwapChain1**>(&swapChain));
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
 	//生成が上手くいかず起動できない
 	assert(SUCCEEDED(hr));
 
@@ -269,6 +269,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//SwapChainからResourceを引っ張ってくる
 	ID3D12Resource* swapChainResources[2] = { nullptr };
 	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
+
 	//生成が上手くいかず起動できない
 	assert(SUCCEEDED(hr));
 	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
@@ -278,49 +279,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
+
 	//ディスクリプタの先頭をして取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
 	//2のディスクリプタを用意
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	rtvHandles[0] = rtvStartHandle;
+
 	//１つ目を作成(最初は作る場所を指定する必要がある)
 	device->CreateRenderTargetView(swapChainResources[0], &rtvDesc, rtvHandles[0]);
+
 	//２つ目を作成(自力で作成する)
 	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
-	typedef struct D3D12_CPU_DESCRIPTOP_HANDLE {
-
-		SIZE_T ptr;
-
-	}; D3D12_CPU_DESCRIPTOP_HANDLE;
-
-	rtvHandles[0] = rtvStartHandle;
-	rtvHandles[1].ptr= rtvHandles[0].ptr+device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+
 	//描画先のRTVを設定する
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
 	//指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
 	//コマンドリスの内容を確定。全て積んでからCloseすること
 	hr = commandList->Close();
 	assert(SUCCEEDED(hr));
 
-	//CPUにコマンドリストの実行を行わせる
+	//GPUにコマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(1, commandLists);
+
 	//GPUとOSに画面の交換を行うように通知する
 	swapChain->Present(1, 0);
-	hr = commandAllocator->Reset();
-	assert(SUCCEEDED(hr));
-	//次のフレーム用のコマンドリストを準備
-	hr = commandList->Reset(commandAllocator,nullptr);
-	assert(SUCCEEDED(hr));
 
+	//次のフレーム用のコマンドリストを準備
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
 
 	MSG msg{};
 	//ウィンドウのｘボタンが押されるまでループ
