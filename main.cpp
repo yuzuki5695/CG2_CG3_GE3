@@ -177,6 +177,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Log("Complete create D3D12Device!!!\n");	//初期化完了のログを出す
 
 
+
+
 	//コマンドキュー生成
 	ID3D12CommandQueue* commandQueue = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commasndQueueDesc{};
@@ -191,8 +193,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 	//コマンドリスト生成
-	ID3D12GraphicsCommandList* commandlist = nullptr;
-	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandAllocator));
+	ID3D12GraphicsCommandList* commandList = nullptr;
+	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
 	//生成が上手くいかず起動できない
 	assert(SUCCEEDED(hr));
 
@@ -210,7 +212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//コマンドキュー、ウィンドハンドル、設定を渡して生成する
 	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue,hwnd,&swapChainDesc,nullptr,nullptr,reinterpret_cast<IDXGISwapChain1**>(&swapChain));
 	//生成が上手くいかず起動できない
-	assert(SUCCEEDED(hr);
+	assert(SUCCEEDED(hr));
 
 
 	//ディスクリプタヒープの生成
@@ -220,30 +222,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rtvDescriptorHeapDesc.NumDescriptors = 2;
 	hr = device->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap));
 	//生成が上手くいかず起動できない
-	assert(SUCCEEDED(hr);
+	assert(SUCCEEDED(hr));
 
 	//SwapChainからResourceを引っ張ってくる
-	ID3D12Resource* swapChainResource[2] = { nullptr };
-	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResource[0]));
+	ID3D12Resource* swapChainResources[2] = { nullptr };
+	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
 	//生成が上手くいかず起動できない
-	assert(SUCCEEDED(hr);
-	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResource[1]));
-	assert(SUCCEEDED(hr);
+	assert(SUCCEEDED(hr));
+	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
+	assert(SUCCEEDED(hr));
 
 	//RTVの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
 	//ディスクリプタの先頭をして取得
-	D3D12_CPU_DESCRIPTOP_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	//2のディスクリプタを用意
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	rtvHandles[0] = rtvStartHandle;
 	//１つ目を作成(最初は作る場所を指定する必要がある)
-	device->CreateRenderTargetView(swapChaiResources[0], &rtvDesc, rtvHandles[0]);
+	device->CreateRenderTargetView(swapChainResources[0], &rtvDesc, rtvHandles[0]);
 	//２つ目を作成(自力で作成する)
-	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOP_HEAP_TYPE_RTV);
-	device->CreateRenderTargetView(swapChaiResources[1], &rtvDesc, rtvHandles[1]);
+	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
 
@@ -256,32 +258,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	rtvHandles[0] = rtvStartHandle;
-	rtvHandles[1].ptr= rtvHandles[0].ptr+device-> > GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOP_HEAP_TYPE_RTV);
+	rtvHandles[1].ptr= rtvHandles[0].ptr+device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 	//描画先のRTVを設定する
-	commandlist->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
 	//指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	commandlist->ClearRanderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 	//コマンドリスの内容を確定。全て積んでからCloseすること
-	hr = commandlist->Close();
-	assert(SUCCEEDED(hr);
+	hr = commandList->Close();
+	assert(SUCCEEDED(hr));
 
 
 
 
 	//CPUにコマンドリストの実行を行わせる
-	D3D12CommandList* commandLists[] = { commandList };
+	ID3D12CommandList* commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(1, commandLists);
 	//GPUとOSに画面の交換を行うように通知する
 	swapChain->Present(1, 0);
 	hr = commandAllocator->Reset();
-	assert(SUCCEEDED(hr);
+	assert(SUCCEEDED(hr));
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator,nullptr);
-	assert(SUCCEEDED(hr);
+	assert(SUCCEEDED(hr));
 
 
 
