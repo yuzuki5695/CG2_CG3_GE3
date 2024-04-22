@@ -347,16 +347,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hr = commandList->Reset(commandAllocator,nullptr);
 	assert(SUCCEEDED(hr));
 
+	//初期値で0でfenceを作る
+	ID3D12Fence* fence = nullptr;
+	uint64_t fenceValue = 0;
+	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	assert(SUCCEEDED(hr));
 
+	//FenceのSignalを待つためのイベントを作成する
+	HANDLE fenceEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
+	assert(fenceEvent != nullptr);
+
+	//fenceの値を更新
 	fenceValue++;
-
+	//GPUがここまでたどり着いた時に。Fenceの値を指定した値に代入するようにSignalを送る
 	commandQueue->Signal(fence, fenceValue);
 	
 	//Fenceの値が指定したSingnal値に
 	//GetCompletedValueの初期値はFence作成時に渡した初期値
 	if(fence->GetCompletedValue() < fenceValue){
 	//指定したsighalにたどりついていないので、たどり着くまで待つようにイベントを設定する
-	fence->GetEventOnCompletion(fenceValue, fenceEvent);
+	fence->SetEventOnCompletion(fenceValue, fenceEvent);
 	//イベントを待つ
 	WaitForSingleObject(fenceEvent, INFINITE);
 	
