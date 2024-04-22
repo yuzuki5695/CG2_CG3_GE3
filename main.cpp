@@ -112,16 +112,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	);
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
 	ID3D12Debug1* debugController = nullptr;
-	if (SUCCEEDED(ID3D12DebugInterface(IID_PPV_ARGS(&debugController)))) {
-
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		//デバックレイヤーを有効化する
 		debugController->EnableDebugLayer();
 		//さらにGPU側でもチェックを行うようにする
 		debugController->SetEnableGPUBasedValidation(TRUE);
-     }
+	}
 #endif 
 
 
