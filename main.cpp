@@ -8,6 +8,7 @@
 #include <dxgi1_6.h>
 #include <cassert>
 
+
 //クライアント領域のサイズ
 const uint32_t kClientWidth = 1280;
 const uint32_t kClientHeight = 720;
@@ -110,6 +111,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		nullptr
 	);
 
+
+#ifdef DEBUG
+
+	ID3D12Debug1* debugController = nullptr;
+	if (SUCCEEDED(ID3D12DebugInterface(IID_PPV_ARGS(&debugController)))) {
+
+		//デバックレイヤーを有効化する
+		debugController->EnableDebugLayer();
+		//さらにGPU側でもチェックを行うようにする
+		debugController->SetEnableGPUBasedValidation(TRUE);
+     }
+#endif 
+
+
 	//ウィンドウを表示
 	ShowWindow(hwnd, SW_SHOW);
 
@@ -175,6 +190,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
 	Log("Complete create D3D12Device!!!\n");	//初期化完了のログを出す
+
+#ifdef DEBUG
+	ID3D12InfoQueue* infoQueue = nullptr;
+	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+		//ヤバイエラー時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTIOM, true);
+		//エラー時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		//警告時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		//解放
+		infoQueue->Release();
+
+		//抑制するメッセージもID
+		ID3D12_MESSAGE_ID denyIds[] = {
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LTST_TYPE
+		};
+		//抑制レベル
+		ID3D12_MESSAGE_SEVERITY severities[] = { ID3D12_MESSAGE_SEVERITY_INFO };
+		ID3D12_INFO_QUEUE_FILTER filter{};
+		filter.DenyList.NumIDs = _countof(denyIds);
+		filter.DenyList.pIDList = denyIds;
+		filter.DenyList.NumSeverities = _countof(severities);
+		filter.DenyList.pSeverityList = severities;
+		//指定したメッセージの表示を抑制
+		infoQueue->PushStorageFilter(&filter);
+	}
+
+#endif 
+
+
 
 
 
@@ -284,6 +330,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator,nullptr);
 	assert(SUCCEEDED(hr));
+
+
+
+
 
 
 
