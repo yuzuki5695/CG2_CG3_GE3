@@ -1,6 +1,4 @@
 #include <Windows.h>
-#pragma comment(lib,"d3d12.lib")
-#pragma comment(lib,"dxgi.lib")
 #include <cstdint>
 #include <string>
 #include <format>
@@ -8,8 +6,10 @@
 #include <dxgi1_6.h>
 #include <cassert>
 #include<dxgidebug.h>
-#pragma comment(lib,"dxguid.lib")
 
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
+#pragma comment(lib,"dxguid.lib")
 
 //クライアント領域のサイズ
 const uint32_t kClientWidth = 1280;
@@ -192,11 +192,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(device != nullptr);
 	Log("Complete create D3D12Device!!!\n");	//初期化完了のログを出す
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
 	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 		//ヤバイエラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTIOM, true);
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 		//エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		//警告時に止まる
@@ -205,20 +205,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		infoQueue->Release();
 
 		//抑制するメッセージもID
-		ID3D12_MESSAGE_ID denyIds[] = {
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LTST_TYPE
+		D3D12_MESSAGE_ID denyIds[] = {
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
 		};
 		//抑制レベル
-		ID3D12_MESSAGE_SEVERITY severities[] = { ID3D12_MESSAGE_SEVERITY_INFO };
-		ID3D12_INFO_QUEUE_FILTER filter{};
+		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
+		D3D12_INFO_QUEUE_FILTER filter{};
 		filter.DenyList.NumIDs = _countof(denyIds);
 		filter.DenyList.pIDList = denyIds;
 		filter.DenyList.NumSeverities = _countof(severities);
 		filter.DenyList.pSeverityList = severities;
+
 		//指定したメッセージの表示を抑制
 		infoQueue->PushStorageFilter(&filter);
-	}
 
+	}
 #endif 
 
 	//コマンドキュー生成
@@ -252,7 +253,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	//コマンドキュー、ウィンドハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue,hwnd,&swapChainDesc,nullptr,nullptr,reinterpret_cast<IDXGISwapChain1**>(&swapChain));
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
 	//生成が上手くいかず起動できない
 	assert(SUCCEEDED(hr));
 
@@ -269,6 +270,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//SwapChainからResourceを引っ張ってくる
 	ID3D12Resource* swapChainResources[2] = { nullptr };
 	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
+
 	//生成が上手くいかず起動できない
 	assert(SUCCEEDED(hr));
 	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
@@ -278,29 +280,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
+
 	//ディスクリプタの先頭をして取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
 	//2のディスクリプタを用意
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	rtvHandles[0] = rtvStartHandle;
+
 	//１つ目を作成(最初は作る場所を指定する必要がある)
 	device->CreateRenderTargetView(swapChainResources[0], &rtvDesc, rtvHandles[0]);
+
 	//２つ目を作成(自力で作成する)
 	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
-
-	typedef struct D3D12_CPU_DESCRIPTOP_HANDLE {
-
-		SIZE_T ptr;
-
-	}; D3D12_CPU_DESCRIPTOP_HANDLE;
-
-
-
-	rtvHandles[0] = rtvStartHandle;
-	rtvHandles[1].ptr= rtvHandles[0].ptr+device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -329,8 +324,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	//画面に描く処理は全て終わり、画面に移すので、状態を還元
 	//今回はRenderTargetからPresentにする
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	//TransitionBarrierを張る
 	commandList->ResourceBarrier(1, &barrier);
 
@@ -338,16 +333,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hr = commandList->Close();
 	assert(SUCCEEDED(hr));
 
-	//CPUにコマンドリストの実行を行わせる
+	//GPUにコマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(1, commandLists);
+
 	//GPUとOSに画面の交換を行うように通知する
 	swapChain->Present(1, 0);
-	hr = commandAllocator->Reset();
-	assert(SUCCEEDED(hr));
-	//次のフレーム用のコマンドリストを準備
-	hr = commandList->Reset(commandAllocator,nullptr);
-	assert(SUCCEEDED(hr));
+
 
 	//初期値で0でfenceを作る
 	ID3D12Fence* fence = nullptr;
@@ -356,24 +348,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 	//FenceのSignalを待つためのイベントを作成する
-	HANDLE fenceEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 
 	//fenceの値を更新
 	fenceValue++;
 	//GPUがここまでたどり着いた時に。Fenceの値を指定した値に代入するようにSignalを送る
 	commandQueue->Signal(fence, fenceValue);
-	
-	//Fenceの値が指定したSingnal値に
+
+	//Fenceの値が指定したSingnal値にたどり着いているか確認する
 	//GetCompletedValueの初期値はFence作成時に渡した初期値
-	if(fence->GetCompletedValue() < fenceValue){
-	//指定したsighalにたどりついていないので、たどり着くまで待つようにイベントを設定する
-	fence->SetEventOnCompletion(fenceValue, fenceEvent);
-	//イベントを待つ
-	WaitForSingleObject(fenceEvent, INFINITE);
-	
+	if (fence->GetCompletedValue() < fenceValue) {
+		//指定したsighalにたどりついていないので、たどり着くまで待つようにイベントを設定する
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+		//イベントを待つ
+		WaitForSingleObject(fenceEvent, INFINITE);
+
 	}
 
+	//次のフレーム用のコマンドリストを準備
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
 
 	MSG msg{};
 	//ウィンドウのｘボタンが押されるまでループ
