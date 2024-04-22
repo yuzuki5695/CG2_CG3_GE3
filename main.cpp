@@ -348,9 +348,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 
+	fenceValue++;
 
-
-
+	commandQueue->Signal(fence, fenceValue);
 
 
 
