@@ -222,7 +222,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//生成が上手くいかず起動できない
 	assert(SUCCEEDED(hr);
 
-
+	//SwapChainからResourceを引っ張ってくる
 	ID3D12Resource* swapChainResource[2] = { nullptr };
 	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResource[0]));
 	//生成が上手くいかず起動できない
@@ -230,9 +230,54 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResource[1]));
 	assert(SUCCEEDED(hr);
 
+	//RTVの設定
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
+	//ディスクリプタの先頭をして取得
+	D3D12_CPU_DESCRIPTOP_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	//2のディスクリプタを用意
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
+	rtvHandles[0] = rtvStartHandle;
+	//１つ目を作成(最初は作る場所を指定する必要がある)
+	device->CreateRenderTargetView(swapChaiResources[0], &rtvDesc, rtvHandles[0]);
+	//２つ目を作成(自力で作成する)
+	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOP_HEAP_TYPE_RTV);
+	device->CreateRenderTargetView(swapChaiResources[1], &rtvDesc, rtvHandles[1]);
 
 
 
+	typedef struct D3D12_CPU_DESCRIPTOP_HANDLE {
+
+		SIZE_T ptr;
+
+	}; D3D12_CPU_DESCRIPTOP_HANDLE;
+
+
+
+	rtvHandles[0] = rtvStartHandle;
+	rtvHandles[1].ptr= rtvHandles[0].ptr+device-> > GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOP_HEAP_TYPE_RTV);
+
+	//書き込むバックバッファのインデックスを取得
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+	//描画先のRTVを設定する
+	commandlist->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	//指定した色で画面全体をクリアする
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	commandlist->ClearRanderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+	//コマンドリスの内容を確定。全て積んでからCloseすること
+	hr = commandlist->Close();
+	assert(SUCCEEDED(hr);
+
+
+
+
+	//CPUにコマンドリストの実行を行わせる
+
+	//GPUとOSに画面の交換を行うように通知する
+	
+
+	//
 
 
 
