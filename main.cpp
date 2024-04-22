@@ -351,9 +351,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	fenceValue++;
 
 	commandQueue->Signal(fence, fenceValue);
-
-
-
+	
+	//Fenceの値が指定したSingnal値に
+	//GetCompletedValueの初期値はFence作成時に渡した初期値
+	if(fence->GetCompletedValue() < fenceValue){
+	//指定したsighalにたどりついていないので、たどり着くまで待つようにイベントを設定する
+	fence->GetEventOnCompletion(fenceValue, fenceEvent);
+	//イベントを待つ
+	WaitForSingleObject(fenceEvent, INFINITE);
+	
+	}
 
 
 	MSG msg{};
