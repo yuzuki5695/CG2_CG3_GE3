@@ -273,13 +273,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	//CPUにコマンドリストの実行を行わせる
-
+	D3D12CommandList* commandLists[] = { commandList };
+	commandQueue->ExecuteCommandLists(1, commandLists);
 	//GPUとOSに画面の交換を行うように通知する
-	
-
-	//
-
-
+	swapChain->Present(1, 0);
+	hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr);
+	//次のフレーム用のコマンドリストを準備
+	hr = commandList->Reset(commandAllocator,nullptr);
+	assert(SUCCEEDED(hr);
 
 
 
