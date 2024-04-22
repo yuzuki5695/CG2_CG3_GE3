@@ -398,8 +398,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		debug->Release();
 	}
 
-	//警告時に止まる(コメントアウト)
-	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,true);
+	//警告時に止まる
+	//InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,true);
 
 	CloseHandle(fenceEvent);
 	fence->Release();
