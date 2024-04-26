@@ -538,7 +538,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	graphicspipelineStateDesc.RasterizerState = rasterizerDesc;
 	//書き込むRTVの情報
 	graphicspipelineStateDesc.NumRenderTargets = 1;
-	graphicspipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_SAMPLE_SRGE;
+	graphicspipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	//利用するとポロロジ(形状)のタイプ
 	graphicspipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	//どのように画面に色を打ち込むかの設定
