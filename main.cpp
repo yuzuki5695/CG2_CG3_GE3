@@ -75,6 +75,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 
+
+
+
+
+
+
+
+
+
 IDxcBlob* CompileShader(
 	//CompilerするShaderファイルのパス
 	const std::wstring& filePath,
@@ -138,6 +147,10 @@ IDxcBlob* CompileShader(
 	//実行用のバイナリを返却
 	return shadeBlob;
 };
+
+
+
+
 
 
 
@@ -417,6 +430,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	//RootParameter作成
+	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[0].Descriptor.ShaderRegister = 0;
+	descriptionRootSignature.pParameters = rootParameters;
+	descriptionRootSignature.NumParameters = _countof(rootParameters);
+
+
+	ID3D12Resource* CreatreBufferResouce(ID3D12Device* device,size_t sizeInBytes);
+
+	ID3D12Resource* vertexResouce = CreatreBufferResouce(device,sizeof(Vector4) * 3 );
+
+
+
+
 	//シリアライズしてバイナリにする
 	ID3DBlob* signatureBlod = nullptr;
 	ID3DBlob* errorBlod = nullptr;
@@ -550,6 +580,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
+
+
+
+	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズ
+	ID3D12Resource* materialResource = CreatreBufferResouce(device, sizeof(Vector4));
+	//マテリアルにデータを書き込む
+	Vector4* materialDeta = nullptr;
+	//書き込むためのアダレス取得
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDeta));
+	
+
+
+
+
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator, nullptr);
 	assert(SUCCEEDED(hr));
@@ -583,7 +627,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
 
-
+		
 
 				//指定した色で画面全体をクリアする
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
@@ -628,6 +672,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			commandList->DrawInstanced(3, 1, 0, 0);
 
 
+
+
+			//今回は赤を書き込む
+			*materialDeta = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+			//マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
+
+
 		}
 	}
 
@@ -653,6 +706,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rootSignature->Release();
 	pixelShaderBlob->Release();
 	vertexShaderBlob->Release();
+	materialResource->Release();
 
 #ifdef _DEBUG
 	debugController->Release();
