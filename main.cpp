@@ -552,7 +552,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//１頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(Vector4);
 
-	//頂点リソースにデータを書き込む
+	
+
+	//次のフレーム用のコマンドリストを準備
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
+
+	MSG msg{};
+	//ウィンドウのｘボタンが押されるまでループ
+	while (msg.message != WM_QUIT) {
+		//Windowにメッセージが来たら最優先で処理させる
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+
+
+
+
+
+
+
+
+
+
+
+			//頂点リソースにデータを書き込む
 	Vector4* vertexDate = nullptr;
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDate));
@@ -583,21 +607,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	//次のフレーム用のコマンドリストを準備
-	hr = commandList->Reset(commandAllocator, nullptr);
-	assert(SUCCEEDED(hr));
-
-	MSG msg{};
-	//ウィンドウのｘボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		//Windowにメッセージが来たら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-
-		}
-		else {
-			//ゲームの処理
 
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
@@ -609,6 +618,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//描画
 			commandList->DrawInstanced(3, 1, 0, 0);
+		}
+		else {
+			//ゲームの処理	
 
 
 		}
