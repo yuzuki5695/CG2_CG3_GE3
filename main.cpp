@@ -6,7 +6,8 @@
 #include <dxgi1_6.h>
 #include <cassert>
 #include<dxgidebug.h>
-
+#include<dxcapi.h>
+#pragma comment(lib,"dxcompiler.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -71,6 +72,104 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	//標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
+
+
+IDxcBlob* CompileShader(
+	//CompilerするShaderファイルのパス
+	const std::wstring& filePath,
+	//Compilerに使用するProfile
+	const wchar_t* profile,
+	//初期化で生成したものを3つ
+	IDxcUtils* dxcUtils,
+	IDxcCompiler3* dxcCompiler,
+	IDxcIncludeHandler* includeHandler) {
+	//シェーダーをコンパイルする旨をログに出す
+	Log(ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
+	//hlslファイルを読む
+	IDxcBlobEncoding* shaderSource = nullptr;
+	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+	//読めなければ止める
+	assert(SUCCEEDED(hr));
+	//読み込んだファイルの内容を設定
+	DxcBuffer shaderSourceBuffer;
+	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
+	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
+	shaderSourceBuffer.Encoding = DXC_CP_UTF8;//UTF8の文字コードであることを確認
+
+	LPCWSTR arguments[] = {
+		filePath.c_str(),
+		L"-E",L"main",
+		L"-T",profile,
+		L"-Zi",L"-Qembed_debug",
+		L"-Od",
+		L"-Zpr"
+	};
+
+	//実際にShaderをコンパイル
+	IDxcResult* shaderResult = nullptr;
+	hr = dxcCompiler->Compile(
+		&shaderSourceBuffer,
+		arguments,
+		_countof(arguments),
+		includeHandler,
+		IID_PPV_ARGS(&shaderResult)
+	);
+	//コンパイルエラーではなくdxcが起動できないなど致命的な状況
+	assert(SUCCEEDED(hr));
+	//警告・エラーがでたらログに出して止める
+	IDxcBlobUtf8* shaderError = nullptr;
+	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
+		Log(shaderError->GetStringPointer());
+		//警告・エラーダメ絶対
+		assert(false);
+	}
+	//コンパイル結果から実行用のバイナリ部分を取得
+	IDxcBlob* shadeBlob = nullptr;
+	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shadeBlob), nullptr);
+	assert(SUCCEEDED(hr));
+	//成功したログを出す
+	Log(ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
+
+	//もう使わないリソースを解放
+	shaderSource->Release();
+	shaderResult->Release();
+	//実行用のバイナリを返却
+	return shadeBlob;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //Windowsアプリでのエントリーポイント（main関数）
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -351,6 +450,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 
+
+	//dxcCompilerを初期化
+	IDxcUtils* dxcUtils = nullptr;
+	IDxcCompiler3* dxCompiler = nullptr;
+	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
+	assert(SUCCEEDED(hr));
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxCompiler));
+	assert(SUCCEEDED(hr));
+
+	//includeに対応するための設定
+	IDxcIncludeHandler* IincludeHandler = nullptr;
+	hr = dxcUtils->CreateDefaultIncludeHandler(&IincludeHandler);
+	assert(SUCCEEDED(hr));
+
 	//fenceの値を更新
 	fenceValue++;
 	//GPUがここまでたどり着いた時に。Fenceの値を指定した値に代入するようにSignalを送る
@@ -365,6 +478,82 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		WaitForSingleObject(fenceEvent, INFINITE);
 
 	}
+
+
+	//RootSignature作成
+	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
+	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	//シリアライズしてバイナリにする
+	ID3DBlob* signatureBlod = nullptr;
+	ID3DBlob* errorBlod = nullptr;
+	hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlod, &errorBlod);
+	if (FAILED(hr)) {
+		Log(reinterpret_cast<char*>(errorBlod->GetBufferPointer()));
+		assert(false);
+	}
+
+	//バイナリを元に生成
+	ID3D12RootSignature* rootSignature = nullptr;
+	hr = device->CreateRootSignature(0, signatureBlod->GetBufferPointer(), signatureBlod->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	assert(SUCCEEDED(hr));
+
+
+	//InputLayout
+	D3D12_INPUT_ELEMENT_DESC inputELementDescs[1] = {};
+	inputELementDescs[0].SemanticName = "POSITION";
+	inputELementDescs[0].SemanticIndex = 0;
+	inputELementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputELementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputELementDescs;
+	inputLayoutDesc.NumElements = _countof(inputELementDescs);
+
+	// BlendStateの設定
+	D3D12_BLEND_DESC blendDesc{};
+	//全ての色要素を書き込む
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	//ResitezerStateの設定
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	//裏面(時計周り)を表示しない
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
+	//shaderをコンパイルする
+	IDxcBlob* vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0",dxcUtils,dxCompiler,IincludeHandler);
+	assert(vertexShaderBlob != nullptr);
+
+	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"vs_6_0", dxcUtils, dxCompiler, IincludeHandler);
+	assert(pixelShaderBlob != nullptr);
+
+
+
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicspipelineStateDesc{};
+	graphicspipelineStateDesc.pRootSignature = rootSignature;
+	graphicspipelineStateDesc.InputLayout = inputLayoutDesc;
+	graphicspipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize()};
+	graphicspipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
+	graphicspipelineStateDesc.BlendState = blendDesc;
+	graphicspipelineStateDesc.RasterizerState = rasterizerDesc;
+	//書き込むRTVの情報
+	graphicspipelineStateDesc.NumRenderTargets = 1;
+	graphicspipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_SAMPLE_SRGE;
+	//利用するとポロロジ(形状)のタイプ
+	graphicspipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//どのように画面に色を打ち込むかの設定
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator, nullptr);
