@@ -616,6 +616,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.bottom = kClientHeight;
 
 
+
+	commandList->RSSetViewports(1, &viewport);
+	commandList->RSSetScissorRects(1, &scissorRect);
+	//RootSignatureを設定
+	commandList->SetGraphicsRootDescriptorTable(rootSignature);
+	commandList->SetPipelineState(graphicsPipelineState);
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	//形状を設定
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//	描画
+	commandList->DrawInstanced(3, 1, 0, 0);
+
+
+
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator, nullptr);
 	assert(SUCCEEDED(hr));
@@ -646,6 +660,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
+
+
+	vertexResource->Release();
+	graphicsPipelineState->Release();
+	if (errorBlod) {
+		errorBlod->Release();
+	}
+	rootSignature->Release();
+	pixelShaderBlob->Release();
+	vertexShaderBlob->Release();
+
 #ifdef _DEBUG
 	debugController->Release();
 #endif 
