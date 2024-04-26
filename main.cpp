@@ -543,7 +543,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 
-
 	//頂点バッファビューを作成
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	//リソースの先頭のアドレスから使う
@@ -584,21 +583,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-
-
-	commandList->RSSetViewports(1, &viewport);
-	commandList->RSSetScissorRects(1, &scissorRect);
-	//RootSignatureを設定
-	commandList->SetGraphicsRootSignature(rootSignature);
-	commandList->SetPipelineState(graphicsPipelineState);
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	//形状を設定
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//	描画
-	commandList->DrawInstanced(3, 1, 0, 0);
-
-
-
 	//次のフレーム用のコマンドリストを準備
 	hr = commandList->Reset(commandAllocator, nullptr);
 	assert(SUCCEEDED(hr));
@@ -610,9 +594,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+
 		}
 		else {
 			//ゲームの処理
+
+			commandList->RSSetViewports(1, &viewport);
+			commandList->RSSetScissorRects(1, &scissorRect);
+			//RootSignatureを設定
+			commandList->SetGraphicsRootSignature(rootSignature);
+			commandList->SetPipelineState(graphicsPipelineState);
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+			//形状を設定
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//描画
+			commandList->DrawInstanced(3, 1, 0, 0);
+
 
 		}
 	}
@@ -644,7 +641,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	debugController->Release();
 #endif 
 	CloseWindow(hwnd);
-
 
 	//リソースリークチェック
 	IDXGIDebug1* debug;
