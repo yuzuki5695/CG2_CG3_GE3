@@ -369,45 +369,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
-	//TransitionBarrierの設定
-	D3D12_RESOURCE_BARRIER barrier{};
-	//今回のバリアはTransition
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	//Noneにしておく
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	//バリアを張る対象のリソース。現在のバックバッファに対して行う
-	barrier.Transition.pResource = swapChainResources[backBufferIndex];
-	//還元前(現在)のResourceStart
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	//還元後ResourceStart
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//TransitionBarrierを張る
-	commandList->ResourceBarrier(1, &barrier);
-
 
 	//描画先のRTVを設定する
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
-	//指定した色で画面全体をクリアする
-	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-
-	//画面に描く処理は全て終わり、画面に移すので、状態を還元
-	//今回はRenderTargetからPresentにする
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	//TransitionBarrierを張る
-	commandList->ResourceBarrier(1, &barrier);
-
-	//コマンドリスの内容を確定。全て積んでからCloseすること
-	hr = commandList->Close();
-	assert(SUCCEEDED(hr));
-
-	//GPUにコマンドリストの実行を行わせる
-	ID3D12CommandList* commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(1, commandLists);
-
-	//GPUとOSに画面の交換を行うように通知する
-	swapChain->Present(1, 0);
 
 
 	//初期値で0でfenceを作る
@@ -503,7 +467,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicspipelineStateDesc{};
 	graphicspipelineStateDesc.pRootSignature = rootSignature;
 	graphicspipelineStateDesc.InputLayout = inputLayoutDesc;
-	graphicspipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize()};
+	graphicspipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize() };
 	graphicspipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
 	graphicspipelineStateDesc.BlendState = blendDesc;
 	graphicspipelineStateDesc.RasterizerState = rasterizerDesc;
@@ -552,31 +516,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//１頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(Vector4);
 
-	
-
-	//次のフレーム用のコマンドリストを準備
-	hr = commandList->Reset(commandAllocator, nullptr);
-	assert(SUCCEEDED(hr));
-
-	MSG msg{};
-	//ウィンドウのｘボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		//Windowにメッセージが来たら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-
-
-
-
-
-
-
-
-
-
-
-			//頂点リソースにデータを書き込む
+	//頂点リソースにデータを書き込む
 	Vector4* vertexDate = nullptr;
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDate));
@@ -608,6 +548,74 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.bottom = kClientHeight;
 
 
+
+
+	//次のフレーム用のコマンドリストを準備
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
+
+	MSG msg{};
+	//ウィンドウのｘボタンが押されるまでループ
+	while (msg.message != WM_QUIT) {
+		//Windowにメッセージが来たら最優先で処理させる
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+
+		}
+		else {
+			//ゲームの処理
+
+
+
+				//TransitionBarrierの設定
+			D3D12_RESOURCE_BARRIER barrier{};
+			//今回のバリアはTransition
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			//Noneにしておく
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			//バリアを張る対象のリソース。現在のバックバッファに対して行う
+			barrier.Transition.pResource = swapChainResources[backBufferIndex];
+			//還元前(現在)のResourceStart
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			//還元後ResourceStart
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			//TransitionBarrierを張る
+			commandList->ResourceBarrier(1, &barrier);
+
+
+
+				//指定した色で画面全体をクリアする
+			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
+			//画面に描く処理は全て終わり、画面に移すので、状態を還元
+			//今回はRenderTargetからPresentにする
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			//TransitionBarrierを張る
+			commandList->ResourceBarrier(1, &barrier);
+
+			//コマンドリスの内容を確定。全て積んでからCloseすること
+			hr = commandList->Close();
+			assert(SUCCEEDED(hr));
+
+			//GPUにコマンドリストの実行を行わせる
+			ID3D12CommandList* commandLists[] = { commandList };
+			commandQueue->ExecuteCommandLists(1, commandLists);
+
+			//GPUとOSに画面の交換を行うように通知する
+			swapChain->Present(1, 0);
+
+
+
+
+
+
+
+
+
+
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
 			//RootSignatureを設定
@@ -616,11 +624,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 			//形状を設定
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			//描画
+			//	描画
 			commandList->DrawInstanced(3, 1, 0, 0);
-		}
-		else {
-			//ゲームの処理	
 
 
 		}
