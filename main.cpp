@@ -521,12 +521,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	//RootParameter作成
-	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[1].Descriptor.ShaderRegister = 0;
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
+
 
 
 	ID3D12Resource* CreatreBufferResouce(ID3D12Device* device,size_t sizeInBytes);
@@ -669,17 +673,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	//RootParametr作成
 
-	D3D12_ROOT_PARAMETER rootParameters[2] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[0].Descriptor.ShaderRegister = 0;
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[1].Descriptor.ShaderRegister = 0;
-	descriptionRootSignature.pParameters = rootParameters;
-	descriptionRootSignature.NumParameters = _countof(rootParameters);
-
-
+	
 
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズ
 	ID3D12Resource* materialResource = CreatreBufferResouce(device, sizeof(Vector4));
@@ -792,14 +786,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			transform.rotate.y += 0.03f;
 
 			Matrix4x4 worudMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
-			*wvpDate = worudMatrix;
+		//	*wvpDate = worudMatrix;
 
 
 
 
 			Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 			Transform cameraMatrix = MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-			*wvpDate = worudMatrix;
+		//	*wvpDate = worudMatrix;
 
 
 
