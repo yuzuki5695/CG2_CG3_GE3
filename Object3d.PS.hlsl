@@ -1,3 +1,39 @@
+
+
+
+struct TransfomationMatrix {
+
+	float32_t4x4 MVP;
+
+};
+
+
+ConstantBuffer<TransfomationMatrix> gtransformarionMatrix : registere(bo);
+
+struct VertexShaderOutput{
+float32_t4 position : SV_POSITION;
+}
+
+
+
+struct VertexShaderInput{
+float32_t4 position : SV_POSITION;
+}
+
+VertexShaderOutput main(VertexShaderInput niput){
+
+
+VertexShaderOutput output;
+
+output.position =mul(input.position,ggtransformarionMatrix.MVP);
+
+returbn potput;
+
+};
+
+
+
+
 struct PixelShaderOutput{
 
 float32_t4 color : SV_TARGETO;

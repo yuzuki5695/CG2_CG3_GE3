@@ -12,6 +12,7 @@
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #include"Vector4.h"
+#include"Vector3.h"
 
 //クライアント領域のサイズ
 const uint32_t kClientWidth = 1280;
@@ -76,9 +77,97 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 
 
+struct Transform{
+
+	Vector3 scale;
+	Vector3 rotate;
+	Vector3 translate;
+
+};
 
 
+struct Matrix4x4 {
+	float m[4][4];
+};
 
+
+// 1. X軸回転行列
+Matrix4x4 MakeRotateXMatrix(float radian) {
+	Matrix4x4 result{};
+	float Ctheta = std::cos(radian);
+	float Stheta = std::sin(radian);
+
+	result.m[0][0] = 1.0f; result.m[0][1] = 0.0f;    result.m[0][2] = 0.0f;   result.m[0][3] = 0.0f;
+	result.m[1][0] = 0.0f; result.m[1][1] = Ctheta;  result.m[1][2] = Stheta; result.m[1][3] = 0.0f;
+	result.m[2][0] = 0.0f; result.m[2][1] = -Stheta; result.m[2][2] = Ctheta; result.m[2][3] = 0.0f;
+	result.m[3][0] = 0.0f; result.m[3][1] = 0.0f;    result.m[3][2] = 0.0f;   result.m[3][3] = 1.0f;
+
+
+	return result;
+}
+
+//2. Y軸回転行列
+Matrix4x4 MakeRotateYMatrix(float radian) {
+	Matrix4x4 result{};
+	float Ctheta = std::cos(radian);
+	float Stheta = std::sin(radian);
+
+	result.m[0][0] = Ctheta; result.m[0][1] = 0.0f; result.m[0][2] = -Stheta; result.m[0][3] = 0.0f;
+	result.m[1][0] = 0.0f;   result.m[1][1] = 1.0f; result.m[1][2] = 0.0f;    result.m[1][3] = 0.0f;
+	result.m[2][0] = Stheta; result.m[2][1] = 0.0f; result.m[2][2] = Ctheta;  result.m[2][3] = 0.0f;
+	result.m[3][0] = 0.0f;   result.m[3][1] = 0.0f; result.m[3][2] = 0.0f;    result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+//3. Z軸回8;転行列
+Matrix4x4 MakeRotateZMatrix(float radian) {
+	Matrix4x4 result{};
+	float Ctheta = std::cos(radian);
+	float Stheta = std::sin(radian);
+
+	result.m[0][0] = Ctheta;  result.m[0][1] = Stheta; result.m[0][2] = 0.0f; result.m[0][3] = 0.0f;
+	result.m[1][0] = -Stheta; result.m[1][1] = Ctheta; result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
+	result.m[2][0] = 0.0f;    result.m[2][1] = 0.0f;   result.m[2][2] = 1.0f; result.m[2][3] = 0.0f;
+	result.m[3][0] = 0.0f;    result.m[3][1] = 0.0f;   result.m[3][2] = 0.0f; result.m[3][3] = 1.0f;
+
+	return result;
+
+}
+
+//4.合成
+Matrix4x4 Multiply(const Matrix4x4 m1, const Matrix4x4 m2) {
+
+	Matrix4x4 result{};
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				result.m[i][j] += m1.m[i][k] * m2.m[k][j];
+			}
+		}
+	}
+
+	return result;
+};
+
+//5.3次元アフィン変換
+Matrix4x4 MakeAftineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
+	Matrix4x4 result;
+	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
+	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
+	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
+	Matrix4x4 rotateRMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+
+	result.m[0][0] = scale.x * rotateRMatrix.m[0][0]; result.m[0][1] = scale.x * rotateRMatrix.m[0][1]; result.m[0][2] = scale.x * rotateRMatrix.m[0][2]; 	result.m[0][3] = 0.0f;
+	result.m[1][0] = scale.y * rotateRMatrix.m[1][0]; result.m[1][1] = scale.y * rotateRMatrix.m[1][1]; result.m[1][2] = scale.y * rotateRMatrix.m[1][2]; result.m[1][3] = 0.0f;
+	result.m[2][0] = scale.z * rotateRMatrix.m[2][0]; result.m[2][1] = scale.z * rotateRMatrix.m[2][1]; result.m[2][2] = scale.z * rotateRMatrix.m[2][2]; result.m[2][3] = 0.0f;
+	result.m[3][0] = translate.x; result.m[3][1] = translate.y; result.m[3][2] = translate.z; result.m[3][3] = 1.0f;
+
+	return result;
+};
 
 
 
@@ -578,8 +667,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.bottom = kClientHeight;
 
 
+	//RootParametr作成
 
-
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[0].Descriptor.ShaderRegister = 0;
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[1].Descriptor.ShaderRegister = 0;
+	descriptionRootSignature.pParameters = rootParameters;
+	descriptionRootSignature.NumParameters = _countof(rootParameters);
 
 
 
@@ -678,6 +776,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			*materialDeta = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 			//マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
+
+
+
+
+			//wvp用のCBfferの場所を設定
+			//commandList->SetGraphicsRootShaderResourceView(1, )
+
+
+
+			Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+
+			transform.rotate.y += 0.03f;
+
+			Matrix4x4 worudMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+			*wvpDate = worudMatrix;
+
+
+
+
+			Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
+			Transform cameraMatrix = MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+			*wvpDate = worudMatrix;
+
+
+
+			//Matrix4x4 proiectMatrox;
+
+
 
 
 
