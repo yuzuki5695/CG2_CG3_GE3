@@ -511,47 +511,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 
-	//頂点バッファビューを作成
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	//リソースの先頭のアドレスから使う
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点３つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(Vector4) * 3;
-	//１頂点あたりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(Vector4);
-
-	//頂点リソースにデータを書き込む
-	Vector4* vertexDate = nullptr;
-	//書き込むためのアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDate));
-	//左下
-	vertexDate[0] = {-0.5f,-0.5f,0.0f,1.0f};
-	//上
-	vertexDate[1] = {0.0f,0.5f,0.0f,1.0f};
-	//右上
-	vertexDate[2] = {0.5f,-0.5f,0.0f,1.0f};
-
-
-	//ビューポート
-	D3D12_VIEWPORT viewport{};
-	//クライアント領域のサイズと一緒にして画面全体に表示
-	viewport.Width = kClientWidth;
-	viewport.Height = kClientHeight;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-
-	//シザー矩形
-	D3D12_RECT scissorRect{};
-	//基本的にビューポートと同じ矩形が構成される
-	scissorRect.left = 0;
-	scissorRect.right = kClientWidth;
-	scissorRect.top = 0;
-	scissorRect.bottom = kClientHeight;
-
-
 
 
 	//次のフレーム用のコマンドリストを準備
@@ -613,11 +572,48 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
+			//頂点バッファビューを作成
+			D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+			//リソースの先頭のアドレスから使う
+			vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+			//使用するリソースのサイズは頂点３つ分のサイズ
+			vertexBufferView.SizeInBytes = sizeof(Vector4) * 3;
+			//１頂点あたりのサイズ
+			vertexBufferView.StrideInBytes = sizeof(Vector4);
 
 
 
+			//頂点リソースにデータを書き込む
+			Vector4* vertexDate = nullptr;
+			//書き込むためのアドレスを取得
+			vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDate));
+			//左下
+			vertexDate[0] = { -0.5f,-0.5f,0.0f,1.0f };
+			//上
+			vertexDate[1] = { 0.0f,0.5f,0.0f,1.0f };
+			//右上
+			vertexDate[2] = { 0.5f,-0.5f,0.0f,1.0f };
 
 
+
+			//ビューポート
+			D3D12_VIEWPORT viewport{};
+			//クライアント領域のサイズと一緒にして画面全体に表示
+			viewport.Width = kClientWidth;
+			viewport.Height = kClientHeight;
+			viewport.TopLeftX = 0;
+			viewport.TopLeftY = 0;
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+
+
+			//シザー矩形
+			D3D12_RECT scissorRect{};
+			//基本的にビューポートと同じ矩形が構成される
+			scissorRect.left = 0;
+			scissorRect.right = kClientWidth;
+			scissorRect.top = 0;
+			scissorRect.bottom = kClientHeight;
 
 
 			commandList->RSSetViewports(1, &viewport);
