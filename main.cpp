@@ -369,7 +369,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
-
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
@@ -413,7 +412,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//指定したsighalにたどりついていないので、たどり着くまで待つようにイベントを設定する
 		fence->SetEventOnCompletion(fenceValue, fenceEvent);
 		//イベントを待つ
-		WaitForSingleObject(fenceEvent, INFINITE);
+		WaitForSingleObject(fenceEvent,INFINITE);
 
 	}
 
@@ -496,7 +495,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_RESOURCE_DESC vertexResourceDesc{};
 	//バッファリソース、テクスチャの場合はまた別の設定をする
 	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	vertexResourceDesc.Width = sizeof(Vector4) * 3;
+	vertexResourceDesc.Width = sizeof(Vector4) * 3;//リソースのサイズ、今回はvector4を3頂点分
 
 	//バッファの場合はこれらは１にする
 	vertexResourceDesc.Height = 1;
@@ -509,7 +508,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ID3D12Resource* vertexResource = nullptr;
 	hr = device->CreateCommittedResource(&uploadHeapProperties,D3D12_HEAP_FLAG_NONE,&vertexResourceDesc,D3D12_RESOURCE_STATE_GENERIC_READ,nullptr,IID_PPV_ARGS(&vertexResource));
 	assert(SUCCEEDED(hr));
-
 
 
 
@@ -527,11 +525,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		}
 		else {
+						
 			//ゲームの処理
 
-
-
-				//TransitionBarrierの設定
+			//TransitionBarrierの設定
 			D3D12_RESOURCE_BARRIER barrier{};
 			//今回のバリアはTransition
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -545,7 +542,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			//TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
-
 
 
 				//指定した色で画面全体をクリアする
@@ -595,7 +591,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			vertexDate[2] = { 0.5f,-0.5f,0.0f,1.0f };
 
 
-
 			//ビューポート
 			D3D12_VIEWPORT viewport{};
 			//クライアント領域のサイズと一緒にして画面全体に表示
@@ -616,12 +611,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			scissorRect.bottom = kClientHeight;
 
 
-			commandList->RSSetViewports(1, &viewport);
-			commandList->RSSetScissorRects(1, &scissorRect);
+			commandList->RSSetViewports(1, &viewport);//Viewportを設定
+			commandList->RSSetScissorRects(1, &scissorRect);//Scirssorを設定
 			//RootSignatureを設定
 			commandList->SetGraphicsRootSignature(rootSignature);
-			commandList->SetPipelineState(graphicsPipelineState);
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+			commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
 			//形状を設定
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//	描画
@@ -643,7 +638,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
-
 
 	vertexResource->Release();
 	graphicsPipelineState->Release();
