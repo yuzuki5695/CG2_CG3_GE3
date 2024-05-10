@@ -143,11 +143,31 @@ IDxcBlob* CompileShader(
 	return shadeBlob;
 };
 
+DirectX::ScratchImage LoadTexture(const std::string& filepath) {
+	//テクスチャファイルを呼んでプログラムを扱えるようにする
+	DirectX::ScratchImage image{};
+	std::wstring filepathw = ConvertString(filepathw);
+	HRESULT hr = DirectX::LoadFromWICFile(filepathw.c_str(), DirectX::WIC_FLAGS_FORCE_SAGB, nullptr, image);
+	assert(SUCCEEDED(hr));
+
+	//ミニマップの作成
+	DirectX::ScratchImage mipImages{};
+	hr = DirectX::GenerateMipMaps(image.GetImages()), image.GetImageConst(), image.GetMetadate(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
+	assert(SUCCEEDED(hr));
+
+	//マップチップつ付きのデータを返す
+	return mipImages;
+}
 
 
 //Windowsアプリでのエントリーポイント（main関数）
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+
+	CoUninitialize();
+
+
 	WNDCLASS wc{};
 
 	//ウィンドウプロシージャ
