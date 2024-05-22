@@ -334,34 +334,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
-	//TransitionBarrierの設定
-	D3D12_RESOURCE_BARRIER barrier{};
-	//今回のバリアはTransition
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	//Noneにしておく
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	//バリアを張る対象のリソース。現在のバックバッファに対して行う
-	barrier.Transition.pResource = swapChainResources[backBufferIndex];
-	//還元前(現在)のResourceStart
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	//還元後ResourceStart
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//TransitionBarrierを張る
-	commandList->ResourceBarrier(1, &barrier);
-
-
-	//描画先のRTVを設定する
-	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
-	//指定した色で画面全体をクリアする
-	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-	//画面に描く処理は全て終わり、画面に移すので、状態を還元
-	//今回はRenderTargetからPresentにする
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	//TransitionBarrierを張る
-	commandList->ResourceBarrier(1, &barrier);
-
+	
 	//コマンドリスの内容を確定。全て積んでからCloseすること
 	hr = commandList->Close();
 	assert(SUCCEEDED(hr));
@@ -449,7 +422,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputELementDescs;
 	inputLayoutDesc.NumElements = _countof(inputELementDescs);
-	
+
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	//すべての色要素を書き込む
@@ -548,7 +521,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-
 	//シザー矩形
 	D3D12_RECT scissorRect{};
 	//基本的にビューポートと同じ矩形が構成される
@@ -556,19 +528,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.right = kClientWidth;
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
-
-	commandList->RSSetViewports(1, &viewport);//Viewportを設定
-	commandList->RSSetScissorRects(1, &scissorRect);//Scirssorを設定
-	//RootSignatureを設定
-	commandList->SetGraphicsRootSignature(rootSignature);
-	commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
-	//形状を設定
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//	描画
-	commandList->DrawInstanced(3, 1, 0, 0);
-
-
+	
 	MSG msg{};
 	//ウィンドウのｘボタンが押されるまでループ
 	while (msg.message != WM_QUIT) {
@@ -579,13 +539,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		} else {
 			//ゲームの処理
 
+			//TransitionBarrierの設定
+			D3D12_RESOURCE_BARRIER barrier{};
+			//今回のバリアはTransition
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			//Noneにしておく
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			//バリアを張る対象のリソース。現在のバックバッファに対して行う
+			barrier.Transition.pResource = swapChainResources[backBufferIndex];
+			//還元前(現在)のResourceStart
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			//還元後ResourceStart
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			//TransitionBarrierを張る
+			commandList->ResourceBarrier(1, &barrier);
 
+			//描画先のRTVを設定する
+			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+			//指定した色で画面全体をクリアする
+			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+			//画面に描く処理は全て終わり、画面に移すので、状態を還元
+			//今回はRenderTargetからPresentにする
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			//TransitionBarrierを張る
+			commandList->ResourceBarrier(1, &barrier);
 
-
-
-
-
-
+			commandList->RSSetViewports(1, &viewport);//Viewportを設定
+			commandList->RSSetScissorRects(1, &scissorRect);//Scirssorを設定
+			//RootSignatureを設定。 PSOに設定しているけど別途設定が必要
+			commandList->SetGraphicsRootSignature(rootSignature);
+			commandList->SetPipelineState(graphicsPipelineState);//PSOを設定
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);//VBVを設定
+			//形状を設定。  PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//描画!(DrawCall/ドローコール)。 3頂点で1つのインスタンス。 インスタンスについては今後
+			commandList->DrawInstanced(3, 1, 0, 0);
 
 		}
 	}
