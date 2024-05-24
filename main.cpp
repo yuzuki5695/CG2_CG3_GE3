@@ -301,22 +301,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     assert(SUCCEEDED(hr));
 
     //========= RootSignatureを生成する =========//
-    D3D12_ROOT_SIGNATURE_DESC decriptionRootSignature{};
-    decriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-    //// RootParameterを作成。複数設定できるので配列。今回葉結果1つなので長さ1の配列
-    //D3D12_ROOT_PARAMETER rootParameters[1] = {};
-    //rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; 
-    //rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;  
-    //rootParameters[0].Descriptor.ShaderRegister = 0;  
-    //decriptionRootSignature.pParameters = rootParameters;  
-    //decriptionRootSignature.NumParameters = _countof(rootParameters);  
+    D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
+    descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+     
+    //RootParameter作成
+    D3D12_ROOT_PARAMETER rootParameters[1] = {};
+    rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    rootParameters[0].Descriptor.ShaderRegister = 0;
+    descriptionRootSignature.pParameters = rootParameters;
+    descriptionRootSignature.NumParameters = _countof(rootParameters);
 
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
-    hr = D3D12SerializeRootSignature(&decriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+    hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
     if (FAILED(hr)) {
         Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
         assert(false);
