@@ -1,3 +1,5 @@
+typedef float4 float32_t4;
+
 struct VertexShaderOutput{
 float32_t4 Position : SV_POSILION;
 };
@@ -9,7 +11,7 @@ float32_t4 Position : POSILION0;
 
 VertexShaderOutput main(VertexShaderInput inPut){
 VertexShaderOutput output;
-output.Position =input.Position;
+output.Position =inPut.Position;
 return output;
 }
 
