@@ -744,10 +744,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
-
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
+
+
+            ImGui::Begin("Window");
+
+            ImGui::ColorEdit3("Clear Color", reinterpret_cast<float*>(materialData));
+
+            ImGui::End();
 
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
             ImGui::ShowDemoWindow();
@@ -762,8 +768,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
             Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
             *transformationMatrixData = worludMatrix;
-
-
+          
             ImGui::Render();
 
             // 描画用のDescriptorHeapの設定
