@@ -13,10 +13,6 @@
 #pragma comment(lib,"dxguid.lib")
 #include"Vector4.h"
 
-//クライアント領域のサイズ
-const uint32_t kClientWidth = 1280;
-const uint32_t kClientHeight = 720;
-
 void Log(const std::string& message)
 {
 	OutputDebugStringA(message.c_str());
@@ -74,16 +70,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-
-
-
-
-
-
-
-
-
-
 IDxcBlob* CompileShader(
 	//CompilerするShaderファイルのパス
 	const std::wstring& filePath,
@@ -139,7 +125,7 @@ IDxcBlob* CompileShader(
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shadeBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	//成功したログを出す
-	Log(ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
+	Log(ConvertString(std::format(L"Compile Shader,path:{},profile:{}\n", filePath, profile)));
 
 	//もう使わないリソースを解放
 	shaderSource->Release();
@@ -149,9 +135,32 @@ IDxcBlob* CompileShader(
 };
 
 
+ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 
-
-
+	//IDXGIのファクトリーの生成
+	IDXGIFactory7* dxgiFactory = nullptr;
+	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+	//頂点リソース用のヒープの設定
+	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+	//頂点リソースの設定
+	D3D12_RESOURCE_DESC vertexResourceDesc{};
+	//バッファリソース、テクスチャの場合はまた別の設定をする
+	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	vertexResourceDesc.Width = sizeInBytes; 
+	//バッファの場合はこれらは１にする
+	vertexResourceDesc.Height = 1;
+	vertexResourceDesc.DepthOrArraySize = 1;
+	vertexResourceDesc.MipLevels = 1;
+	vertexResourceDesc.SampleDesc.Count = 1;
+	//バッファの場合はこれにする
+	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	//実際に頂点リソースを作る
+	ID3D12Resource* vertexResource = nullptr;
+	hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
+	assert(SUCCEEDED(hr));
+	return vertexResource;
+};
 
 
 //Windowsアプリでのエントリーポイント（main関数）
@@ -174,6 +183,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ウィンドウクラス登録
 	RegisterClass(&wc);
 
+	//クライアント領域のサイズ
+	const uint32_t kClientWidth = 1280;
+	const uint32_t kClientHeight = 720;
+
 	//ウィンドウサイズを表す構造体にクライアント領域を入れる
 	RECT wrc = { 0, 0, kClientWidth, kClientHeight };
 
@@ -195,6 +208,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		nullptr
 	);
 
+	//ウィンドウを表示
+	ShowWindow(hwnd, SW_SHOW);
 
 #ifdef _DEBUG
 
@@ -206,10 +221,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		debugController->SetEnableGPUBasedValidation(TRUE);
 	}
 #endif 
-
-
-	//ウィンドウを表示
-	ShowWindow(hwnd, SW_SHOW);
+	
 
 	//DXGIファクトリーの生成
 	IDXGIFactory7* dxgiFactory = nullptr;
@@ -378,7 +390,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 
 
-
 	//書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
@@ -438,14 +449,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rootParameters[0].Descriptor.ShaderRegister = 0;
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
-
-
-	ID3D12Resource* CreatreBufferResouce(ID3D12Device* device,size_t sizeInBytes);
-
-	ID3D12Resource* vertexResouce = CreatreBufferResouce(device,sizeof(Vector4) * 3 );
-
-
-
+	
+	ID3D12Resource* vertexResouce = CreateBufferResource(device,sizeof(Vector4) * 3 );
 
 	//シリアライズしてバイナリにする
 	ID3DBlob* signatureBlod = nullptr;
@@ -471,7 +476,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputELementDescs;
 	inputLayoutDesc.NumElements = _countof(inputELementDescs);
-
 
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
@@ -515,26 +519,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
 
 
-	//頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
-	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
-	//頂点リソースの設定
-	D3D12_RESOURCE_DESC vertexResourceDesc{};
-	//バッファリソース、テクスチャの場合はまた別の設定をする
-	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	vertexResourceDesc.Width = sizeof(Vector4) * 3;
 
-	//バッファの場合はこれらは１にする
-	vertexResourceDesc.Height = 1;
-	vertexResourceDesc.DepthOrArraySize = 1;
-	vertexResourceDesc.MipLevels = 1;
-	vertexResourceDesc.SampleDesc.Count = 1;
-	//バッファの場合はこれにする
-	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	//実際に頂点リソースを作る
-	ID3D12Resource* vertexResource = nullptr;
-	hr = device->CreateCommittedResource(&uploadHeapProperties,D3D12_HEAP_FLAG_NONE,&vertexResourceDesc,D3D12_RESOURCE_STATE_GENERIC_READ,nullptr,IID_PPV_ARGS(&vertexResource));
-	assert(SUCCEEDED(hr));
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(Vector4) * 3);
+
+	//マテリアル用のリソース
+	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
+
+	//マテリアル用にデータを書き込む
+	Vector4* materialData = nullptr;
+
+	//書き込むためのアドレスを取得
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+	//今回は赤
+	*materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 
 
 	//頂点バッファビューを作成
@@ -568,7 +566,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-
 	//シザー矩形
 	D3D12_RECT scissorRect{};
 	//基本的にビューポートと同じ矩形が構成される
@@ -577,21 +574,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-
-
-
-
-
-
-	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズ
-	ID3D12Resource* materialResource = CreatreBufferResouce(device, sizeof(Vector4));
-	//マテリアルにデータを書き込む
-	Vector4* materialDeta = nullptr;
-	//書き込むためのアダレス取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDeta));
 	
-
-
 
 
 	//次のフレーム用のコマンドリストを準備
@@ -629,7 +612,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		
 
-				//指定した色で画面全体をクリアする
+			//指定した色で画面全体をクリアする
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
@@ -651,15 +634,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//GPUとOSに画面の交換を行うように通知する
 			swapChain->Present(1, 0);
 
-
-
-
-
-
-
-
-
-
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
 			//RootSignatureを設定
@@ -668,19 +642,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 			//形状を設定
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());			
 			//	描画
 			commandList->DrawInstanced(3, 1, 0, 0);
-
-
-
-
-			//今回は赤を書き込む
-			*materialDeta = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-			//マテリアルCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-
-
-
 		}
 	}
 
@@ -696,8 +661,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
-
-
+	
 	vertexResource->Release();
 	graphicsPipelineState->Release();
 	if (errorBlod) {
