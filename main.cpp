@@ -871,17 +871,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     debugController->Release();
 
 #endif
-
     vertexResoruce->Release();
     graphicsPipelineState->Release();
     signatureBlob->Release();
     if (errorBlob) {
         errorBlob->Release();
-    }
-    rootSignature->Release();
-    pixelShaderBlob->Release();
-    vertexShaderBlob->Release();
-
+    } 
     //リソースチェック
     IDXGIDebug1* debug;
     if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
