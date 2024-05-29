@@ -715,7 +715,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     scissorRect.left = 0;
     scissorRect.right = kClientWidth;
     scissorRect.top = 0;
-    scissorRect.bottom = kClientHeight;
+    scissorRect.bottom = kClientHeight; 
 
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
