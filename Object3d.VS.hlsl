@@ -1,14 +1,11 @@
 typedef float4 float32_t4;
-typedef float4 float32_t4*4;
+typedef float4 float32_t4x4;
 
 struct TransformationMatrix{
     float32_t4x4 WVP; 
 };
 
-
-
-
-
+ConstantBuffer<TransformationMatrix> gtransformationMatrix : register(b0);
 struct VertexShaderOutput
 {
     float32_t4 Position : SV_POSITION;
@@ -22,6 +19,6 @@ struct VertexShaderInput
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    output.Position = input.Position;
+    output.Position = mul(input.Position,gtransformationMatrix.WVP);
     return output;
 }
