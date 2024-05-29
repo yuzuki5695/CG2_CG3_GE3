@@ -22,7 +22,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
 
-
 struct Matrix4x4 {
     float m[4][4];
 };
@@ -341,9 +340,17 @@ ID3D12DescriptorHeap* CreatedescriptorHeap(
 }
 
 
+
+
+//
+//ID3D12Resource* CreateTextureResource(ID3D12Debug* device,const DirectX::TexMetadata& metadata) {
+//
+//}
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
+    CoInitializeEx(0, COINIT_MULTITHREADED);
 
     WNDCLASS wc{};
     //ウィンドウプロシージャ
@@ -393,6 +400,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         debugController->SetEnableGPUBasedValidation(TRUE);
     }
 #endif // _DEBUG
+
 
 
     /*D3D12Device生成*/
@@ -536,8 +544,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
     //今回は赤
-    *materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-
+    *materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f); 
 
     //---------------------------------------------//
     //------ TransformationMatrix用のResource ------//
@@ -849,6 +856,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ImGui_ImplDX12_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    // COMの終了処理
+    CoUninitialize();
 
     CloseHandle(fenceEvent);
     fence->Release();
