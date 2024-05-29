@@ -521,11 +521,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
     ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
     //データを書き込む
-    Matrix4x4* wvpData = nullptr;
+    Matrix4x4* transformationMatrixData = nullptr;
     //書き込むためのアドレスを取得
-    wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+    wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
     //単位行列を書き込んでおく
-    *wvpData = MakeIdentity4x4();
+    *transformationMatrixData = MakeIdentity4x4();
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
@@ -698,7 +698,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     scissorRect.bottom = kClientHeight;
 
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };  */
+    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
     MSG msg{};
     // ウィンドウの×ボタンが押されるまでループ
@@ -710,14 +710,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
-            transform.rotate.y += 0.03f;
+            ///------------------------///
+            ///-----MVPMatrixを作る-----///
+            ///------------------------///
+            transform.rotate.y += 0.01f;
             Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale,transform.rotate,transform.translate);
             Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
             Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-            Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f,float(kClientWidth) / float(kClientHeight),0.1f,100.0f);
-            // MVPMatrixを作る
+            Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f,float(kClientWidth) / float(kClientHeight),0.1f,100.0f);          
             Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
-            *wvpData = worldViewProjectionMatrix;
+            *transformationMatrixData = worludMatrix;
 
 
             // ここから書き込むバックバッファのインデックスを取得

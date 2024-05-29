@@ -1,5 +1,3 @@
-typedef float4 float32_t4;
-typedef float4 float32_t4x4;
 
 struct TransformationMatrix{
     float32_t4x4 WVP; 

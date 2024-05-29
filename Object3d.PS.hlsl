@@ -1,4 +1,3 @@
-typedef float4 float32_t4;
 
 struct Material
 {
