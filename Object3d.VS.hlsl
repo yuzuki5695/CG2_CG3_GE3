@@ -1,27 +1,23 @@
-struct VertexShaderOutput{
-float32_t4 Position : SV_POSILION;
+
+struct TransformationMatrix
+{
+    float32_t4x4 WVP;
 };
 
-struct VertexShaderInput{
-float32_t4 Position : POSILION0;
+ConstantBuffer<TransformationMatrix> gtransformationMatrix : register(b0);
+struct VertexShaderOutput
+{
+    float32_t4 Position : SV_POSITION;
 };
 
-
-VertexShaderOutput main(VertexShaderInput inPut){
-VertexShaderOutput output;
-output.Position =input.Position;
-return output;
-}
-
-
-struct PixelShaderOutput{
-
-float32_t4 color : SV_TARGETO;
-
+struct VertexShaderInput
+{
+    float32_t4 Position : POSITION0;
 };
-PixelShaderOutput main(){
-PixelShaderOutput output;
-output.color = float32_t4(1.0,1.0,1.0,1.0);
-return output;
 
+VertexShaderOutput main(VertexShaderInput input)
+{
+    VertexShaderOutput output;
+    output.Position = mul(input.Position, gtransformationMatrix.WVP);
+    return output;
 }
