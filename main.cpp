@@ -22,6 +22,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
 
+
 struct Matrix4x4 {
     float m[4][4];
 };
@@ -324,7 +325,7 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 };
 
 
-ID3D12DescriptorHeap* CreatedescriptorHeap(
+ID3D12DescriptorHeap* CreateDescriptorHeap(
     ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
 {
     //ディスクリプタヒープの生成
@@ -340,8 +341,6 @@ ID3D12DescriptorHeap* CreatedescriptorHeap(
 }
 
 
-
-
 //
 //ID3D12Resource* CreateTextureResource(ID3D12Debug* device,const DirectX::TexMetadata& metadata) {
 //
@@ -351,7 +350,6 @@ ID3D12DescriptorHeap* CreatedescriptorHeap(
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
     CoInitializeEx(0, COINIT_MULTITHREADED);
-
     WNDCLASS wc{};
     //ウィンドウプロシージャ
     wc.lpfnWndProc = WindowProc;
@@ -400,7 +398,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         debugController->SetEnableGPUBasedValidation(TRUE);
     }
 #endif // _DEBUG
-
 
 
     /*D3D12Device生成*/
@@ -544,7 +541,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
     //今回は赤
-    *materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f); 
+    *materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+
 
     //---------------------------------------------//
     //------ TransformationMatrix用のResource ------//
@@ -597,9 +595,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     // RTV用のヒープでディスクリプタの数は2。RTVはshader内で触るものではないので、ShaderVisibleはfalse
-    ID3D12DescriptorHeap* rtvDescriptorHeap = CreatedescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+    ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
     // SRV用のディスクリプタの数は128.RTVはshader内で触るものなので、ShaderVisibleはtrue
-    ID3D12DescriptorHeap* srvDescriptorHeap = CreatedescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+    ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
     //SwapChainからResourceを引っ張ってくる
     ID3D12Resource* swapChainResources[2] = { nullptr };
@@ -877,21 +875,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     vertexShaderBlob->Release();
     materialResource->Release();
     wvpResource->Release();
+    rtvDescriptorHeap->Release();
+    srvDescriptorHeap->Release();
 #ifdef _DEBUG
     debugController->Release();
 
 #endif
-
     vertexResoruce->Release();
     graphicsPipelineState->Release();
     signatureBlob->Release();
     if (errorBlob) {
         errorBlob->Release();
     }
-    rootSignature->Release();
-    pixelShaderBlob->Release();
-    vertexShaderBlob->Release();
-
     //リソースチェック
     IDXGIDebug1* debug;
     if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
