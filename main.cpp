@@ -325,7 +325,7 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 };
 
 
-ID3D12DescriptorHeap* CreatedescriptorHeap(
+ID3D12DescriptorHeap* CreateDescriptorHeap(
     ID3D12Device* device,D3D12_DESCRIPTOR_HEAP_TYPE heapType,UINT numDescriptors,bool shaderVisible) 
 {
     //ディスクリプタヒープの生成
@@ -590,9 +590,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     // RTV用のヒープでディスクリプタの数は2。RTVはshader内で触るものではないので、ShaderVisibleはfalse
-    ID3D12DescriptorHeap* rtvDescriptorHeap = CreatedescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+    ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
     // SRV用のディスクリプタの数は128.RTVはshader内で触るものなので、ShaderVisibleはtrue
-    ID3D12DescriptorHeap* srvDescriptorHeap = CreatedescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+    ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
     //SwapChainからResourceを引っ張ってくる
     ID3D12Resource* swapChainResources[2] = { nullptr };
@@ -867,6 +867,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     vertexShaderBlob->Release();
     materialResource->Release();
     wvpResource->Release();
+    rtvDescriptorHeap->Release();
+    srvDescriptorHeap->Release();
 #ifdef _DEBUG
     debugController->Release();
 
