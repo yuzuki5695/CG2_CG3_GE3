@@ -339,11 +339,39 @@ ID3D12DescriptorHeap* CreateDescriptorHeap(
     assert(SUCCEEDED(hr));
     return descriptorHeap;
 }
+ 
 
-
+//
 //
 //ID3D12Resource* CreateTextureResource(ID3D12Debug* device,const DirectX::TexMetadata& metadata) {
 //
+//    // metadataを基にResourceの設定
+//    D3D12_RESOURCE_DESC resourceDesc{};
+//    resourceDesc.Width = UINT(metadata.width);// Textureの幅
+//    resourceDesc.Height = UINT(metadata.height);// Textureの高さ
+//    resourceDesc.MipLevels = UINT16(metadata.mipLevels);// mipmapの数
+//    resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize);// 奥行き or 配列Textureの配列数
+//    resourceDesc.Format = metadata.format; // TextureのFormat
+//    resourceDesc.SampleDesc.Count = 1; // サンプリングカウント. 1固定
+//    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension); // Textureの次元数。普段使っているのは2次元
+//
+//    // 利用するHeapの設定。非常に特殊な運用。02_04exで一般的なケース版がある
+//    D3D12_HEAP_PROPERTIES heapProperties{};
+//    heapProperties.Type = D3D12_HEAP_TYPE_CUSTOM; // 細かい設定
+//    heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK; // WriteBackポリシーでCPUアクセス可能
+//    heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0; // プロセッサの近くに配置
+//
+//    // Resourceの生成
+//    ID3D12Resource* resource = nullptr;
+//    HRESULT hr = device->CreateCommittedResource(
+//        &heapProperties,
+//        D3D12_HEAP_FLAG_NONE,
+//        &resource,
+//        D3D12_RESOURCE_STATE_GENERIC_READ,
+//        nullptr,
+//        IID_PPV_ARGS(&resource));
+//    assert(SUCCEEDED(hr));
+//    return resource;
 //}
 
 //Windowsアプリでのエントリーポイント(main関数)
@@ -738,6 +766,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         srvDescriptorHeap,
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+
+
+
 
     MSG msg{};
     // ウィンドウの×ボタンが押されるまでループ
