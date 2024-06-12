@@ -1,3 +1,4 @@
+#include "Object3d.hlsli"
 
 struct Material
 {
@@ -11,7 +12,7 @@ struct PixeShaderOutput
     float32_t4 color : SV_TARGET0;
 };
 
-PixeShaderOutput main()
+PixeShaderOutput main(VertexShaderOutput input)
 {
     PixeShaderOutput output;
     output.color = gMaterial.color;
