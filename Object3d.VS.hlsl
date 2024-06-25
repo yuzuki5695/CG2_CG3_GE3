@@ -14,7 +14,8 @@ struct VertexShaderInput
 
 VertexShaderOutput main(VertexShaderOutput input)
 {
-    VertexShaderOutput output = input.texcoord;
+    VertexShaderOutput output;
     output.Position = mul(input.Position, gtransformationMatrix.WVP);
+    output.texcoord = input.texcoord;
     return output;
 }
