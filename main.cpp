@@ -781,7 +781,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //-----------------------------//
     //-------ImGuiの初期化-----------//
     //-----------------------------//
-    /*IMGUI_CHECKVERSION();
+    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
@@ -790,7 +790,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         rtvDesc.Format,
         srvDescriptorHeap,
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()); */
+        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
     
 
     MSG msg{};
@@ -803,13 +803,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
+            ImGui_ImplDX12_NewFrame();
+            ImGui_ImplWin32_NewFrame();
+            ImGui::NewFrame();
 
-           // ImGui_ImplDX12_NewFrame();
-            //ImGui_ImplWin32_NewFrame();
-           // ImGui::NewFrame();
+            ImGui::Begin("Sprite");
+            ImGui::ColorEdit3("Clear Color", reinterpret_cast<float*>(materialData));
+            ImGui::DragFloat3("translate", (&transformSprite.translate.x));
+            ImGui::End();
 
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-            //ImGui::ShowDemoWindow();
+            ImGui::ShowDemoWindow();
 
             ///------------------------///
             ///-----MVPMatrixを作る-----///
@@ -832,7 +836,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worludMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
             *transformationMatrixDateSprite = worldViewProjectionMatrixSprite;
 
-           // ImGui::Render();
+            ImGui::Render();
 
             // 描画用のDescriptorHeapの設定
             ID3D12DescriptorHeap* descriptorHeap[] = { srvDescriptorHeap };
@@ -891,9 +895,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // TransformationMatrixBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(1,transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画! (DrawCall/ドローコール)
-            commandList->DrawInstanced(6, 1, 0, 0);
-
-
+            commandList->DrawInstanced(6, 1, 0, 0);     
        
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド終了---------------*/
@@ -943,9 +945,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     CoUninitialize();
 
     // ImGuiの終了処理。
- //   ImGui_ImplDX12_Shutdown();
- //   ImGui_ImplWin32_Shutdown();
-  //  ImGui::DestroyContext();
+    ImGui_ImplDX12_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
     
     CloseHandle(fenceEvent);
     fence->Release();
