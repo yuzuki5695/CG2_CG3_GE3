@@ -452,7 +452,7 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device,int32_t w
         D3D12_HEAP_FLAG_NONE, //Heapの特殊な設定。特になし。
         &resourceDesc, //Resourceの設定
         D3D12_RESOURCE_STATE_DEPTH_WRITE, //深度値を書き込む状態にしておく
-        nullptr, //Clear最適値
+        &depthClearValue, //Clear最適値
         IID_PPV_ARGS(&resource)); //作成するResourceポインタへのポインタ
     assert(SUCCEEDED(hr));
     return resource;
@@ -1040,10 +1040,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 描画先のRTVとDSVを設定する
             D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
             // 描画先のRTVを指定する
-            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false,&dsvHandle);
-            // 指定した深度で画面全体をクリアする
-            commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
+            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false,&dsvHandle);          
             // 指定した色で画面全体をクリアする
             float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
             commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
@@ -1061,6 +1058,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);                
+            // 指定した深度で画面全体をクリアする
+            commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
             // 描画！
             commandList->DrawInstanced(6, 1, 0, 0);
