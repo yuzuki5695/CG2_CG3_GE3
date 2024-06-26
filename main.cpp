@@ -1,4 +1,4 @@
-﻿#include<Windows.h>
+#include<Windows.h>
 #include<cstdint>
 #include<string>
 #include<format>
@@ -646,7 +646,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
     //今回は赤
-    *materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+    *materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 
     //---------------------------------------------//
@@ -868,14 +868,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     //SRVの生成
     device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
-
-
-
-
-
-
-
-
 
 
 
