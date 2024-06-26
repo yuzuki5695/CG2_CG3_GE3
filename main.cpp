@@ -949,6 +949,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+            //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
+            commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
             // 描画！
             commandList->DrawInstanced(3, 1, 0, 0);
 
