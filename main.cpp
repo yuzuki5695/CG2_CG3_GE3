@@ -458,10 +458,10 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device,int32_t w
     return resource;
 }
 
-//
-//bool DepthFunc(float currZ, float prevZ) {
-//    return currZ <= prevZ;
-//}
+
+bool DepthFunc(float currZ, float prevZ) {
+    return currZ <= prevZ;
+}
 //
 //bool DepthFunc(float currZ, float prevZ) {
 //    return currZ >= prevZ;
@@ -1036,8 +1036,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
             // TransitionBarrierを張る
             commandList->ResourceBarrier(1, &barrier);
+
+            // 描画先のRTVとDSVを設定する
+            D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
             // 描画先のRTVを指定する
-            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false,&dsvHandle);
+            // 指定した深度で画面全体をクリアする
+            commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
             // 指定した色で画面全体をクリアする
             float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
             commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
@@ -1054,12 +1060,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
-            commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-            // 描画先のRTVとDSVを設定する
-            D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-            // 指定した深度で画面全体をクリアする
-            commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+            commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);                
 
             // 描画！
             commandList->DrawInstanced(6, 1, 0, 0);
