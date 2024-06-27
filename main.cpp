@@ -778,6 +778,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
+
+    const uint32_t kSubdivision = 6; //分割数
+
+    // 経度分割1つ分の角度
+    const float KLonEverv = (float)M_PI * 2.0f / float(kSubdivision);
+    // 緯度分割1つ分の角度
+    const float KLatEverv = (float)M_PI / float(kSubdivision);
+    // 緯度の方向に分割
+    for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+        float lat = -(float)M_PI / 2.0f + KLatEverv * latIndex;
+        // 経度の方向に分割しながら線を描く
+        for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+            uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+            float lon = lonIndex * KLonEverv;
+            // 頂点にデータを入力する。基準点a
+            vertexData[start].position.x = cos(lat) * cos(lon);
+            vertexData[start].position.y = sin(lat);
+            vertexData[start].position.z = cos(lat) * sin(lon);
+            vertexData[start].position.w = 1.0f;
+            vertexData[start].texcoord = { 1.0f,1.0f };
+
+
+
+
+
+
+        }
+    }
+
     //-----------------------------//
     //-------ImGuiの初期化-----------//
     //-----------------------------//
