@@ -33,7 +33,14 @@ struct VertexData
 {
     Vector4 position;
     Vector2 texcoord;
+    Vector3 normal;
 };
+
+struct Material {
+    Vector4 color;
+    int32_t endbleLighting;
+};
+
 
 //ウィンドウプロージャー
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -259,12 +266,13 @@ void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata) {
             d = { cos(nextLat) * cos(nextLon) ,sin(nextLat),cos(nextLat) * sin(nextLon) ,1.0f };   
 
             // 頂点にデータを入力する。基準点a
-            vertexdata[startindex] = { a, {u, v} };
-            vertexdata[startindex + 1] = { b, {u, nextV} };
-            vertexdata[startindex + 2] = { c, {nextU, v} };
-            vertexdata[startindex + 3] = { b, {u, nextV} };
-            vertexdata[startindex + 4] = { d, {nextU, nextV} };
-            vertexdata[startindex + 5] = { c, {nextU, v} };
+            vertexdata[startindex] = { a, {u, v},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z }};
+            vertexdata[startindex + 1] = { b, {u, nextV},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
+            vertexdata[startindex + 2] = { c, {nextU, v},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
+            vertexdata[startindex + 3] = { b, {u, nextV},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
+            vertexdata[startindex + 4] = { d, {nextU, nextV},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
+            vertexdata[startindex + 5] = { c, {nextU, v},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
+
         }
     }
 }
@@ -514,7 +522,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector4* materialData = nullptr;
     //書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-    //今回は赤
+    //今回は白
     *materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 
@@ -531,6 +539,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //単位行列を書き込んでおく
     *transformationMatrixData = MakeIdentity4x4();
 
+    //マテリアル用のリソース
+    ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
+    //マテリアル用にデータを書き込む
+    Material* materialDataSprite = nullptr;
+    //書き込むためのアドレスを取得
+    materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
+    //今回は白
+    materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+    // SpriteはLightingしないでfalseを設定する
+    materialDataSprite->endbleLighting = false;
+
+
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
@@ -545,7 +565,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     assert(SUCCEEDED(hr));
 
     //======== InputLayout設定 ==========//
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
     inputElementDescs[0].SemanticName = "POSITION";
     inputElementDescs[0].SemanticIndex = 0;
     inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -555,6 +575,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     inputElementDescs[1].SemanticIndex = 0;
     inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
     inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+    inputElementDescs[2].SemanticName = "NORMAL";
+    inputElementDescs[2].SemanticIndex = 0;
+    inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
     D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
     inputLayoutDesc.pInputElementDescs = inputElementDescs;
@@ -820,6 +845,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
     vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
+    vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
+
     // Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
     ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device,sizeof(Matrix4x4));
     // データを書き込む
@@ -961,7 +988,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
-            commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
