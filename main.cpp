@@ -525,7 +525,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //今回は白
     *materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-
     //---------------------------------------------//
     //------ TransformationMatrix用のResource ------//
     //---------------------------------------------//
@@ -549,7 +548,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     // SpriteはLightingしないでfalseを設定する
     materialDataSprite->endbleLighting = false;
-
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
