@@ -249,14 +249,14 @@ void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata) {
             float u = float(lonIndex) / float(ksubdivision);
             float v = 1.0f - float(latIndex) / float(ksubdivision);
             float nextU = float(lonIndex + 1) / float(ksubdivision);
-            float nextV = 1.0f - float(latIndex + 1) / float(ksubdivision);
+            float nextV = 1.0f - float(latIndex + 1) / float(ksubdivision);        
 
             Vector4 a, b, c, d;
 
             a = { cos(lat) * cos(lon) ,sin(lat),cos(lat) * sin(lon) ,1.0f };
             b = { cos(nextLat) * cos(lon) ,sin(nextLat),cos(nextLat) * sin(lon) ,1.0f };
             c = { cos(lat) * cos(nextLon) ,sin(lat),cos(lat) * sin(nextLon) ,1.0f };
-            d = { cos(nextLat) * cos(nextLon) ,sin(nextLat),cos(nextLat) * sin(nextLon) ,1.0f };
+            d = { cos(nextLat) * cos(nextLon) ,sin(nextLat),cos(nextLat) * sin(nextLon) ,1.0f };   
 
             // 頂点にデータを入力する。基準点a
             vertexdata[startindex] = { a, {u, v} };
@@ -717,7 +717,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
     // リソースの先頭のアドレスから使う
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
-    // 使用するリソースのサイズは6つ分のサイズ
+    // 使用するリソースのサイズはの頂点数分のサイズ
     vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
     // 1頂点当たりのサイズ
     vertexBufferView.StrideInBytes = sizeof(VertexData);
@@ -806,7 +806,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-100.0f} };
+    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
   
 
     //-----------------------------//
