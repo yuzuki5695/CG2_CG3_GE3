@@ -35,11 +35,11 @@ struct VertexData
     Vector2 texcoord;
     Vector3 normal;
 };
-
-struct Material {
-    Vector4 color;
-    int32_t endbleLighting;
-};
+//
+//struct Material {
+//    Vector4 color;
+//    int32_t endbleLighting;
+//};
 
 
 //ウィンドウプロージャー
@@ -538,16 +538,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //単位行列を書き込んでおく
     *transformationMatrixData = MakeIdentity4x4();
 
-    //マテリアル用のリソース
-    ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
-    //マテリアル用にデータを書き込む
-    Material* materialDataSprite = nullptr;
-    //書き込むためのアドレスを取得
-    materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
-    //今回は白
-    materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-    // SpriteはLightingしないでfalseを設定する
-    materialDataSprite->endbleLighting = false;
+    ////マテリアル用のリソース
+    //ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
+    ////マテリアル用にデータを書き込む
+    //Material* materialDataSprite = nullptr;
+    ////書き込むためのアドレスを取得
+    //materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
+    ////今回は白
+    //materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+    //// SpriteはLightingしないでfalseを設定する
+    //materialDataSprite->endbleLighting = false;
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
@@ -986,7 +986,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
-            commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
