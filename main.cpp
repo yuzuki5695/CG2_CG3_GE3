@@ -677,32 +677,55 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     vertexResoruce->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
     
     /*-----------------------------------------------------*/
-    /*----------------------三角形1枚目---------------------*/
-    /*----------------------------------------------------*/
-
-    //左下
-    vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
-    vertexData[0].texcoord = { 0.0f,1.0f };
-    //上
-    vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
-    vertexData[1].texcoord = { 0.5f,0.0f };
-    //右下
-    vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
-    vertexData[2].texcoord = { 1.0f,1.0f };
-
+    /*-----------------------球の描画-----------------------*/
     /*-----------------------------------------------------*/
-    /*----------------------三角形2枚目---------------------*/
-    /*----------------------------------------------------*/
 
-    //左下2
-    vertexData[3].position = { -0.5f,-0.5f,0.5f,1.0f };
-    vertexData[3].texcoord = { 0.0f,1.0f };
-    //上2
-    vertexData[4].position = { 0.0f,0.0f,0.0f,1.0f };
-    vertexData[4].texcoord = { 0.5f,0.0f };
-    //右下2
-    vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
-    vertexData[5].texcoord = { 1.0f,1.0f };
+    const uint32_t kSubdivision = 16; //分割数
+
+    uint32_t vertexCount = kSubdivision * kSubdivision * 4;
+
+    // 経度分割1つ分の角度
+    const float KLonEverv = (float)M_PI * 2.0f / float(kSubdivision);
+    // 緯度分割1つ分の角度
+    const float KLatEverv = (float)M_PI / float(kSubdivision);
+
+    // 緯度の方向に分割
+    for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+        float lat = -(float)M_PI / 2.0f + KLatEverv * latIndex;
+        //次の緯度
+        float nextLat = lat + KLatEverv;
+        // 経度の方向に分割しながら線を描く
+        for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+            uint32_t startindex = (latIndex * kSubdivision + lonIndex) * 6;           
+            float lon = lonIndex * KLonEverv;
+            //次の経度
+            float nextLon = lon + KLonEverv;
+          
+            float u = float(lonIndex) / float(kSubdivision);
+            float v = 1.0f - float(latIndex) / float(kSubdivision);
+
+            Vector4 a, b, c,d;
+
+            a = { cos(lat) * cos(lon) ,sin(lat),cos(lat) * sin(lon) ,1.0f };
+            b = { cos(nextLat) * cos(lon) ,sin(nextLat),cos(nextLat) * sin(lon) ,1.0f };
+            c = { cos(lat) * cos(nextLon) ,sin(lat),cos(lat) * sin(nextLon) ,1.0f };
+            d = { cos(nextLat) * cos(nextLon) ,sin(nextLat),cos(nextLat) * sin(nextLon) ,1.0f };
+
+            // 頂点にデータを入力する。基準点a
+            vertexData[startindex].position = a;
+            vertexData[startindex].texcoord = { u, v };
+
+            vertexData[startindex+1].position = b;
+            vertexData[startindex+1].texcoord = { u, v };
+
+            vertexData[startindex+2].position = c;
+            vertexData[startindex+2].texcoord = { u, v };
+
+            vertexData[startindex+ 3].position = d;
+            vertexData[startindex + 3].texcoord = { u, v };
+
+        }
+    }
 
     /*-------------------------------------------------------*/
    /*----------------------spriteのデータ---------------------*/
@@ -777,60 +800,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
-
-
-    const uint32_t kSubdivision = 6; //分割数
-
-
-    // 経度分割1つ分の角度
-    const float KLonEverv = (float)M_PI * 2.0f / float(kSubdivision);
-    // 緯度分割1つ分の角度
-    const float KLatEverv = (float)M_PI / float(kSubdivision);
-    // 緯度の方向に分割
-    for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-        float lat = -(float)M_PI / 2.0f + KLatEverv * latIndex;
-        float nextLat = lat + KLatEverv;
-        // 経度の方向に分割しながら線を描く
-        for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-            uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-            float lon = lonIndex * KLonEverv;
-            float nextLon = lon + KLonEverv;
-            
-            float u = float(lonIndex) / float(kSubdivision);
-            float v =1.0f- float(latIndex) / float(kSubdivision);
-
-            // 頂点にデータを入力する。基準点a
-            vertexData[start].position.x = cos(lat) * cos(lon);
-            vertexData[start].position.y = sin(lat);
-            vertexData[start].position.z = cos(lat) * sin(lon);
-            vertexData[start].position.w = 1.0f;
-            vertexData[start].texcoord = { u, v };
-
-            // 基準点B
-            vertexData[start + 1].position.x = cos(lat) * cos(nextLon);
-            vertexData[start + 1].position.y = sin(lat);
-            vertexData[start + 1].position.z = cos(lat) * sin(nextLon);
-            vertexData[start + 1].position.w = 1.0f;
-            vertexData[start + 1].texcoord = { u, v };
-
-            // 基準点C
-            vertexData[start + 2].position.x = cos(nextLat) * cos(lon);
-            vertexData[start + 2].position.y = sin(nextLat);
-            vertexData[start + 2].position.z = cos(nextLat) * sin(lon);
-            vertexData[start + 2].position.w = 1.0f;
-            vertexData[start + 2].texcoord = { u, v };
-
-            // 基準点D
-            vertexData[start + 3].position.x = cos(nextLat) * cos(nextLon);
-            vertexData[start + 3].position.y = sin(nextLat);
-            vertexData[start + 3].position.z = cos(nextLat) * sin(nextLon);
-            vertexData[start + 3].position.w = 1.0f;
-            vertexData[start + 3].texcoord = { u, v };
-
-
-
-        }
-    }
 
     //-----------------------------//
     //-------ImGuiの初期化-----------//
@@ -938,9 +907,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 
-            // 描画！(今回は球)           
-           // commandList->DrawInstanced(vertexData->position[], 1, 0, 0);
-
+            // 描画！(今回は球)    
+            commandList->DrawInstanced(vertexCount, 1, 0, 0);
+            
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
             /*---------------------------------------------------*/
