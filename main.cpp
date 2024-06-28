@@ -223,6 +223,53 @@ bool DepthFunc(float currZ, float prevZ) {
 //}
 
 
+/*------------------------------------------------------------------------------------*/
+/*-------------------------------------球の作成関数-------------------------------------*/
+/*------------------------------------------------------------------------------------*/
+
+void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata, const float KlonEverv, const float KlatEverv) {
+
+    // 経度分割1つ分の角度
+    const float KLonEverv = (float)M_PI * 2.0f / float(ksubdivision);
+    // 緯度分割1つ分の角度
+    const float KLatEverv = (float)M_PI / float(ksubdivision);
+
+    // 緯度の方向に分割
+    for (uint32_t latIndex = 0; latIndex < ksubdivision; ++latIndex) {
+        float lat = -(float)M_PI / 2.0f + KlatEverv * latIndex;
+        //次の緯度
+        float nextLat = lat + KlatEverv;
+        // 経度の方向に分割しながら線を描く
+        for (uint32_t lonIndex = 0; lonIndex < ksubdivision; ++lonIndex) {
+            uint32_t startindex = (latIndex * ksubdivision + lonIndex) * 6;
+            float lon = lonIndex * KlonEverv;
+            //次の経度
+            float nextLon = lon + KlonEverv;
+
+            float u = float(lonIndex) / float(ksubdivision);
+            float v = 1.0f - float(latIndex) / float(ksubdivision);
+            float nextU = float(lonIndex + 1) / float(ksubdivision);
+            float nextV = 1.0f - float(latIndex + 1) / float(ksubdivision);
+
+            Vector4 a, b, c, d;
+
+            a = { cos(lat) * cos(lon) ,sin(lat),cos(lat) * sin(lon) ,1.0f };
+            b = { cos(nextLat) * cos(lon) ,sin(nextLat),cos(nextLat) * sin(lon) ,1.0f };
+            c = { cos(lat) * cos(nextLon) ,sin(lat),cos(lat) * sin(nextLon) ,1.0f };
+            d = { cos(nextLat) * cos(nextLon) ,sin(nextLat),cos(nextLat) * sin(nextLon) ,1.0f };
+
+            // 頂点にデータを入力する。基準点a
+            vertexdata[startindex] = { a, {u, v} };
+            vertexdata[startindex + 1] = { b, {u, nextV} };
+            vertexdata[startindex + 2] = { c, {nextU, v} };
+            vertexdata[startindex + 3] = { b, {u, nextV} };
+            vertexdata[startindex + 4] = { d, {nextU, nextV} };
+            vertexdata[startindex + 5] = { c, {nextU, v} };
+        }
+    }
+}
+
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
@@ -656,18 +703,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
     /*-------------------------------------------------------*/
-    /*----------------------三角形のデータ---------------------*/
-    /*------------------------------------------------------*/
+    /*----------------------球のデータ-------------------------*/
+    /*-------------------------------------------------------*/
 
+    const uint32_t kSubdivision = 16; //球の分割数
+
+    uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
+    
     // 関数化したResouceで作成
-    ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * 6);
+    ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
 
     //頂点バッファビューを作成する
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
     // リソースの先頭のアドレスから使う
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
     // 使用するリソースのサイズは6つ分のサイズ
-    vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+    vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
     // 1頂点当たりのサイズ
     vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -680,52 +731,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*-----------------------球の描画-----------------------*/
     /*-----------------------------------------------------*/
 
-    const uint32_t kSubdivision = 16; //分割数
-
-    uint32_t vertexCount = kSubdivision * kSubdivision * 4;
-
     // 経度分割1つ分の角度
     const float KLonEverv = (float)M_PI * 2.0f / float(kSubdivision);
     // 緯度分割1つ分の角度
     const float KLatEverv = (float)M_PI / float(kSubdivision);
-
-    // 緯度の方向に分割
-    for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-        float lat = -(float)M_PI / 2.0f + KLatEverv * latIndex;
-        //次の緯度
-        float nextLat = lat + KLatEverv;
-        // 経度の方向に分割しながら線を描く
-        for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-            uint32_t startindex = (latIndex * kSubdivision + lonIndex) * 6;           
-            float lon = lonIndex * KLonEverv;
-            //次の経度
-            float nextLon = lon + KLonEverv;
-          
-            float u = float(lonIndex) / float(kSubdivision);
-            float v = 1.0f - float(latIndex) / float(kSubdivision);
-
-            Vector4 a, b, c,d;
-
-            a = { cos(lat) * cos(lon) ,sin(lat),cos(lat) * sin(lon) ,1.0f };
-            b = { cos(nextLat) * cos(lon) ,sin(nextLat),cos(nextLat) * sin(lon) ,1.0f };
-            c = { cos(lat) * cos(nextLon) ,sin(lat),cos(lat) * sin(nextLon) ,1.0f };
-            d = { cos(nextLat) * cos(nextLon) ,sin(nextLat),cos(nextLat) * sin(nextLon) ,1.0f };
-
-            // 頂点にデータを入力する。基準点a
-            vertexData[startindex].position = a;
-            vertexData[startindex].texcoord = { u, v };
-
-            vertexData[startindex+1].position = b;
-            vertexData[startindex+1].texcoord = { u, v };
-
-            vertexData[startindex+2].position = c;
-            vertexData[startindex+2].texcoord = { u, v };
-
-            vertexData[startindex+ 3].position = d;
-            vertexData[startindex + 3].texcoord = { u, v };
-
-        }
-    }
+    // 球の頂点にデータを入力
+    DrawSphere(kSubdivision, vertexData, KLonEverv, KLatEverv);
 
     /*-------------------------------------------------------*/
    /*----------------------spriteのデータ---------------------*/
@@ -799,7 +810,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
+    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-100.0f} };
+  
 
     //-----------------------------//
     //-------ImGuiの初期化-----------//
@@ -833,6 +845,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::Begin("Sprite");
             ImGui::ColorEdit3("Clear Color", reinterpret_cast<float*>(materialData));
             ImGui::DragFloat3("translate", (&transformSprite.translate.x));
+            ImGui::DragFloat("Camera", (&cameratransform.translate.z));
             ImGui::End();
 
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
@@ -842,7 +855,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ///-----MVPMatrixを作る-----///
             ///------------------------///
              
-            transform.rotate.y += 0.01f;
+            transform.rotate.y += 0.01f;   
 
             Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
             Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
