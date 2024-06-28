@@ -806,7 +806,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
+    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
   
 
     //-----------------------------//
@@ -841,9 +841,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::Begin("Sprite");
             ImGui::ColorEdit3("Clear Color", reinterpret_cast<float*>(materialData));
             ImGui::DragFloat3("translate", (&transformSprite.translate.x));
-            ImGui::DragFloat("Camera", (&cameratransform.translate.z));
             ImGui::End();
 
+          
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
             ImGui::ShowDemoWindow();
 
@@ -851,14 +851,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ///-----MVPMatrixを作る-----///
             ///------------------------///
              
-            transform.rotate.y += 0.01f;   
+            transform.rotate.y += 0.01f;
 
             Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
             Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
             Matrix4x4 viewMatrix = Inverse(cameraMatrix);
             Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
             Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
-            *transformationMatrixData = worludMatrix;
+            *transformationMatrixData = worldViewProjectionMatrix;
+          
+            // カメラ行列の再計算
+            cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
+            viewMatrix = Inverse(cameraMatrix);
+            worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
 
 
             // Sprite用のWrldViewProjectionMatrixを作る
