@@ -267,11 +267,11 @@ void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata) {
 
             // 頂点にデータを入力する。基準点a
             vertexdata[startindex] = { a, {u, v},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z }};
-            vertexdata[startindex + 1] = { b, {u, nextV},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
-            vertexdata[startindex + 2] = { c, {nextU, v},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
-            vertexdata[startindex + 3] = { b, {u, nextV},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
-            vertexdata[startindex + 4] = { d, {nextU, nextV},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
-            vertexdata[startindex + 5] = { c, {nextU, v},{vertexdata[startindex].position.x,vertexdata[startindex].position.y,vertexdata[startindex].position.z } };
+            vertexdata[startindex + 1] = { b, {u, nextV},{vertexdata[startindex+1].position.x,vertexdata[startindex+1].position.y,vertexdata[startindex+1].position.z } };
+            vertexdata[startindex + 2] = { c, {nextU, v},{vertexdata[startindex+2].position.x,vertexdata[startindex+2].position.y,vertexdata[startindex+2].position.z } };
+            vertexdata[startindex + 3] = { b, {u, nextV},{vertexdata[startindex+3].position.x,vertexdata[startindex+3].position.y,vertexdata[startindex+3].position.z } };
+            vertexdata[startindex + 4] = { d, {nextU, nextV},{vertexdata[startindex+4].position.x,vertexdata[startindex+4].position.y,vertexdata[startindex+4].position.z } };
+            vertexdata[startindex + 5] = { c, {nextU, v},{vertexdata[startindex+5].position.x,vertexdata[startindex+5].position.y,vertexdata[startindex+5].position.z } };
 
         }
     }
