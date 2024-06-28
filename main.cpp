@@ -781,6 +781,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     const uint32_t kSubdivision = 6; //分割数
 
+
     // 経度分割1つ分の角度
     const float KLonEverv = (float)M_PI * 2.0f / float(kSubdivision);
     // 緯度分割1つ分の角度
@@ -788,19 +789,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 緯度の方向に分割
     for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
         float lat = -(float)M_PI / 2.0f + KLatEverv * latIndex;
+        float nextLat = lat + KLatEverv;
         // 経度の方向に分割しながら線を描く
         for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
             uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
             float lon = lonIndex * KLonEverv;
+            float nextLon = lon + KLonEverv;
+            
+            float u = float(lonIndex) / float(kSubdivision);
+            float v =1.0f- float(latIndex) / float(kSubdivision);
+
             // 頂点にデータを入力する。基準点a
             vertexData[start].position.x = cos(lat) * cos(lon);
             vertexData[start].position.y = sin(lat);
             vertexData[start].position.z = cos(lat) * sin(lon);
             vertexData[start].position.w = 1.0f;
-            vertexData[start].texcoord = { 1.0f,1.0f };
+            vertexData[start].texcoord = { u, v };
 
+            // 基準点B
+            vertexData[start + 1].position.x = cos(lat) * cos(nextLon);
+            vertexData[start + 1].position.y = sin(lat);
+            vertexData[start + 1].position.z = cos(lat) * sin(nextLon);
+            vertexData[start + 1].position.w = 1.0f;
+            vertexData[start + 1].texcoord = { u, v };
 
+            // 基準点C
+            vertexData[start + 2].position.x = cos(nextLat) * cos(lon);
+            vertexData[start + 2].position.y = sin(nextLat);
+            vertexData[start + 2].position.z = cos(nextLat) * sin(lon);
+            vertexData[start + 2].position.w = 1.0f;
+            vertexData[start + 2].texcoord = { u, v };
 
+            // 基準点D
+            vertexData[start + 3].position.x = cos(nextLat) * cos(nextLon);
+            vertexData[start + 3].position.y = sin(nextLat);
+            vertexData[start + 3].position.z = cos(nextLat) * sin(nextLon);
+            vertexData[start + 3].position.w = 1.0f;
+            vertexData[start + 3].texcoord = { u, v };
 
 
 
@@ -912,8 +937,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 指定した深度で画面全体をクリアする
             commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-            // 描画！
-            commandList->DrawInstanced(6, 1, 0, 0);
+
+            // 描画！(今回は球)           
+           // commandList->DrawInstanced(vertexData->position[], 1, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
