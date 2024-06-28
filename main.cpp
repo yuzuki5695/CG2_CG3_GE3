@@ -227,7 +227,7 @@ bool DepthFunc(float currZ, float prevZ) {
 /*-------------------------------------球の作成関数-------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 
-void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata, const float KlonEverv, const float KlatEverv) {
+void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata) {
 
     // 経度分割1つ分の角度
     const float KLonEverv = (float)M_PI * 2.0f / float(ksubdivision);
@@ -236,15 +236,15 @@ void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata, const float
 
     // 緯度の方向に分割
     for (uint32_t latIndex = 0; latIndex < ksubdivision; ++latIndex) {
-        float lat = -(float)M_PI / 2.0f + KlatEverv * latIndex;
+        float lat = -(float)M_PI / 2.0f + KLatEverv * latIndex;
         //次の緯度
-        float nextLat = lat + KlatEverv;
+        float nextLat = lat + KLatEverv;
         // 経度の方向に分割しながら線を描く
         for (uint32_t lonIndex = 0; lonIndex < ksubdivision; ++lonIndex) {
             uint32_t startindex = (latIndex * ksubdivision + lonIndex) * 6;
-            float lon = lonIndex * KlonEverv;
+            float lon = lonIndex * KLonEverv;
             //次の経度
-            float nextLon = lon + KlonEverv;
+            float nextLon = lon + KLonEverv;
 
             float u = float(lonIndex) / float(ksubdivision);
             float v = 1.0f - float(latIndex) / float(ksubdivision);
@@ -731,12 +731,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*-----------------------球の描画-----------------------*/
     /*-----------------------------------------------------*/
 
-    // 経度分割1つ分の角度
-    const float KLonEverv = (float)M_PI * 2.0f / float(kSubdivision);
-    // 緯度分割1つ分の角度
-    const float KLatEverv = (float)M_PI / float(kSubdivision);
     // 球の頂点にデータを入力
-    DrawSphere(kSubdivision, vertexData, KLonEverv, KLatEverv);
+    DrawSphere(kSubdivision, vertexData);
 
     /*-------------------------------------------------------*/
    /*----------------------spriteのデータ---------------------*/
