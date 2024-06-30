@@ -6,12 +6,12 @@ struct Material
     int32_t endbleLighting;
 };
 
-struct DirectionalLight
-{
-    float32_t4 color; //!< ライトの色
-    float32_t3 disrection; //!< ライトの向き
-    float intensity; //!< 輝度
-};
+//struct DirectionalLight
+//{
+//    float32_t4 color; //!< ライトの色
+//    float32_t3 disrection; //!< ライトの向き
+//    float intensity; //!< 輝度
+//};
 
 ConstantBuffer<Material> gMaterial : register(b0);
 
@@ -23,7 +23,7 @@ struct PixeShaderOutput
 
 Texture2D<float32_t4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
-ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
+//ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
 
 PixeShaderOutput main(VertexShaderOutput input)
 {
@@ -32,12 +32,12 @@ PixeShaderOutput main(VertexShaderOutput input)
     
     PixeShaderOutput output;
     
-    if (gMaterial.endbleLighting != 0){// Linhthingする場合
-        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.disrection)); 
-        output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
-    }
-    else{// Linhthingしない場合、前回までと同じ演算
+    //if (gMaterial.endbleLighting != 0){// Linhthingする場合
+    //    float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.disrection)); 
+    //    output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+    //}
+    //else{// Linhthingしない場合、前回までと同じ演算
         output.color = gMaterial.color * textureColor;
-    }
+    //}
     return output;
 }
