@@ -592,6 +592,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Normalize(directionalLightDate->disrection);
     directionalLightDate->intensity = 1.0f;
 
+   /*-----------------------------------------------------------------------------------*/
+   /*--------------------------------Resourceの作成終了-----------------------------------*/
+   /*-----------------------------------------------------------------------------------*/
+
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
