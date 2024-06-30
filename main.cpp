@@ -580,17 +580,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
    /*-----------------------平行光源用のResource-------------------------*/
    /*------------------------------------------------------------------*/
 
-    //// 平行光源用のリソースを作る
-    //ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
-    //// 平行光源用にデータを書き込む
-    //DirectionalLight* directionalLightDate = nullptr;
-    //// 書き込むためのアドレスを取得
-    //directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
-    //// デフォルト値はとりあえず以下のようにして置く
-    //directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    //directionalLightDate->disrection = { 0.0f,-1.0f,0.0f };
-    //Normalize(directionalLightDate->disrection);
-    //directionalLightDate->intensity = 1.0f;
+    // 平行光源用のリソースを作る
+    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
+    // 平行光源用にデータを書き込む
+    DirectionalLight* directionalLightDate = nullptr;
+    // 書き込むためのアドレスを取得
+    directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
+    // デフォルト値はとりあえず以下のようにして置く
+    directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    directionalLightDate->disrection = { 0.0f,-1.0f,0.0f };
+    Normalize(directionalLightDate->disrection);
+    directionalLightDate->intensity = 1.0f;
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
@@ -921,6 +921,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
   
+
     //-----------------------------//
     //-------ImGuiの初期化-----------//
     //-----------------------------//
@@ -1139,7 +1140,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     mipImages2.Release();
     materialResource->Release();
     materialResourceSprite->Release();
-   // directionalLightResource->Release();
+    directionalLightResource->Release();
 
 #ifdef _DEBUG
     debugController->Release();

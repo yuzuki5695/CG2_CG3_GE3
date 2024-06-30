@@ -37,9 +37,7 @@ PixeShaderOutput main(VertexShaderOutput input)
     { // Linhthingする場合
         float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.disrection));
         output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
-    }
-    else
-    { // Linhthingしない場合、前回までと同じ演算
+    }else{ // Linhthingしない場合、前回までと同じ演算
         output.color = gMaterial.color * textureColor;
     }
     return output;
