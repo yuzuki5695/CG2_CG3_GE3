@@ -36,6 +36,11 @@ struct VertexData
     Vector3 normal;
 };
 
+struct TransformationMatrix {
+    Matrix4x4 WVP;
+    Matrix4x4 World;
+};
+
 struct Material {
     Vector4 color;
     int32_t endbleLighting;
@@ -576,7 +581,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
    /*------------------------------------------------------------------*/
 
     // 平行光源用のリソースを作る
-    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(Material));
+    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
     // 平行光源用にデータを書き込む
     DirectionalLight* directionalLightDate = nullptr;
     // 書き込むためのアドレスを取得
@@ -585,7 +590,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     directionalLightDate->disrection = { 0.0f,-1.0f,0.0f };
     directionalLightDate->intensity = 1.0f;
-
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
@@ -1023,6 +1027,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
+           // commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
             commandList->SetGraphicsRootConstantBufferView(0, directionalLightResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());

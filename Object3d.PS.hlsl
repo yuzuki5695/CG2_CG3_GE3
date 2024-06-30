@@ -6,6 +6,13 @@ struct Material
     int32_t endbleLighting;
 };
 
+struct DirectionalLight
+{
+    float32_t4 color; //!< ライトの色
+    float32_t3 disrection; //!< ライトの向き
+    float intensity; //!< 輝度
+};
+
 ConstantBuffer<Material> gMaterial : register(b0);
 
 struct PixeShaderOutput
