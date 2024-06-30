@@ -1063,11 +1063,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
+    mipImages.Release();
+    mipImages2.Release();
+  
 
 #ifdef _DEBUG
     debugController->Release();
 
 #endif
+
     vertexResoruce->Release();
     vertexResoruceSprite->Release();
     graphicsPipelineState->Release();
@@ -1075,6 +1079,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     if (errorBlob) {
         errorBlob->Release();
     }
+
+
     //リソースチェック
     IDXGIDebug1* debug;
     if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
