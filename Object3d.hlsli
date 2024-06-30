@@ -6,13 +6,6 @@ struct VertexShaderOutput
     float32_t3 normal : NORMAL0;
 };
 
-
-struct Material
-{
-    Vector4 color;
-    int32_t endbleLighting;
-};
-
 struct DirectionalLight
 {
     float32_t4 color; //!< ライトの色

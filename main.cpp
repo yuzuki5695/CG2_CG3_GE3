@@ -525,6 +525,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptionRootSignature.pStaticSamplers = staticSamplers;
     descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
   
+
+    /*------------------------------------------------------------------------------------*/
+    /*----------------------------------Resourceの作成-------------------------------------*/
+    /*------------------------------------------------------------------------------------*/
+
+    /*------------------------------------------------------------------*/
+    /*----------------------マテリアル用のResource------------------------*/
+    /*------------------------------------------------------------------*/
+
     // マテリアル用のリソース
     ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(VertexData));
     // マテリアル用にデータを書き込む
@@ -534,9 +543,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 今回は白
     *materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    //---------------------------------------------//
-    //------ TransformationMatrix用のResource ------//
-    //---------------------------------------------//
+   /*------------------------------------------------------------------*/
+   /*----------------TransformationMatrix用のResource-------------------*/
+   /*------------------------------------------------------------------*/
 
     // WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
     ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
@@ -546,6 +555,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
     // 単位行列を書き込んでおく
     *transformationMatrixData = MakeIdentity4x4();
+
+   /*------------------------------------------------------------------*/
+   /*------------------------Sprite用のResource-------------------------*/
+   /*------------------------------------------------------------------*/
 
     //Sprite用のマテリアルリソースを作る
     ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
@@ -557,6 +570,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialSpriteDate->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     // SpriteはLightingしないでfalseを設定する
     materialSpriteDate->endbleLighting = false;
+
+   /*------------------------------------------------------------------*/
+   /*-----------------------平行光源用のResource-------------------------*/
+   /*------------------------------------------------------------------*/
 
     // 平行光源用のリソースを作る
     ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(Material));
