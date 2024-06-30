@@ -35,22 +35,22 @@ struct VertexData
     Vector2 texcoord;
     Vector3 normal;
 };
-//
-//struct TransformationMatrix {
-//    Matrix4x4 WVP;
-//    Matrix4x4 World;
-//};
+
+struct TransformationMatrix {
+    Matrix4x4 WVP;
+    Matrix4x4 World;
+};
 
 struct Material {
     Vector4 color;
     int32_t endbleLighting;
 };
-//
-//struct DirectionalLight {
-//    Vector4 color;//!< ライトの色
-//    Vector3 disrection;//!< ライトの向き
-//    float intensity;//!< 輝度
-//};
+
+struct DirectionalLight {
+    Vector4 color;//!< ライトの色
+    Vector3 disrection;//!< ライトの向き
+    float intensity;//!< 輝度
+};
 
 //ウィンドウプロージャー
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -496,7 +496,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
     //RootParameter作成
-    D3D12_ROOT_PARAMETER rootParameters[3] = {};
+    D3D12_ROOT_PARAMETER rootParameters[4] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
@@ -510,9 +510,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;//Tableの中身の配列を指定    
     rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);//利用する数
     
-   // rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-   // rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixeShaderで使う
-   // rootParameters[3].Descriptor.ShaderRegister = 1;// レジスタ番号1を使う
+    rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
+    rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+    rootParameters[3].Descriptor.ShaderRegister = 1;// レジスタ番号1を使う
 
     descriptionRootSignature.pParameters = rootParameters;// ルートパラメータ配列へのポインタ
     descriptionRootSignature.NumParameters = _countof(rootParameters);// 配列の長さ
@@ -589,6 +589,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //// デフォルト値はとりあえず以下のようにして置く
     //directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     //directionalLightDate->disrection = { 0.0f,-1.0f,0.0f };
+    //Normalize(directionalLightDate->disrection);
     //directionalLightDate->intensity = 1.0f;
 
     //シリアライズしてバイナリにする
@@ -952,14 +953,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
 
-            ImGui::Begin("Sprite");
-            ImGui::ColorEdit3("Clear Color", reinterpret_cast<float*>(materialData));
-            ImGui::DragFloat3("translate", (&transformSprite.translate.x));
+            ImGui::Begin("Sprite");       
             ImGui::DragFloat3("CameroTranslate", (&cameratransform.translate.x));
             ImGui::SliderFloat("CameroRarotateX", &cameratransform.rotate.x, -5.0f,5.0f);
             ImGui::SliderFloat("CameroRarotateY", &cameratransform.rotate.y, -5.0f,5.0f);
             ImGui::SliderFloat("CameroRarotateZ", &cameratransform.rotate.z, -5.0f,5.0f);
-            ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+           
+            ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
+            ImGui::DragFloat3("translateSprite", (&transformSprite.translate.x));
+            ImGui::Checkbox("useMonsterBall", &useMonsterBall);  
             ImGui::End();
 
           
@@ -1032,7 +1034,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-           // commandList->SetGraphicsRootConstantBufferView(0, directionalLightResource->GetGPUVirtualAddress());
+          //  commandList->SetGraphicsRootConstantBufferView(0, directionalLightResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。

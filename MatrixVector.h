@@ -19,6 +19,32 @@ Matrix4x4 MakeIdentity4x4() {
     return result;
 };
 
+//長さ（ノルム）
+float Length(const Vector3& v) {
+    float result;
+
+    result = sqrtf(powf(v.x, 2) + powf(v.y, 2) + powf(v.z, 2));
+
+    return result;
+};
+
+
+//正規化
+Vector3  Normalize(const Vector3& v) {
+    Vector3 result{};
+
+    float length = Length(v);
+
+    if (length != 0.0) {
+        result.x = v.x / length;
+        result.y = v.y / length;
+        result.z = v.z / length;
+    }
+
+    return result;
+};
+
+
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& matrix) {
 
