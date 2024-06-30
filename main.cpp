@@ -525,13 +525,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptionRootSignature.pStaticSamplers = staticSamplers;
     descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
   
-    //マテリアル用のリソース
+    // マテリアル用のリソース
     ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(VertexData));
-    //マテリアル用にデータを書き込む
+    // マテリアル用にデータを書き込む
     Vector4* materialData = nullptr;
-    //書き込むためのアドレスを取得
+    // 書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-    //今回は白
+    // 今回は白
     *materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
     //---------------------------------------------//
@@ -540,23 +540,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
     ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
-    //データを書き込む
+    // データを書き込む
     Matrix4x4* transformationMatrixData = nullptr;
-    //書き込むためのアドレスを取得
+    // 書き込むためのアドレスを取得
     wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
-    //単位行列を書き込んでおく
+    // 単位行列を書き込んでおく
     *transformationMatrixData = MakeIdentity4x4();
 
-    //マテリアル用のリソース
+    //Sprite用のマテリアルリソースを作る
     ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
-    //マテリアル用にデータを書き込む
+    // Sprite用にデータを書き込む
     Material* materialSpriteDate = nullptr;
-    //書き込むためのアドレスを取得
+    // 書き込むためのアドレスを取得
     materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialSpriteDate));
-    //今回は白
+    // 今回は白
     materialSpriteDate->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     // SpriteはLightingしないでfalseを設定する
     materialSpriteDate->endbleLighting = false;
+
+    // 平行光源用のリソースを作る
+    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(Material));
+    // 平行光源用にデータを書き込む
+    DirectionalLight* directionalLightDate = nullptr;
+    // 書き込むためのアドレスを取得
+    directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
+    // デフォルト値はとりあえず以下のようにして置く
+    directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    directionalLightDate->disrection = { 0.0f,-1.0f,0.0f };
+    directionalLightDate->intensity = 1.0f;
+
 
     //シリアライズしてバイナリにする
     ID3DBlob* signatureBlob = nullptr;
@@ -887,7 +899,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
   
-    
     //-----------------------------//
     //-------ImGuiの初期化-----------//
     //-----------------------------//
@@ -995,7 +1006,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
-            commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(0, directionalLightResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
@@ -1091,15 +1102,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     dxgiFactory->Release();
     rootSignature->Release();
     pixelShaderBlob->Release();
-    vertexShaderBlob->Release();
-    materialResource->Release();
-    materialResourceSprite->Release();
+    vertexShaderBlob->Release(); 
     wvpResource->Release();
     rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
     mipImages.Release();
     mipImages2.Release();
+    materialResource->Release();
+    materialResourceSprite->Release();
+    directionalLightResource->Release();
 
 #ifdef _DEBUG
     debugController->Release();

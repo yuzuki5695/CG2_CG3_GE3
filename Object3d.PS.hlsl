@@ -10,6 +10,7 @@ ConstantBuffer<Material> gMaterial : register(b0);
 struct PixeShaderOutput
 {
     float32_t4 color : SV_TARGET0;
+    
 };
 
 Texture2D<float32_t4> gTexture : register(t0);
@@ -22,6 +23,13 @@ PixeShaderOutput main(VertexShaderOutput input)
     float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
     
     PixeShaderOutput output;
-    output.color = gMaterial.color * textureColor;
+    
+    if (gMaterial.endbleLighting != 0){// Linhthingする場合
+        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.disrection)); 
+        output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+    }
+    else{// Linhthingしない場合、前回までと同じ演算
+        output.color = gMaterial.color * textureColor;
+    }
     return output;
 }
