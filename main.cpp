@@ -1080,7 +1080,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         errorBlob->Release();
     }
 
-
     //リソースチェック
     IDXGIDebug1* debug;
     if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
