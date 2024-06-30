@@ -1059,7 +1059,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         }
     }
-
+    
     ///COMの終了
     CoUninitialize();
 
@@ -1089,6 +1089,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
+    mipImages.Release();
+    mipImages2.Release();
 
 #ifdef _DEBUG
     debugController->Release();
