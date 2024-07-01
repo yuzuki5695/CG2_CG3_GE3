@@ -1013,6 +1013,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     wvpResource->Release();
     rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
+    textureResource->Release();
+  
+
 #ifdef _DEBUG
     debugController->Release();
 
