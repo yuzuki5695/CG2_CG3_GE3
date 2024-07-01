@@ -1063,8 +1063,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
+    textureResource->Release();
+    textureResource2->Release();
+    depthStencilResource->Release();
+    transformationMatrixResourceSprite->Release();
     mipImages.Release();
     mipImages2.Release();
+
+
 
 #ifdef _DEBUG
     debugController->Release();
