@@ -1065,13 +1065,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     dsvDescriptorHeap->Release();
     mipImages.Release();
     mipImages2.Release();
-  
 
 #ifdef _DEBUG
     debugController->Release();
 
 #endif
-
     vertexResoruce->Release();
     vertexResoruceSprite->Release();
     graphicsPipelineState->Release();
