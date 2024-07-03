@@ -501,7 +501,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
     
     rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// レジスタ番号0を使う
+    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShaderでを使う
     rootParameters[1].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
 
     rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTableを使う
@@ -575,21 +575,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // SpriteはLightingしないでfalseを設定する
     materialSpriteDate->endbleLighting = false;
 
-   /*------------------------------------------------------------------*/
-   /*-----------------------平行光源用のResource-------------------------*/
-   /*------------------------------------------------------------------*/
-
-    // 平行光源用のリソースを作る
-    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
-    // 平行光源用にデータを書き込む
-    DirectionalLight* directionalLightDate = nullptr;
-    // 書き込むためのアドレスを取得
-    directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
-    // デフォルト値はとりあえず以下のようにして置く
-    directionalLightDate->color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
-    directionalLightDate->disrection = Vector3{ 0.0f,-1.0f,0.0f };
-    directionalLightDate->intensity = 1.0f;
-    directionalLightDate->disrection = Normalize(directionalLightDate->disrection);// 正規化
 
    /*-----------------------------------------------------------------------------------*/
    /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -809,12 +794,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // DepthStencilの設定
     graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
     graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
+    
     // 実際に生成
     ID3D12PipelineState* graphicsPipelineState = nullptr;
     hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
     assert(SUCCEEDED(hr));
-
 
     /*-------------------------------------------------------*/
     /*----------------------球のデータ-------------------------*/
@@ -849,8 +833,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     DrawSphere(kSubdivision, vertexData);
 
     /*-------------------------------------------------------*/
-   /*----------------------spriteのデータ---------------------*/
-   /*------------------------------------------------------*/
+    /*----------------------spriteのデータ---------------------*/
+    /*------------------------------------------------------*/
 
     // Sprite用の頂点リソースを作る
     ID3D12Resource* vertexResoruceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
@@ -900,6 +884,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 単位行列を書き込んでおく
     *transformationMatrixDateSprite = MakeIdentity4x4();
 
+   /*------------------------------------------------------------------*/
+   /*-----------------------平行光源用のResource-------------------------*/
+   /*------------------------------------------------------------------*/
+
+    // 平行光源用のリソースを作る
+    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
+    // 平行光源用にデータを書き込む
+    DirectionalLight* directionalLightDate = nullptr;
+    // 書き込むためのアドレスを取得
+    directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
+    // デフォルト値はとりあえず以下のようにして置く
+    directionalLightDate->color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
+    directionalLightDate->direction = Vector3{ 0.0f,-1.0f,0.0f };
+    directionalLightDate->intensity = 1.0f;
+    directionalLightDate->direction = Normalize(directionalLightDate->direction);// 正規化
+
+
+
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -939,9 +941,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
     
-
     bool useMonsterBall = true;
-
 
     MSG msg{};
     // ウィンドウの×ボタンが押されるまでループ
@@ -966,9 +966,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::DragFloat3("translateSprite", (&transformSprite.translate.x));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);  
+            ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(directionalLightDate));
             ImGui::End();
 
-          
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
             ImGui::ShowDemoWindow();
 
@@ -1024,7 +1024,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 描画先のRTVとDSVを設定する
             D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
             // 描画先のRTVを指定する
-            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false,&dsvHandle);          
+            commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false,&dsvHandle);
             // 指定した色で画面全体をクリアする
             float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
             commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
@@ -1038,10 +1038,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-            // wvp用のCBufferの場所を設定 
-            commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             // 平行光源用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+            // wvp用のCBufferの場所を設定 
+            commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
             // 指定した深度で画面全体をクリアする
@@ -1050,13 +1050,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             //SRVを切り替えて画像を変えるS
             commandList->SetGraphicsRootDescriptorTable(2,useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 
-            // 描画！(今回は球)    
-            commandList->DrawInstanced(vertexCount, 1, 0, 0);               
+            // 描画！(今回は球) 
+            commandList->DrawInstanced(vertexCount, 1, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
             /*---------------------------------------------------*/
-
 
             //// Spriteの描画は常にuvCheckerにする
             //commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
