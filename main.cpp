@@ -575,6 +575,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // SpriteはLightingしないでfalseを設定する
     materialSpriteDate->endbleLighting = false;
 
+   /*------------------------------------------------------------------*/
+   /*-----------------------平行光源用のResource-------------------------*/
+   /*------------------------------------------------------------------*/
+
+    // 平行光源用のリソースを作る
+    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
+    // 平行光源用にデータを書き込む
+    DirectionalLight* directionalLightDate = nullptr;
+    // 書き込むためのアドレスを取得
+    directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
+    // デフォルト値はとりあえず以下のようにして置く
+    directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
+    directionalLightDate->intensity = 1.0f;
 
    /*-----------------------------------------------------------------------------------*/
    /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -884,24 +898,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 単位行列を書き込んでおく
     *transformationMatrixDateSprite = MakeIdentity4x4();
 
-   /*------------------------------------------------------------------*/
-   /*-----------------------平行光源用のResource-------------------------*/
-   /*------------------------------------------------------------------*/
-
-    // 平行光源用のリソースを作る
-    ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
-    // 平行光源用にデータを書き込む
-    DirectionalLight* directionalLightDate = nullptr;
-    // 書き込むためのアドレスを取得
-    directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
-    // デフォルト値はとりあえず以下のようにして置く
-    directionalLightDate->color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
-    directionalLightDate->direction = Vector3{ 0.0f,-1.0f,0.0f };
-    directionalLightDate->intensity = 1.0f;
-    directionalLightDate->direction = Normalize(directionalLightDate->direction);// 正規化
-
-
-
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -966,7 +962,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::DragFloat3("translateSprite", (&transformSprite.translate.x));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);  
-            ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(directionalLightDate));
+           //ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(directionalLightDate));
             ImGui::End();
 
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
@@ -1038,12 +1034,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-            // 平行光源用のCBufferの場所を設定 
-            commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+            // 平行光源用のCBufferの場所を設定 
+            commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
             // 指定した深度で画面全体をクリアする
             commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
