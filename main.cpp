@@ -46,10 +46,10 @@ struct Material {
     int32_t endbleLighting;
 };
 
-struct DirectionalLight {
-    Vector4 color;//!< ライトの色
-    Vector3 disrection;//!< ライトの向き
-    float intensity;//!< 輝度
+struct DirectionalLight{
+    Vector4 color; //!< ライトの色
+    Vector3 direction; //!< ライトの向き
+    float intensity; //!< 輝度
 };
 
 //ウィンドウプロージャー
@@ -494,7 +494,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-
     //RootParameter作成
     D3D12_ROOT_PARAMETER rootParameters[4] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
@@ -507,7 +506,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTableを使う
     rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで使う
-    rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;//Tableの中身の配列を指定    
+    rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;//Tableの中身の配列を指定
     rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);//利用する数
     
     rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
@@ -587,10 +586,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 書き込むためのアドレスを取得
     directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightDate));
     // デフォルト値はとりあえず以下のようにして置く
-    directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    directionalLightDate->disrection = { 0.0f,-1.0f,0.0f };
-    Normalize(directionalLightDate->disrection);
+    directionalLightDate->color = Vector4{ 1.0f, 1.0f, 1.0f, 1.0f };
+    directionalLightDate->disrection = Vector3{ 0.0f,-1.0f,0.0f };
     directionalLightDate->intensity = 1.0f;
+    directionalLightDate->disrection = Normalize(directionalLightDate->disrection);// 正規化
 
    /*-----------------------------------------------------------------------------------*/
    /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -1038,10 +1037,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
-            commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-          //  commandList->SetGraphicsRootConstantBufferView(0, directionalLightResource->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+            // 平行光源用のCBufferの場所を設定 
+            commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
             // 指定した深度で画面全体をクリアする
@@ -1140,6 +1140,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
+    textureResource->Release();
+    textureResource2->Release();
+    depthStencilResource->Release();
+    transformationMatrixResourceSprite->Release();
     mipImages.Release();
     mipImages2.Release();
     materialResource->Release();
