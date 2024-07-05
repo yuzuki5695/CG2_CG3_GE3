@@ -550,14 +550,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
    /*----------------TransformationMatrix用のResource-------------------*/
    /*------------------------------------------------------------------*/
 
-    // WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-    ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
+    // WVP,World用のリソースを作る。TransformationMatrixを用意する
+    ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(TransformationMatrix));
     // データを書き込む
-    Matrix4x4* transformationMatrixData = nullptr;
+    TransformationMatrix* transformationMatrixData = nullptr;
     // 書き込むためのアドレスを取得
     wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
     // 単位行列を書き込んでおく
-    *transformationMatrixData = MakeIdentity4x4();
+    transformationMatrixData->WVP = MakeIdentity4x4();
+    transformationMatrixData->World = MakeIdentity4x4();
 
    /*------------------------------------------------------------------*/
    /*------------------------Sprite用のResource-------------------------*/
@@ -965,6 +966,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::DragFloat3("translateSprite", (&transformSprite.translate.x));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);  
+            ImGui::ColorEdit3("lLightColor", reinterpret_cast<float*>(directionalLightDate));
            //ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(directionalLightDate));
             ImGui::End();
 
@@ -972,7 +974,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ShowDemoWindow();
 
             ///------------------------///
-            ///-----MVPMatrixを作る-----///
+            ///-----MVP,WorldMatrixを作る-----///
             ///------------------------///
              
             transform.rotate.y += 0.01f;
@@ -982,8 +984,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 viewMatrix = Inverse(cameraMatrix);
             Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
             Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
-            *transformationMatrixData = worldViewProjectionMatrix;
-          
+            transformationMatrixData->World = worludMatrix;
+            transformationMatrixData->WVP =  worldViewProjectionMatrix;
+
             // カメラ行列の再計算
             cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
             viewMatrix = Inverse(cameraMatrix);
