@@ -740,13 +740,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;				//2Dテクスチャ
     srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
 
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc3{};
-    srvDesc3.Format = metadata.format;
-    srvDesc3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDesc3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;				//2Dテクスチャ
-    srvDesc3.Texture2D.MipLevels = UINT(metadata.mipLevels);
-
-
     //SRVを作成するDescriptorHeapの場所を決める
     D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 0);
     D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 0);
@@ -761,12 +754,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 2);
     //SRVの生成
     device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
-
-    //SRVを作成するDescriptorHeapの場所を決める
-    D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU3 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 3);
-    D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU3 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 3);
-    //SRVの生成
-    device->CreateShaderResourceView(textureResource, &srvDesc3, textureSrvHandleCPU3);
     
     /*------------------------------------------------------------*/
     /*--------------------------DSVの設定--------------------------*/
@@ -850,7 +837,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     VertexData* vertexData = nullptr;
     //書き込むためのアドレスを取得
     vertexResoruce->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-    
+
     /*-----------------------------------------------------*/
     /*-----------------------球の描画-----------------------*/
     /*-----------------------------------------------------*/
@@ -909,6 +896,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     transformationMatrixResourceSprite->Map(0,nullptr,reinterpret_cast<void**>(&transformationMatrixDateSprite));
     // 単位行列を書き込んでおく
     *transformationMatrixDateSprite = MakeIdentity4x4();
+
+
+
+
 
     // ビューポート
     D3D12_VIEWPORT viewport{};
