@@ -483,10 +483,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
     assert(SUCCEEDED(hr));
 
-    //RootSignature作成
-    D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-    descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
     //DescriptorRange
     D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
     descriptorRange[0].BaseShaderRegister = 0;
@@ -513,11 +509,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[3].Descriptor.ShaderRegister = 1;// レジスタ番号1を使う
 
+    //RootSignature作成
+    D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
+    descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
     descriptionRootSignature.pParameters = rootParameters;// ルートパラメータ配列へのポインタ
     descriptionRootSignature.NumParameters = _countof(rootParameters);// 配列の長さ
 
     //Samplerの設定
-    D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+    D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
     staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;//バイリニアフィルタ	
     staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//0～1の範囲外をリピート		
     staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -727,6 +726,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
     ID3D12Resource* textureResource2 = CreateTextureResource(device, metadata2);
     UploadTextureData(textureResource2, mipImages2);
+
+    //2枚目のTextureを読んで転送する
+    DirectX::ScratchImage mipImages3 = LoadTexture("resources/monsterBall.png");
+    const DirectX::TexMetadata& metadata3 = mipImages3.GetMetadata();
+    ID3D12Resource* textureResource3 = CreateTextureResource(device, metadata3);
+    UploadTextureData(textureResource3, mipImages3);
 
     //metaDataを基にSRVの設定
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -1033,7 +1038,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
             commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             // マテリアルCBufferの場所を設定
-            commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
