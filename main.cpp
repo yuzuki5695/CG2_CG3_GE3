@@ -873,45 +873,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*----------------------spriteのデータ---------------------*/
     /*------------------------------------------------------*/
 
-    //// Sprite用の頂点リソースを作る
-    //ID3D12Resource* vertexResoruceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
-
-    // //頂点バッファビューを作成する
-    //D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
-    //// リソースの先頭のアドレスから使う
-    //vertexBufferViewSprite.BufferLocation = vertexResoruceSprite->GetGPUVirtualAddress();
-    //// 使用するリソースのサイズは6つ分のサイズ
-    //vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
-    //// 1頂点当たりのサイズ
-    //vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
-
-    ////頂点リソースにデータを書き込む
-    //VertexData* vertexDataSprite = nullptr;
-    ////書き込むためのアドレスを取得
-    //vertexResoruceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-
-    //// 1枚目の三角形
-    //vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
-    //vertexDataSprite[0].texcoord = { 0.0f,1.0f };
-
-    //vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
-    //vertexDataSprite[1].texcoord = { 0.0f,0.0f };
-
-    //vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
-    //vertexDataSprite[2].texcoord = { 1.0f,1.0f };
-
-    //// 2枚目の三角形
-    //vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };
-    //vertexDataSprite[3].texcoord = { 0.0f,0.0f };
-
-    //vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };
-    //vertexDataSprite[4].texcoord = { 1.0f,0.0f };
-
-    //vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
-    //vertexDataSprite[5].texcoord = { 1.0f,1.0f };
-
-    //vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
-
     ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
     //頂点バッファビューを作成する
     D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
@@ -921,7 +882,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
     // インデックスはuint32_tとする
     indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
-
+    // インデックスリソースにデータを書き込む
     uint32_t* indexDateSprite = nullptr;
     indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDateSprite));
     indexDateSprite[0] = 0; indexDateSprite[1] = 1; indexDateSprite[2] = 2;
@@ -1085,30 +1046,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 描画！(今回は球) 
             commandList->DrawInstanced(vertexCount, 1, 0, 0);
 
-
-            commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            // 描画
-            commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
-            //スプライトの描画設定
-            //commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-            //commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-            //commandList->SetGraphicsRootConstantBufferView(1,transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
             /*---------------------------------------------------*/
 
-            //// Spriteの描画は常にuvCheckerにする
-            //commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+            // Spriteの描画は常にuvCheckerにする
+            commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+            commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
+            // 描画
+            commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-            //// Spriteの描画。変更が必要なものだけ変更する
-            //commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);        
-            //// TransformationMatrixBufferの場所を設定
-            //commandList->SetGraphicsRootConstantBufferView(1,transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
-            //// 描画! (DrawCall/ドローコール)
-            //commandList->DrawInstanced(6, 1, 0, 0);     
        
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド終了---------------*/
