@@ -17,6 +17,7 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include"MatrixVector.h"
 #include"Resource.h"
+#include"Matrix3x3.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -44,6 +45,8 @@ struct TransformationMatrix {
 struct Material {
     Vector4 color;
     int32_t endbleLighting;
+    float padding[3];
+    Matrix4x4 uvTransform;
 };
 
 struct DirectionalLight{
@@ -567,7 +570,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     // Lightingするのでtrueを設定する
     materialData->endbleLighting = true;
-    
+    // 単位行列を書き込んでおく
+    materialData->uvTransform = MakeIdentity4x4();
+
    /*------------------------------------------------------------------*/
    /*----------------TransformationMatrix用のResource-------------------*/
    /*------------------------------------------------------------------*/
@@ -596,6 +601,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialSpriteDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     // SpriteはLightingしないでfalseを設定する
     materialSpriteDate->endbleLighting = false;
+    // 単位行列を書き込んでおく
+    materialSpriteDate->uvTransform = MakeIdentity4x4();
 
    /*------------------------------------------------------------------*/
    /*-----------------------平行光源用のResource-------------------------*/
@@ -873,45 +880,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*----------------------spriteのデータ---------------------*/
     /*------------------------------------------------------*/
 
-    //// Sprite用の頂点リソースを作る
-    //ID3D12Resource* vertexResoruceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
-
-    // //頂点バッファビューを作成する
-    //D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
-    //// リソースの先頭のアドレスから使う
-    //vertexBufferViewSprite.BufferLocation = vertexResoruceSprite->GetGPUVirtualAddress();
-    //// 使用するリソースのサイズは6つ分のサイズ
-    //vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
-    //// 1頂点当たりのサイズ
-    //vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
-
-    ////頂点リソースにデータを書き込む
-    //VertexData* vertexDataSprite = nullptr;
-    ////書き込むためのアドレスを取得
-    //vertexResoruceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-
-    //// 1枚目の三角形
-    //vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
-    //vertexDataSprite[0].texcoord = { 0.0f,1.0f };
-
-    //vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
-    //vertexDataSprite[1].texcoord = { 0.0f,0.0f };
-
-    //vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
-    //vertexDataSprite[2].texcoord = { 1.0f,1.0f };
-
-    //// 2枚目の三角形
-    //vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };
-    //vertexDataSprite[3].texcoord = { 0.0f,0.0f };
-
-    //vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };
-    //vertexDataSprite[4].texcoord = { 1.0f,0.0f };
-
-    //vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
-    //vertexDataSprite[5].texcoord = { 1.0f,1.0f };
-
-    //vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
-
     ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
     //頂点バッファビューを作成する
     D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
@@ -962,6 +930,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
   
+    Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
 
     //-----------------------------//
     //-------ImGuiの初期化-----------//
@@ -997,7 +967,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ShowDemoWindow();
 
             ImGui::Begin("Sprite");       
-            ImGui::DragFloat3("CameroTranslate", (&transformSprite.translate.x));
+           // ImGui::DragFloat3("CameroTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
             ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
@@ -1006,16 +976,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);  
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x,0.01f);
             ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity,0.01f); 
-           //ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(directionalLightDate));
+
+            ImGui::DragFloat2("UVTranslate",&uvTransformSprite.translate.x,0.01f,-10.0f,10.0f);
+            ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+            ImGui::DragFloat("UVRotate", &uvTransformSprite.rotate.x);
             ImGui::End();
 
             ImGui::Render();
-
-            ///------------------------///
-            ///-----MVP,WorldMatrixを作る-----///
-            ///------------------------///
              
            // transform.rotate.y += 0.01f;
+
+            /*------------------------------------------*/
+            /*---------MVP,WorldMatrixの行列を作る--------*/
+            /*------------------------------------------*/
 
             Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
             Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
@@ -1025,13 +998,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             transformationMatrixData->World = worludMatrix;
             transformationMatrixData->WVP =  worldViewProjectionMatrix;
 
-            // Sprite用のWrldViewProjectionMatrixを作る
+            /*-------------------------------------------*/
+           /*---Sprite用のWrldViewProjectionMatrixを作る---*/
+           /*--------------------------------------------*/
+
             Matrix4x4 worludMatrixSprite = MakeAftineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
             Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
             Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f,float(kClientWidth),float(kClientHeight), 0.0f, 100.0f);
             Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worludMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
             transformationMatrixDateSprite->World = worludMatrix;
             transformationMatrixDateSprite->WVP = worldViewProjectionMatrixSprite;
+
+            /*----------------------------------------*/
+            /*---------UVTransform用の行列を作る--------*/
+            /*----------------------------------------*/
+
+            Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
+            uvTransformMatrix = Multiply(uvTransformMatrix,MakeRotateZMatrix(uvTransformSprite.rotate.z));
+            uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+            materialSpriteDate->uvTransform = uvTransformMatrix;
 
             // 描画用のDescriptorHeapの設定
             ID3D12DescriptorHeap* descriptorHeap[] = { srvDescriptorHeap };
@@ -1085,30 +1070,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 描画！(今回は球) 
             commandList->DrawInstanced(vertexCount, 1, 0, 0);
 
-
-            commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            // 描画
-            commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
-            //スプライトの描画設定
-            //commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-            //commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-            //commandList->SetGraphicsRootConstantBufferView(1,transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
             /*---------------------------------------------------*/
 
-            //// Spriteの描画は常にuvCheckerにする
-            //commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-            //// Spriteの描画。変更が必要なものだけ変更する
-            //commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);        
-            //// TransformationMatrixBufferの場所を設定
-            //commandList->SetGraphicsRootConstantBufferView(1,transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
-            //// 描画! (DrawCall/ドローコール)
-            //commandList->DrawInstanced(6, 1, 0, 0);     
+            commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
+            // 描画!(DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面0で良い
+            commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
        
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド終了---------------*/

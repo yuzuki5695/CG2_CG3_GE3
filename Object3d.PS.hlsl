@@ -4,6 +4,7 @@ struct Material
 {
     float4 color;
     int endbleLighting;
+    float32_t4x4 uvTransform;
 };
 
 struct DirectionalLight
@@ -28,7 +29,8 @@ SamplerState gSampler : register(s0);
 PixeShaderOutput main(VertexShaderOutput input)
 {
     //TextureをSampling
-    float4 textureColor = gTexture.Sample(gSampler, input.texcoord);
+    float4 TransformesUV = mul(float4(input.texcoord,0.0f,1.0f),gMaterial.uvTransform);
+    float4 textureColor = gTexture.Sample(gSampler, TransformesUV.xy);
     
     PixeShaderOutput output;
     
