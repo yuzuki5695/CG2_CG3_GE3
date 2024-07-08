@@ -894,9 +894,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDateSprite));
     indexDateSprite[0] = 0; indexDateSprite[1] = 1; indexDateSprite[2] = 2;
     indexDateSprite[3] = 1; indexDateSprite[4] = 3; indexDateSprite[5] = 2;
-
  
-    // Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+    // Sprite用のTransformationMatrix用のリソースを作る。
     ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device,sizeof(TransformationMatrix));
     // データを書き込む
     TransformationMatrix* transformationMatrixDateSprite = nullptr;
@@ -1078,7 +1077,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
             commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-           // commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画!(DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面0で良い
             commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
        
@@ -1162,7 +1161,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialResource->Release();
     materialResourceSprite->Release();
     directionalLightResource->Release();
-    indexResourceSprite->Release();
 
 #ifdef _DEBUG
     debugController->Release();
@@ -1170,6 +1168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif
     vertexResoruce->Release();
     //vertexResoruceSprite->Release();
+    indexResourceSprite->Release();
     graphicsPipelineState->Release();
     signatureBlob->Release();
     if (errorBlob) {
