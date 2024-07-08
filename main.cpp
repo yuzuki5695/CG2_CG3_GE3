@@ -906,11 +906,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     transformationMatrixDateSprite->World = MakeIdentity4x4();
     transformationMatrixDateSprite->WVP = MakeIdentity4x4();
 
-
-
-
-
-
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -1081,8 +1076,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
              // Spriteの描画は常にuvCheckerにする
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
             commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+           // commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画!(DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面0で良い
             commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
        
