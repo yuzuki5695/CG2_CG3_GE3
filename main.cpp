@@ -809,7 +809,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             ImGui::Begin("Sprite");
             ImGui::ColorEdit3("Clear Color", reinterpret_cast<float*>(materialData));
-            ImGui::DragFloat3("translate", (&transformSprite.translate.x));
+            ImGui::DragFloat2("translate", (&transformSprite.translate.x));
             ImGui::End();
 
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
