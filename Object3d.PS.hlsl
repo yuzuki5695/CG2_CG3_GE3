@@ -33,7 +33,9 @@ PixeShaderOutput main(VertexShaderOutput input)
     PixeShaderOutput output;
     
     if (gMaterial.endbleLighting != 0){ // Linhthingする場合
-        float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
+        // half lambert
+        float Ndont = dot(normalize(input.normal), -gDirectionalLight.direction);
+        float cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
         output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
     }
     else{ // Linhthingしない場合、前回までと同じ演算
