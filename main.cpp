@@ -890,14 +890,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
 
     // Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-    ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device,sizeof(Matrix4x4));
+    ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device,sizeof(TransformationMatrix));
     // データを書き込む
-    Matrix4x4* transformationMatrixDateSprite = nullptr;
+    TransformationMatrix* transformationMatrixDateSprite = nullptr;
     // 書き込むためのアドレスを取得
     transformationMatrixResourceSprite->Map(0,nullptr,reinterpret_cast<void**>(&transformationMatrixDateSprite));
     // 単位行列を書き込んでおく
-    *transformationMatrixDateSprite = MakeIdentity4x4();
-
+    transformationMatrixDateSprite->World = MakeIdentity4x4();
+    transformationMatrixDateSprite->WVP = MakeIdentity4x4();
 
 
 
@@ -958,10 +958,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::NewFrame();
 
             ImGui::Begin("Sprite");       
-            ImGui::DragFloat3("CameroTranslate", (&cameratransform.translate.x));
-            ImGui::SliderFloat("CameroRarotateX", &cameratransform.rotate.x, -5.0f,5.0f);
-            ImGui::SliderFloat("CameroRarotateY", &cameratransform.rotate.y, -5.0f,5.0f);
-            ImGui::SliderFloat("CameroRarotateZ", &cameratransform.rotate.z, -5.0f,5.0f);
+            ImGui::DragFloat3("CameroTranslate", (&transform.translate.x));
+            ImGui::SliderFloat("CameroRarotateX", &transform.rotate.x, -5.0f,5.0f);
+            ImGui::SliderFloat("CameroRarotateY", &transform.rotate.y, -5.0f,5.0f);
+            ImGui::SliderFloat("CameroRarotateZ", &transform.rotate.z, -5.0f,5.0f);
            
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::DragFloat3("translateSprite", (&transformSprite.translate.x));
@@ -998,7 +998,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
             Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f,float(kClientWidth),float(kClientHeight), 0.0f, 100.0f);
             Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worludMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-            *transformationMatrixDateSprite = worldViewProjectionMatrixSprite;
+            transformationMatrixDateSprite->World = worludMatrix;
+            transformationMatrixDateSprite->WVP = worldViewProjectionMatrixSprite;
+
 
             ImGui::Render();
 
