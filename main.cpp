@@ -906,6 +906,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     transformationMatrixDateSprite->World = MakeIdentity4x4();
     transformationMatrixDateSprite->WVP = MakeIdentity4x4();
 
+
+
+
+
+
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -967,7 +972,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ShowDemoWindow();
 
             ImGui::Begin("Sprite");       
-           // ImGui::DragFloat3("CameroTranslate", (&transformSprite.translate.x));
+            ImGui::DragFloat3("CameroTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
             ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
@@ -1074,7 +1079,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             /*-------------------2dの描画コマンド開始---------------*/
             /*---------------------------------------------------*/
 
+             // Spriteの描画は常にuvCheckerにする
+            commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
             commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
+            commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画!(DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面0で良い
             commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
        
