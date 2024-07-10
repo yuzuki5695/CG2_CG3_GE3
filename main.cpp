@@ -361,7 +361,8 @@ MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const st
     while (std::getline(file, line)) {
         std::string identifier;
         std::istringstream s(line);
-        s >> identifier;// 先頭の識別子を読む
+        s >> identifier;
+
         // identifierの応じた処理
         if (identifier == "map_Kd") {
             std::string textureFilename;
@@ -383,6 +384,7 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
     // 2.  ファイルを開く
     std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
     assert(file.is_open()); // とりあえず開けなかったら止める
+
     // 3. 実際にファイルを読み、ModelDateを構築していく
     while (std::getline(file,line)){
         std::string identifier;
@@ -1115,7 +1117,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
             ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-            ImGui::SliderAngle("SphererRotateX", &uvTransformSprite.rotate.x);
+            ImGui::SliderAngle("SphererRotateX", &modelDate.vertices);
             ImGui::SliderAngle("SphererRotateY", &uvTransformSprite.rotate.y);
             ImGui::SliderAngle("SphererRotateZ", &uvTransformSprite.rotate.z);
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
