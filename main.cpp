@@ -1117,9 +1117,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
             ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-            ImGui::SliderAngle("SphererRotateX", &modelDate.vertices);
-            ImGui::SliderAngle("SphererRotateY", &uvTransformSprite.rotate.y);
-            ImGui::SliderAngle("SphererRotateZ", &uvTransformSprite.rotate.z);
+            ImGui::SliderAngle("SphererRotateX", &cameratransform.rotate.x);
+            ImGui::SliderAngle("SphererRotateY", &cameratransform.rotate.y);
+            ImGui::SliderAngle("SphererRotateZ", &cameratransform.rotate.z);
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
