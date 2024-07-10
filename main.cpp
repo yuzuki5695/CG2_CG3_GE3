@@ -1005,7 +1005,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
             Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f,float(kClientWidth),float(kClientHeight), 0.0f, 100.0f);
             Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worludMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-            transformationMatrixDateSprite->World = worludMatrix;
             transformationMatrixDateSprite->WVP = worldViewProjectionMatrixSprite;
 
             /*----------------------------------------*/
@@ -1015,8 +1014,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
             uvTransformMatrix = Multiply(uvTransformMatrix,MakeRotateZMatrix(uvTransformSprite.rotate.z));
             uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+            //materialData->uvTransform = uvTransformMatrix;
             materialSpriteDate->uvTransform = uvTransformMatrix;
-
+            
             // 描画用のDescriptorHeapの設定
             ID3D12DescriptorHeap* descriptorHeap[] = { srvDescriptorHeap };
             commandList->SetDescriptorHeaps(1, descriptorHeap);
@@ -1077,7 +1077,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
             commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+            //ommandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画!(DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面0で良い
             commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
        
