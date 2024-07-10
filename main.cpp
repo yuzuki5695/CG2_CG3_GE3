@@ -1076,10 +1076,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             /*---------------------------------------------------*/
 
             commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            // Spriteの描画。変更が必要なものだけ変更する
-            commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
             // Spriteの描画は常にuvCheckerにする
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+            // Spriteの描画。変更が必要なものだけ変更する
+            commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
             // TransformationMatrixBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
