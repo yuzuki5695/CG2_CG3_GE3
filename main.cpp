@@ -17,11 +17,14 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include"MatrixVector.h"
 #include"Resource.h"
+#include<fstream>
+#include<sstream>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
+
 
 struct Transform {
     Vector3 scale;
@@ -53,6 +56,12 @@ struct DirectionalLight {
     Vector3 direction; //!< ライトの向き
     float intensity; //!< 輝度
 };
+
+
+struct ModelDate {
+    std::vector<VertexData> vertices;
+};
+
 
 //ウィンドウプロージャー
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -331,6 +340,66 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
     D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     handleGPU.ptr += (descriptorsize * index);
     return handleGPU;
+}
+
+/*----------------------------------------------------------------------*/
+/*-------------------------Objファイルを読む関数---------------------------*/
+/*----------------------------------------------------------------------*/
+
+ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filename) {
+    // 1. 中で必要となる変数の宣言
+    ModelDate modelDate; // 構築するModelDate
+    std::vector<Vector4> positions; // 位置
+    std::vector<Vector3> normals; // 法線
+    std::vector<Vector2> texcoords; // テクスチャ座標
+    std::string line; // ファイルから読んだ1桁を格納するもの
+    // 2.  ファイルを開く
+    std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
+    assert(file.is_open()); // とりあえず開けなかったら止める
+    // 3. 実際にファイルを読み、ModelDateを構築していく
+    while (std::getline(file,line)){
+        std::string identifier;
+        std::istringstream s(line);
+        s >> identifier;// 先頭の識別子を読む
+
+        // identifierの応じた処理
+        if (identifier == "v") {
+            Vector4 position;
+            s >> position.x >> position.y >> position.y;
+            position.w = 1.0f;
+            positions.push_back(position);
+        }else if (identifier == "vt") {
+            Vector2 texcoord;
+            s >> texcoord.x >> texcoord.y;
+            texcoords.push_back(texcoord);
+        } else if (identifier == "vn") {
+            Vector3 normal;
+            s >> normal.x >> normal.y >> normal.y;
+            normals.push_back(normal);
+        } else if (identifier == "f") {
+            // 面は三角形限定。その他は未対応
+            for (int32_t faceVertex = 0; faceVertex < 3;++faceVertex) {
+                std::string vertexDefinition;
+                s >> vertexDefinition;
+                // 頂点の要素へのIndexは、[位置/UV/法線]で格納されているので、分解してIndexを取得する
+                std::istringstream v(vertexDefinition);
+                uint32_t elementIndices[3];
+                for (uint32_t element = 0; element < 3;++element) {
+                    std::string index;
+                    std::getline(v, index, '/');// /区切りでインデックスを読んでいく
+                    elementIndices[element] = std::stoi(index);
+                }
+                // 要素のIndexから、実際の要素の値を取得して、頂点を構築する
+                Vector4 position = positions[elementIndices[0] - 1];
+                Vector2 texcoord = texcoords[elementIndices[1] - 1];
+                Vector3 normal = normals[elementIndices[2] - 1];
+                VertexData vertex = { position,texcoord,normal };
+                modelDate.vertices.push_back(vertex);
+            }
+        }
+    }
+    // 4. ModelDateを返す
+    return modelDate;
 }
 
 //Windowsアプリでのエントリーポイント(main関数)
