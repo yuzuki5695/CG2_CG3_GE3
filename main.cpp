@@ -740,7 +740,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み
-    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
+    ModelDate modelDate = LoadObjFile("resources", "axis.obj");
 
     // 関数化したResouceで作成
     ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
@@ -1114,12 +1114,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ShowDemoWindow();
 
             ImGui::Begin("Sprite");
-            ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
-            ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-            ImGui::SliderAngle("SphererRotateX", &cameratransform.rotate.x);
-            ImGui::SliderAngle("SphererRotateY", &cameratransform.rotate.y);
-            ImGui::SliderAngle("SphererRotateZ", &cameratransform.rotate.z);
+            ImGui::SliderAngle("SphererRotateX", &transform.rotate.x);
+            ImGui::SliderAngle("SphererRotateY", &transform.rotate.y);
+            ImGui::SliderAngle("SphererRotateZ", &transform.rotate.z);
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
