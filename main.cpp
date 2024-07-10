@@ -392,18 +392,19 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
         // identifierの応じた処理
         if (identifier == "v") {
             Vector4 position;
-            s >> position.x >> position.y >> position.y;
+            s >> position.x >> position.y >> position.z;
+            position.x *= -1.0f;// 位置のx成分を反転
             position.w = 1.0f;
-            position.x *= -1.0f;
             positions.push_back(position);
         }else if (identifier == "vt") {
             Vector2 texcoord;
             s >> texcoord.x >> texcoord.y;
+            texcoord.y = 1.0f - texcoord.y;
             texcoords.push_back(texcoord);
         } else if (identifier == "vn") {
             Vector3 normal;
-            s >> normal.x >> normal.y >> normal.y;
-            normal.x *= -1.0f;
+            s >> normal.x >> normal.y >> normal.z;
+            normal.x *= -1.0f;// 法線のx成分を反転
             normals.push_back(normal);
         } else if (identifier == "f") {
             VertexData triangle[3];
