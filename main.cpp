@@ -57,11 +57,15 @@ struct DirectionalLight {
     float intensity; //!< 輝度
 };
 
+struct MaterialDate {
+    std::string textureFilePath;
+};
+
 
 struct ModelDate {
     std::vector<VertexData> vertices;
+    MaterialDate material;
 };
-
 
 //ウィンドウプロージャー
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -346,6 +350,29 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 /*-------------------------Objファイルを読む関数---------------------------*/
 /*----------------------------------------------------------------------*/
 
+
+MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+    // 1. 中で必要となる変数の宣言
+    MaterialDate materialDate; // 構築するMaterialDate
+    std::string line; // ファイルから読んだ1行を格納するもの
+    std::ifstream file(directoryPath + "/" + filename); // 2.ファイルを開く
+    assert(file.is_open()); // とりあえず開けなかったら止める
+    // 3. 実際にファイルを読み、MaterialDateを構築していく
+    while (std::getline(file, line)) {
+        std::string identifier;
+        std::istringstream s(line);
+        s >> identifier;// 先頭の識別子を読む
+        // identifierの応じた処理
+        if (identifier == "map_Kd") {
+            std::string textureFilename;
+            s >> textureFilename;
+            // 連結してファイルパスにする
+            materialDate.textureFilePath = directoryPath + "/" + textureFilename;
+        }
+    }
+    return materialDate;
+}
+
 ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filename) {
     // 1. 中で必要となる変数の宣言
     ModelDate modelDate; // 構築するModelDate
@@ -367,6 +394,7 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
             Vector4 position;
             s >> position.x >> position.y >> position.y;
             position.w = 1.0f;
+            position.x *= -1.0f;
             positions.push_back(position);
         }else if (identifier == "vt") {
             Vector2 texcoord;
@@ -375,8 +403,10 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
         } else if (identifier == "vn") {
             Vector3 normal;
             s >> normal.x >> normal.y >> normal.y;
+            normal.x *= -1.0f;
             normals.push_back(normal);
         } else if (identifier == "f") {
+            VertexData triangle[3];
             // 面は三角形限定。その他は未対応
             for (int32_t faceVertex = 0; faceVertex < 3;++faceVertex) {
                 std::string vertexDefinition;
@@ -393,9 +423,20 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
                 Vector4 position = positions[elementIndices[0] - 1];
                 Vector2 texcoord = texcoords[elementIndices[1] - 1];
                 Vector3 normal = normals[elementIndices[2] - 1];
-                VertexData vertex = { position,texcoord,normal };
-                modelDate.vertices.push_back(vertex);
+                //VertexData vertex = { position,texcoord,normal };
+                //modelDate.vertices.push_back(vertex);
+                triangle[faceVertex] = { position,texcoord,normal };
             }
+            // 頂点を逆順で登録することで、回り順を逆にする
+            modelDate.vertices.push_back(triangle[2]);
+            modelDate.vertices.push_back(triangle[1]);
+            modelDate.vertices.push_back(triangle[0]);
+        } else if (identifier == "mtllib") {
+            // materialTemplateLibrarvファイルの名前を取得する
+            std::string materialFilename;
+            s >> materialFilename;
+            // 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
+            modelDate.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
         }
     }
     // 4. ModelDateを返す
@@ -687,6 +728,101 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
     directionalLightDate->intensity = 1.0f;
 
+    /*-------------------------------------------------------*/
+   /*----------------------球のデータ-------------------------*/
+   /*-------------------------------------------------------*/
+
+    const uint32_t kSubdivision = 16; //球の分割数
+
+    uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
+
+    // モデル読み込み
+    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
+
+    // 関数化したResouceで作成
+    ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
+
+    /*-----------------------------------------------------*/
+    /*-----------------------球の描画-----------------------*/
+    /*-----------------------------------------------------*/
+
+    //頂点バッファビューを作成する
+    D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+    // リソースの先頭のアドレスから使う
+    vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
+    // 使用するリソースのサイズはの頂点のサイズ
+    vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelDate.vertices.size());
+    // 1頂点当たりのサイズ
+    vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+    //頂点リソースにデータを書き込む
+    VertexData* vertexData = nullptr;
+    //書き込むためのアドレスを取得
+    vertexResoruce->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+    // 頂点データをリソースにコピー
+    std::memcpy(vertexData, modelDate.vertices.data(), sizeof(VertexData) * modelDate.vertices.size());
+
+    // 球の頂点にデータを入力
+   // DrawSphere(kSubdivision, vertexData);
+
+    /*-------------------------------------------------------*/
+    /*----------------------spriteのデータ---------------------*/
+    /*------------------------------------------------------*/
+
+    // Sprite用の頂点リソースを作る
+    ID3D12Resource* vertexResoruceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
+
+    //頂点バッファビューを作成する
+    D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+    // リソースの先頭のアドレスから使う
+    vertexBufferViewSprite.BufferLocation = vertexResoruceSprite->GetGPUVirtualAddress();
+    // 使用するリソースのサイズは4つ分のサイズ
+    vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 4;
+    // 1頂点当たりのサイズ
+    vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+    //頂点リソースにデータを書き込む
+    VertexData* vertexDataSprite = nullptr;
+    //書き込むためのアドレスを取得
+    vertexResoruceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+
+    vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
+    vertexDataSprite[0].texcoord = { 0.0f,1.0f };
+    vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
+    vertexDataSprite[1].texcoord = { 0.0f,0.0f };
+    vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
+    vertexDataSprite[2].texcoord = { 1.0f,1.0f };
+    vertexDataSprite[3].position = { 640.0f,0.0f,0.0f,1.0f };
+    vertexDataSprite[3].texcoord = { 1.0f,0.0f };
+    for (int i = 0; i < 4; i++) {
+        vertexDataSprite[i].normal = { 0.0f,0.0f,-1.0f };
+    }
+
+    ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
+    //頂点バッファビューを作成する
+    D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
+    // リソースの先頭のアドレスから使う
+    indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
+    // 使用するリソースのサイズは6つ分のサイズ
+    indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
+    // インデックスはuint32_tとする
+    indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+    // インデックスリソースにデータを書き込む
+    uint32_t* indexDateSprite = nullptr;
+    indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDateSprite));
+    indexDateSprite[0] = 0; indexDateSprite[1] = 1; indexDateSprite[2] = 2;
+    indexDateSprite[3] = 1; indexDateSprite[4] = 3; indexDateSprite[5] = 2;
+
+    // Sprite用のTransformationMatrix用のリソースを作る。
+    ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(TransformationMatrix));
+    // データを書き込む
+    TransformationMatrix* transformationMatrixDateSprite = nullptr;
+    // 書き込むためのアドレスを取得
+    transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDateSprite));
+    // 単位行列を書き込んでおく
+    transformationMatrixDateSprite->World = MakeIdentity4x4();
+    transformationMatrixDateSprite->WVP = MakeIdentity4x4();
+
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
     /*-----------------------------------------------------------------------------------*/
@@ -820,7 +956,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UploadTextureData(textureResource, mipImages);
 
     //2枚目のTextureを読んで転送する
-    DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
+    DirectX::ScratchImage mipImages2 = LoadTexture(modelDate.material.textureFilePath);
     const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
     ID3D12Resource* textureResource2 = CreateTextureResource(device, metadata2);
     UploadTextureData(textureResource2, mipImages2);
@@ -914,96 +1050,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
     assert(SUCCEEDED(hr));
 
-    /*-------------------------------------------------------*/
-    /*----------------------球のデータ-------------------------*/
-    /*-------------------------------------------------------*/
-
-    const uint32_t kSubdivision = 16; //球の分割数
-
-    uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
-
-    // 関数化したResouceで作成
-    ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
-
-    //頂点バッファビューを作成する
-    D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-    // リソースの先頭のアドレスから使う
-    vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
-    // 使用するリソースのサイズはの頂点数分のサイズ
-    vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
-    // 1頂点当たりのサイズ
-    vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-    //頂点リソースにデータを書き込む
-    VertexData* vertexData = nullptr;
-    //書き込むためのアドレスを取得
-    vertexResoruce->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-    /*-----------------------------------------------------*/
-    /*-----------------------球の描画-----------------------*/
-    /*-----------------------------------------------------*/
-
-    // 球の頂点にデータを入力
-    DrawSphere(kSubdivision, vertexData);
-
-    /*-------------------------------------------------------*/
-    /*----------------------spriteのデータ---------------------*/
-    /*------------------------------------------------------*/
-
-    // Sprite用の頂点リソースを作る
-    ID3D12Resource* vertexResoruceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
-
-    //頂点バッファビューを作成する
-    D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
-    // リソースの先頭のアドレスから使う
-    vertexBufferViewSprite.BufferLocation = vertexResoruceSprite->GetGPUVirtualAddress();
-    // 使用するリソースのサイズは4つ分のサイズ
-    vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 4;
-    // 1頂点当たりのサイズ
-    vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
-
-    //頂点リソースにデータを書き込む
-    VertexData* vertexDataSprite = nullptr;
-    //書き込むためのアドレスを取得
-    vertexResoruceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-
-    vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
-    vertexDataSprite[0].texcoord = { 0.0f,1.0f };
-    vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
-    vertexDataSprite[1].texcoord = { 0.0f,0.0f };
-    vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
-    vertexDataSprite[2].texcoord = { 1.0f,1.0f };
-    vertexDataSprite[3].position = { 640.0f,0.0f,0.0f,1.0f };
-    vertexDataSprite[3].texcoord = { 1.0f,0.0f };
-    for (int i = 0; i < 4; i++) {
-        vertexDataSprite[i].normal = { 0.0f,0.0f,-1.0f };
-    }
-
-    ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
-    //頂点バッファビューを作成する
-    D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
-    // リソースの先頭のアドレスから使う
-    indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
-    // 使用するリソースのサイズは6つ分のサイズ
-    indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
-    // インデックスはuint32_tとする
-    indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
-    // インデックスリソースにデータを書き込む
-    uint32_t* indexDateSprite = nullptr;
-    indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDateSprite));
-    indexDateSprite[0] = 0; indexDateSprite[1] = 1; indexDateSprite[2] = 2;
-    indexDateSprite[3] = 1; indexDateSprite[4] = 3; indexDateSprite[5] = 2;
-
-    // Sprite用のTransformationMatrix用のリソースを作る。
-    ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(TransformationMatrix));
-    // データを書き込む
-    TransformationMatrix* transformationMatrixDateSprite = nullptr;
-    // 書き込むためのアドレスを取得
-    transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDateSprite));
-    // 単位行列を書き込んでおく
-    transformationMatrixDateSprite->World = MakeIdentity4x4();
-    transformationMatrixDateSprite->WVP = MakeIdentity4x4();
-
+   
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -1065,8 +1112,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             ImGui::Begin("Sprite");
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
-            ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
+            ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
+            ImGui::SliderAngle("SphererRotateX", &uvTransformSprite.rotate.x);
+            ImGui::SliderAngle("SphererRotateY", &uvTransformSprite.rotate.y);
+            ImGui::SliderAngle("SphererRotateZ", &uvTransformSprite.rotate.z);
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
@@ -1162,7 +1212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
-            commandList->DrawInstanced(vertexCount, 1, 0, 0);
+            commandList->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
@@ -1179,7 +1229,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // TransformationMatrixBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
-            commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+           // commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド終了---------------*/
