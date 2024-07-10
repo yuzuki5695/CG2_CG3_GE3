@@ -1052,8 +1052,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             // Spriteの描画は常にuvCheckerにする
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
             commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            // 描画
+            // 描画! (DrawCall/ドローコール) 6個のインデックスを使用しし1つのインスタンスを描画、その他は当面０で良い
             commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
        
