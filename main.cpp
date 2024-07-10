@@ -881,7 +881,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*------------------------------------------------------*/
 
     ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
-    //頂点バッファビューを作成する
+    //頂点インデックスビューを作成する
     D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
     // リソースの先頭のアドレスから使う
     indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
