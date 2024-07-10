@@ -888,8 +888,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     indexDateSprite[0] = 0; indexDateSprite[1] = 1; indexDateSprite[2] = 2;
     indexDateSprite[3] = 1; indexDateSprite[4] = 3; indexDateSprite[5] = 2;
 
+
+    // Sprite用の頂点リソースを作る
+    ID3D12Resource* vertexResoruceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+
+    //頂点バッファビューを作成する
+    D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+    // リソースの先頭のアドレスから使う
+    vertexBufferViewSprite.BufferLocation = vertexResoruceSprite->GetGPUVirtualAddress();
+    // 使用するリソースのサイズは6つ分のサイズ
+    vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+    // 1頂点当たりのサイズ
+    vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+    //頂点リソースにデータを書き込む
+    VertexData* vertexDataSprite = nullptr;
+    //書き込むためのアドレスを取得
+    vertexResoruceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+
+    // 1枚目の三角形
+    vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
+    vertexDataSprite[0].texcoord = { 0.0f,1.0f };
+
+    vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
+    vertexDataSprite[1].texcoord = { 0.0f,0.0f };
+
+    vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
+    vertexDataSprite[2].texcoord = { 1.0f,1.0f };
+
+    // 2枚目の三角形
+    vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };
+    vertexDataSprite[3].texcoord = { 0.0f,0.0f };
+
+    vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };
+    vertexDataSprite[4].texcoord = { 1.0f,0.0f };
+
+    vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
+    vertexDataSprite[5].texcoord = { 1.0f,1.0f };
+
  
-    // Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+    // Sprite用のTransformationMatrix用のリソースを作る。
     ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device,sizeof(TransformationMatrix));
     // データを書き込む
     TransformationMatrix* transformationMatrixDateSprite = nullptr;
@@ -1053,10 +1091,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // Spriteの描画は常にuvCheckerにする
             commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-            commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
-            // 描画! (DrawCall/ドローコール) 6個のインデックスを使用しし1つのインスタンスを描画、その他は当面０で良い
-            commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
+            //commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
+            // Spriteの描画。変更が必要なものだけ変更する
+            commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+            // TransformationMatrixBufferの場所を設定
+            commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+            // 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
+         //  commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+            // 描画! (DrawCall/ドローコール)
+            commandList->DrawInstanced(6, 1, 0, 0);
        
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド終了---------------*/
@@ -1145,7 +1188,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #endif
     vertexResoruce->Release();
-    //vertexResoruceSprite->Release();
+    vertexResoruceSprite->Release();
     graphicsPipelineState->Release();
     signatureBlob->Release();
     if (errorBlob) {
