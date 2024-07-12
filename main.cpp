@@ -19,6 +19,7 @@
 #include"Resource.h"
 #include<fstream>
 #include<sstream>
+#include "ResourceObject.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -60,7 +61,6 @@ struct DirectionalLight {
 struct MaterialDate {
     std::string textureFilePath;
 };
-
 
 struct ModelDate {
     std::vector<VertexData> vertices;
@@ -506,7 +506,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*D3D12Device生成*/
     ID3D12Device* device = nullptr;
     //IDXGIのファクトリー生成
-    IDXGIFactory7* dxgiFactory = nullptr;
+    Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
     //HRESULTはWindows系のエラーコードであり、
   //関数が成功したかどうかをSUCCEEDEDマクロで判定できる
     HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
@@ -1000,7 +1000,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*------------------------------------------------------------*/
 
     // DepthStencilTextureをウインドウのサイズで作成
-    ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+    ResourceObject depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
     // DSVの設定
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
