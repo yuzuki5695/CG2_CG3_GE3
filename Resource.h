@@ -1,5 +1,5 @@
 #pragma once
-#include<wrl.h>
+#include"ResourceObject.h"
 
 // Resourceの関数化
 Microsoft::WRL::ComPtr<ID3D12Resource>CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes) {
