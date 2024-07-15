@@ -19,7 +19,7 @@
 #include"Resource.h"
 #include<fstream>
 #include<sstream>
-#include "ResourceObject.h"
+#include"ResourceObject.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -61,6 +61,7 @@ struct DirectionalLight {
 struct MaterialDate {
     std::string textureFilePath;
 };
+
 
 struct ModelDate {
     std::vector<VertexData> vertices;
@@ -374,7 +375,7 @@ MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const st
     return materialDate;
 }
 
-ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filename) {
+ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
     ModelDate modelDate; // 構築するModelDate
     std::vector<Vector4> positions; // 位置
@@ -386,7 +387,7 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
     assert(file.is_open()); // とりあえず開けなかったら止める
 
     // 3. 実際にファイルを読み、ModelDateを構築していく
-    while (std::getline(file,line)){
+    while (std::getline(file, line)) {
         std::string identifier;
         std::istringstream s(line);
         s >> identifier;// 先頭の識別子を読む
@@ -398,7 +399,7 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
             position.x *= -1.0f;// 位置のx成分を反転
             position.w = 1.0f;
             positions.push_back(position);
-        }else if (identifier == "vt") {
+        } else if (identifier == "vt") {
             Vector2 texcoord;
             s >> texcoord.x >> texcoord.y;
             texcoord.y = 1.0f - texcoord.y;
@@ -411,13 +412,13 @@ ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filena
         } else if (identifier == "f") {
             VertexData triangle[3];
             // 面は三角形限定。その他は未対応
-            for (int32_t faceVertex = 0; faceVertex < 3;++faceVertex) {
+            for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
                 std::string vertexDefinition;
                 s >> vertexDefinition;
                 // 頂点の要素へのIndexは、[位置/UV/法線]で格納されているので、分解してIndexを取得する
                 std::istringstream v(vertexDefinition);
                 uint32_t elementIndices[3];
-                for (uint32_t element = 0; element < 3;++element) {
+                for (uint32_t element = 0; element < 3; ++element) {
                     std::string index;
                     std::getline(v, index, '/');// /区切りでインデックスを読んでいく
                     elementIndices[element] = std::stoi(index);
@@ -506,7 +507,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*D3D12Device生成*/
     ID3D12Device* device = nullptr;
     //IDXGIのファクトリー生成
-    Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
+    IDXGIFactory7* dxgiFactory = nullptr;
     //HRESULTはWindows系のエラーコードであり、
   //関数が成功したかどうかをSUCCEEDEDマクロで判定できる
     HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
@@ -1000,7 +1001,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*------------------------------------------------------------*/
 
     // DepthStencilTextureをウインドウのサイズで作成
-    ResourceObject depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+    ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
     // DSVの設定
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
@@ -1053,7 +1054,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
     assert(SUCCEEDED(hr));
 
-   
+
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -1125,7 +1126,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("SpriteTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
             ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-            ImGui::SliderAngle ("UVRotate", &uvTransformSprite.rotate.z);
+            ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
             ImGui::End();
 
             ImGui::Render();
