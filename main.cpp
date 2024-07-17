@@ -133,7 +133,7 @@ Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(
     //これからシェーダーをコンパイルする旨をログに出す
     Log(ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
     Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
-    HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+    HRESULT hr = dxcUtils.Get()->LoadFile(filePath.c_str(), nullptr, &shaderSource);
     //読めなかったら止める
     assert(SUCCEEDED(hr));
 
@@ -156,7 +156,7 @@ Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(
     };
     //実際にshaderをコンパイルする
     Microsoft::WRL::ComPtr <IDxcResult> shaderResult = nullptr;
-    hr = dxcCompiler->Compile(
+    hr = dxcCompiler.Get()->Compile(
         &shaderSourceBuffer,
         arguments,
         _countof(arguments),
@@ -168,7 +168,7 @@ Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(
 
     //警告・エラーが出てたらログを出して止める
     Microsoft::WRL::ComPtr <IDxcBlobUtf8> shaderError = nullptr;
-    shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+    shaderResult.Get()->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
     if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
         Log(shaderError->GetStringPointer());
         assert(false);
@@ -187,8 +187,6 @@ Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(
     return shaderBlob;
 
 }
-
-
 
 Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> CreateDescriptorHeap(
     Microsoft::WRL::ComPtr <ID3D12Device>& device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
