@@ -499,7 +499,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         debugController->SetEnableGPUBasedValidation(TRUE);
     }
 #endif // _DEBUG
-
     /*D3D12Device生成*/
     Microsoft::WRL::ComPtr <ID3D12Device> device = nullptr;
     //IDXGIのファクトリー生成
@@ -1162,7 +1161,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             // 描画用のDescriptorHeapの設定
             ID3D12DescriptorHeap* descriptorHeap[] = { srvDescriptorHeap.Get()};
-            commandList->SetDescriptorHeaps(1, descriptorHeap);
+            commandList.Get()->SetDescriptorHeaps(1, descriptorHeap);
 
             // ここから書き込むバックバッファのインデックスを取得
             UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -1240,20 +1239,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
             barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
             // TransitionBarrierを張る
-            commandList->ResourceBarrier(1, &barrier);
+            commandList.Get()->ResourceBarrier(1, &barrier);
             // コマンドリストの内容を確定させる。全てのコマンドを積んでからCloseすること
-            hr = commandList->Close();
+            hr = commandList.Get()->Close();
             assert(SUCCEEDED(hr));
 
             // GPUにコマンドリストのリストの実行を行わせる
             ID3D12CommandList* commandLists[] = { commandList.Get()};
-            commandQueue->ExecuteCommandLists(1, commandLists);
+            commandQueue.Get()->ExecuteCommandLists(1, commandLists);
             // GPUとOSに画面の交換を行うように通知する
-            swapChain->Present(1, 0);
+            swapChain.Get()->Present(1, 0);
             // Fenceの値の更新
             fenceValue++;
             // GPUがここまでたどり着いたときに、Fenceの値に代入するようにSignalを送る
-            commandQueue->Signal(fence.Get(), fenceValue);
+            commandQueue.Get()->Signal(fence.Get(), fenceValue);
             // Fenceの値が指定したSignal値にたどり着いているか確認する
             // GetCompletedValueの初期値はFence作成時に渡した初期値
             if (fence->GetCompletedValue() < fenceValue)
@@ -1264,7 +1263,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 WaitForSingleObject(fenceEvent, INFINITE);
             }
             // 次のフレーム用のコマンドリストを準備
-            hr = commandAllocator->Reset();
+            hr = commandAllocator.Get()->Reset();
             assert(SUCCEEDED(hr));
             hr = commandList->Reset(commandAllocator.Get(), nullptr);
             assert(SUCCEEDED(hr));

@@ -25,6 +25,7 @@ private:
 struct D3DResourceLeakChecker {
 	// デストラクタはオブジェクトの寿命が尽きた時に呼ばれる
 	~D3DResourceLeakChecker() {
+
 		//リソースリークチェック
 		Microsoft::WRL::ComPtr<IDXGIDebug1> debug;
 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
