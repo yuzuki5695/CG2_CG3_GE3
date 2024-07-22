@@ -230,7 +230,7 @@ void UploadTextureData(Microsoft::WRL::ComPtr <ID3D12Resource>& texture, const D
     for (size_t mipLevel = 0; mipLevel < metadata.mipLevels; ++mipLevel)
     {
         //MipMapLevelを指定して各Imageを取得
-        Microsoft::WRL::ComPtr <const DirectX::Image> img = mipImages.GetImage(mipLevel, 0, 0);
+        const DirectX::Image* img = mipImages.GetImage(mipLevel, 0, 0);
         //Textureに転送
         HRESULT hr = texture->WriteToSubresource(
             UINT(mipLevel),
