@@ -2,10 +2,10 @@
 #include"ResourceObject.h"
 
 // Resourceの関数化
-Microsoft::WRL::ComPtr<ID3D12Resource>CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes) {
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes) {
 
     //IDXGIのファクトリーの生成
-    Microsoft::WRL::ComPtr <IDXGIFactory7> dxgiFactory = nullptr;
+    Microsoft::WRL::ComPtr <IDXGIFactory7>  dxgiFactory = nullptr;
     HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
     //頂点リソース用のヒープの設定
     D3D12_HEAP_PROPERTIES uploadHeapProperties{};
@@ -23,7 +23,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource>CreateBufferResource(Microsoft::WRL::ComPt
     //バッファの場合はこれにする
     vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     //実際に頂点リソースを作る
-    Microsoft::WRL::ComPtr<ID3D12Resource> Resource = nullptr;
+    ID3D12Resource* Resource = nullptr;
     hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
         &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&Resource));
     assert(SUCCEEDED(hr));
@@ -32,7 +32,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource>CreateBufferResource(Microsoft::WRL::ComPt
 
 
 //DirectX12のTextureResourceを作る
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Device>& device, const DirectX::TexMetadata& metadata)
+Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(Microsoft::WRL::ComPtr <ID3D12Device>& device, const DirectX::TexMetadata& metadata)
 {
     //1. metadataを基にResourceの設定
     D3D12_RESOURCE_DESC resourceDesc{};
@@ -51,7 +51,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::Com
     heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;					//プロセッサの近くに配膳
 
     //3. Resourceを生成する
-    Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+    Microsoft::WRL::ComPtr <ID3D12Resource> resource = nullptr;
     HRESULT hr = device->CreateCommittedResource(
         &heapProperties,														//Heapの設定
         D3D12_HEAP_FLAG_NONE,													//Heapの特殊な設定。特になし。
@@ -64,7 +64,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::Com
 }
 
 
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device>& device, int32_t width, int32_t heigth) {
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr <ID3D12Device>& device, int32_t width, int32_t heigth) {
     // 生成するResourceの設定
     D3D12_RESOURCE_DESC resourceDesc{};
     resourceDesc.Width = width; // Textureの幅
@@ -87,7 +87,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microso
 
 
     //3. Resourceを生成する
-    Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+    Microsoft::WRL::ComPtr <ID3D12Resource> resource = nullptr;
     HRESULT hr = device->CreateCommittedResource(
         &heapProperies, //Heapの設定
         D3D12_HEAP_FLAG_NONE, //Heapの特殊な設定。特になし。
