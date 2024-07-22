@@ -1280,8 +1280,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ImGui::DestroyContext();
 
     CloseHandle(fenceEvent);
-    mipImages.Release();
-    mipImages2.Release();
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
