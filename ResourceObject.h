@@ -5,7 +5,7 @@
 class ResourceObject
 {
 public:
-	ResourceObject(ID3D12Resource* resource)
+	ResourceObject(Microsoft::WRL::ComPtr <ID3D12Resource>& resource)
 		:resource_(resource)
 	{}
 	// デストラクタはオブジェクトの寿命が尽きた時に呼ばれる
@@ -16,10 +16,10 @@ public:
 		}
 	}
 
-	ID3D12Resource* Get() { return resource_;}
+	Microsoft::WRL::ComPtr <ID3D12Resource> Get() { return resource_;}
 
 private:
-	ID3D12Resource* resource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
 };
 
 struct D3DResourceLeakChecker {

@@ -1,5 +1,9 @@
 #pragma once
 #include"ResourceObject.h"
+#include <d3d12.h>
+#include <dxgi1_4.h>
+#include <d3d12sdklayers.h>
+#include <intsafe.h>
 
 // Resourceの関数化
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes) {
@@ -23,7 +27,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComP
     //バッファの場合はこれにする
     vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     //実際に頂点リソースを作る
-    ID3D12Resource* Resource = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> Resource = nullptr;
     hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
         &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&Resource));
     assert(SUCCEEDED(hr));
