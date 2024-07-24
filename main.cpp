@@ -502,6 +502,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     }
 #endif // _DEBUG
 
+    //リソースリークチェック
+    D3DResourceLeakChecker leakCheck;
+
     /*D3D12Device生成*/
     Microsoft::WRL::ComPtr <ID3D12Device> device = nullptr;
     //IDXGIのファクトリー生成
@@ -1285,8 +1288,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     CloseHandle(fenceEvent);
 
-    //リソースリークチェック
-    D3DResourceLeakChecker leakCheck;
 
     return 0;
 }
