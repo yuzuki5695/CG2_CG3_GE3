@@ -510,10 +510,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //IDXGIのファクトリー生成
     Microsoft::WRL::ComPtr <IDXGIFactory7> dxgiFactory = nullptr;
     //HRESULTはWindows系のエラーコードであり、
-  //関数が成功したかどうかをSUCCEEDEDマクロで判定できる
+    //関数が成功したかどうかをSUCCEEDEDマクロで判定できる
     HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
     //初期化の根本的な部分でエラーが出た場合はプログラムが間違っているか、どうにもできない場合が
-  //多いのでassertにする
+    //多いのでassertにする
     assert(SUCCEEDED(hr));
 
     //仕様するアダプター用の変数。最初にnullptrを入れておく
