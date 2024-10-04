@@ -34,6 +34,24 @@ PixeShaderOutput main(VertexShaderOutput input)
     
     PixeShaderOutput output;
     
+    // textureのα値が0.5以下のときにpixelを棄却
+    if (textureColor.a <= 0.5)
+    {
+        discard;
+    }
+
+    // textureのα値が0のときにpixelを棄却
+    if (textureColor.a == 0.0)
+    {
+        discard;
+    }
+    
+    // output.colorのα値が0のときにpixelを棄却
+    if (output.color.a == 0.0) {
+        discard;
+    }
+    
+    
     if (gMaterial.endbleLighting != 0)
     { // Linhthingする場合
         // half lambert

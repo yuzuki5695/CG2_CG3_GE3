@@ -742,7 +742,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み
-    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
+    ModelDate modelDate = LoadObjFile("resources", "fence.obj");
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
@@ -877,7 +877,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
     blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
-
+    
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
     //裏面(時計回り)を表示しない
@@ -1023,7 +1023,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // Depthの機能を有効化する
     depthStencilDesc.DepthEnable = true;
     // 書き込みする
-    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
     // 比較関数はLessEqual。つまり、近ければ描画される
     depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
@@ -1294,7 +1294,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ImGui::DestroyContext();
 
     CloseHandle(fenceEvent);
-
 
     return 0;
 }
