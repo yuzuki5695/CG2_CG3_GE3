@@ -16,6 +16,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{e32b2c55-0629-4fa9-aae1-4a2739bf3f80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="リソース ファイル\シェ-ダ-ファイル">
+      <UniqueIdentifier>{b4d22bc2-ebc7-4cef-9e82-f2fef9537172}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -42,10 +45,6 @@
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Object3d.VS.hlsl" />
-    <FxCompile Include="Object3d.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vector4.h">
@@ -103,6 +102,16 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Object3d.hlsli" />
+    <None Include="resources\shaders\Object3d.hlsli">
+      <Filter>リソース ファイル\シェ-ダ-ファイル</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
+      <Filter>リソース ファイル\シェ-ダ-ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object3d.VS.hlsl">
+      <Filter>リソース ファイル\シェ-ダ-ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
