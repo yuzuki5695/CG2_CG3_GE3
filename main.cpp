@@ -742,7 +742,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み
-    ModelDate modelDate = LoadObjFile("resources", "axis.obj");
+    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
@@ -870,6 +870,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     D3D12_BLEND_DESC blendDesc{};
     //全ての色要素を書き込む
     blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;           // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;         // すでに書き込まれている色 (デストカラー)
 
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
@@ -1120,7 +1127,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::SliderAngle("SphererRotateX", &transform.rotate.x);
             ImGui::SliderAngle("SphererRotateY", &transform.rotate.y);
             ImGui::SliderAngle("SphererRotateZ", &transform.rotate.z);
-            ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
+            ImGui::ColorEdit4("colorSprite", reinterpret_cast<float*>(materialData));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
             ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
@@ -1277,7 +1284,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         }
     }
-
+    
     ///COMの終了
     CoUninitialize();
 
