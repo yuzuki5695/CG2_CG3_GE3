@@ -742,7 +742,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み
-    ModelDate modelDate = LoadObjFile("resources", "fence.obj");
+    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
+    modelDate.vertices.push_back({ .position = {1.0f,1.0f,0.0f,1.0f},.texcoord = {0.0f,0.0f},.normal = {0.0f,0.0f,1.0f} }); // 左上
+    modelDate.vertices.push_back({ .position = {-1.0f,1.0f,0.0f,1.0f},.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f} }); // 右上
+    modelDate.vertices.push_back({ .position = {1.0f,-1.0f,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f} }); // 左下
+    modelDate.vertices.push_back({ .position = {1.0f,-1.0f,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f} }); // 左下
+    modelDate.vertices.push_back({ .position = {-1.0f,1.0f,0.0f,1.0f},.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f} }); // 右上
+    modelDate.vertices.push_back({ .position = {-1.0f,-1.0f,0.0f,1.0f},.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f} }); // 右下
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
@@ -1222,7 +1228,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
-            commandList->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
+            //commandList->DrawInstanced(UINT(modelDate.vertices.size()), instanceCount, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
@@ -1294,6 +1300,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ImGui::DestroyContext();
 
     CloseHandle(fenceEvent);
-
+    
     return 0;
 }
