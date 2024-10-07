@@ -19,12 +19,12 @@
 #include"Resource.h"
 #include<fstream>
 #include<sstream>
+#include"Input.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
-
 
 struct Transform {
     Vector3 scale;
@@ -586,6 +586,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     }
 #endif
 
+    // ポインタ
+    Input* input = nullptr;
+    
+    // 入力に初期化
+    input = new Input();
+    input->Initialize(wc.hInstance,hwnd);
+
+    // 入力開放
+    delete  input;
+    
     //コマンドキューを生成する
     Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue = nullptr;
     D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
@@ -1108,6 +1118,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
+            // キーボード情報の取得開始
+            keyboard->Acquire();
+            // 全キ-の入力状態を取得する
+            BYTE key[256] = {};
+            keyboard->GetDeviceState(sizeof(key), key);
+
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
@@ -1277,7 +1293,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         }
     }
-
+    
     ///COMの終了
     CoUninitialize();
 
