@@ -1118,12 +1118,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
-            // キーボード情報の取得開始
-            keyboard->Acquire();
-            // 全キ-の入力状態を取得する
-            BYTE key[256] = {};
-            keyboard->GetDeviceState(sizeof(key), key);
-
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
