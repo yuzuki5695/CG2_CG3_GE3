@@ -8,9 +8,6 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 {
 	HRESULT result;
 
-	// 前回のキー入力を保存
-	memcpy(keyPre, key, sizeof(key));
-
 	// DirectInputのインスタンス生成
 	result = DirectInput8Create(hInstance,DIRECTINPUT_VERSION,IID_IDirectInput8,(void**)&directInput,nullptr);
 	assert(SUCCEEDED(result));
@@ -28,6 +25,10 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 
 void Input::Update() 
 {
+
+	// 前回のキー入力を保存
+	memcpy(keyPre, key, sizeof(keyPre));
+
 	// キーボード情報の取得開始
 	keyboard->Acquire();
 	// 全キ-の入力状態を取得する

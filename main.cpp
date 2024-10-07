@@ -1115,13 +1115,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
+            // キーの状態を更新
+            input->Update();
 
             if (input->Triggrkey(DIK_SPACE)) {
                 OutputDebugStringA("Hit SPACE\n");
             }
-
-            // キーの状態を更新
-            input->Update();
 
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
@@ -1292,7 +1291,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         }
     }
-    
+
+    // 入力開放
+    delete  input;
+ 
     ///COMの終了
     CoUninitialize();
 
@@ -1301,8 +1303,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    // 入力開放
-    delete  input;
 
     CloseHandle(fenceEvent);
 
