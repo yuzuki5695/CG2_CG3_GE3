@@ -1118,6 +1118,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
+
+            if (input->Triggrkey(DIK_SPACE)) {
+                OutputDebugStringA("Hit SPACE\n");
+            }
+
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();

@@ -16,9 +16,28 @@ public: // メンバ関数
 	void Initialize(HINSTANCE hInstance,HWND hwnd);
 	// 更新
 	void Update();
+		
+	/// <summary>
+	/// キーの押下をチェック
+	/// </summary>
+	/// <param name="keyNumber"キー番号( DIK_0 等)</param>
+	bool Pushkey(BYTE keyNumber);
+
+	/// <summary>
+	/// キーのトリガーをチェック
+	/// </summary>
+	/// <param name="keyNumber"キー番号( DIK_0 等)</param>
+	/// <returns>トリガーか</returns>
+	bool Triggrkey(BYTE keyNumber);
+
 private: // メンバ変数
 	//キーボードのデバイス
 	ComPtr<IDirectInputDevice8> keyboard;
-
+	// 全キーの状態
+	BYTE key[256] = {};
+	// 前回の全キーの状態
+	BYTE keyPre[256] = {};
+	// DirectInputのインスタンス生成
+	ComPtr<IDirectInput8> directInput = nullptr;
 };
 
