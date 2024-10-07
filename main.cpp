@@ -592,9 +592,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 入力に初期化
     input = new Input();
     input->Initialize(wc.hInstance,hwnd);
-
-    // 入力開放
-    delete  input;
     
     //コマンドキューを生成する
     Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue = nullptr;
@@ -1123,6 +1120,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 OutputDebugStringA("Hit SPACE\n");
             }
 
+            // キーの状態を更新
+            input->Update();
+
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
@@ -1300,6 +1300,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ImGui_ImplDX12_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    // 入力開放
+    delete  input;
 
     CloseHandle(fenceEvent);
 

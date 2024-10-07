@@ -44,7 +44,6 @@ bool Input::Pushkey(BYTE keyNumber)
 	return false;
 }
 
-
 bool Input::Triggrkey(BYTE keyNumber) 
 {
 	// 前回は押していない,今回は押しているのであればtrueを返す
