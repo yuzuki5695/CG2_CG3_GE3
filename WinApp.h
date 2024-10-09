@@ -16,10 +16,12 @@ public: // メンバ関数
 	void Initialize();
 	// 更新
 	void Update();
+	// 終了
+	void Finalize();
 
 	// getter
-	HWND Gethwnd() const { return hwnd; }
-	HINSTANCE GetHInstance() const { return wc.hInstance; }
+	HWND Gethwnd() const { return hwnd_; }
+	HINSTANCE GetHInstance() const { return wc_.hInstance; }	
 
 public: // 定数
 	//クライアント領域のサイズ
@@ -28,8 +30,8 @@ public: // 定数
 
 private:
 	// ウィンドウハンドル
-	HWND hwnd = nullptr;
+	HWND hwnd_ = nullptr;
 	// ウィンドウクラスの設定
-	WNDCLASS wc{};
+	WNDCLASS wc_{};
 };
 

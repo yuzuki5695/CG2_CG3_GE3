@@ -441,7 +441,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 入力に初期化
     input = new Input();
-    input->Initialize(winApp->GetHInstance(), winApp->Gethwnd());
+    input->Initialize(winApp);
 
     //デバックレイヤー
 #ifdef _DEBUG
@@ -1240,10 +1240,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 入力開放
     delete  input;
+
+    // WindowsAPIの終了処理
+    winApp->Finalize();
+
+    // WindowsAPI解放
     delete winApp;
 
-    ///COMの終了
-    CoUninitialize();
 
     // ImGuiの終了処理。
     ImGui_ImplDX12_Shutdown();
