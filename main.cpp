@@ -1,5 +1,3 @@
-#include<Windows.h>
-#include<cstdint>
 #include<string>
 #include<format>
 #include<d3d12.h>
@@ -11,7 +9,6 @@
 #include<assert.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
@@ -20,7 +17,7 @@
 #include<fstream>
 #include<sstream>
 #include"Input.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include "WinApp.h"
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -67,24 +64,7 @@ struct ModelDate {
     MaterialDate material;
 };
 
-//ウィンドウプロージャー
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    //メッセージ二応じてゲーム固有の処理を行う
 
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
-        return true;
-    }
-
-    switch (msg) {
-        //ウィンドウが破棄された
-    case WM_DESTROY:
-        //OSに対して、アプリの終了を伝える
-        PostQuitMessage(0);
-        return 0;
-    }
-    //標準のメッセージ処理を行う
-    return DefWindowProc(hWnd, msg, wParam, lParam);
-}
 void Log(const std::string& message) {
     OutputDebugStringA(message.c_str());;
 }
@@ -453,42 +433,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //COMの初期化
     CoInitializeEx(0, COINIT_MULTITHREADED);
 
-    WNDCLASS wc{};
-    //ウィンドウプロシージャ
-    wc.lpfnWndProc = WindowProc;
-    //ウィンドウクラス名
-    wc.lpszClassName = L"CG2WindowClass";
-    //インスタンスハンドル
-    wc.hInstance = GetModuleHandle(nullptr);
-    //カーソル
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    //ウィンドウクラスを登録する
-    RegisterClass(&wc);
+    //ポインタ
+    Input* input = nullptr;
+    WinApp* winApp = nullptr;
 
-    //クライアント領域のサイズ
-    const int32_t kClientWidth = 1280;
-    const int32_t kClientHeight = 720;
-    //ウィンドウサイズを表す構造体にクライアント領域を入れる
-    RECT wrc = { 0,0,kClientWidth,kClientHeight };
-    //クライアント領域を元に実際のサイズにwrcを変更してもらう
-    AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
+    // WindowsAPIの初期化
+    winApp = new WinApp();
+    winApp->Initialize();
 
-    //ウィンドウの生成
-    HWND hwnd = CreateWindow(
-        wc.lpszClassName,        //利用するクラス名
-        L"CG2",                  //タイトルバーの文字
-        WS_OVERLAPPEDWINDOW,     //よく見るウィンドウスタイル
-        CW_USEDEFAULT,           //表示X座標(Windowsに任せる)
-        CW_USEDEFAULT,           //表示Y座標(WindowsOSに任せる)
-        wrc.right - wrc.left,    //ウィンドウ横幅
-        wrc.bottom - wrc.top,    //ウィンドウ縦幅
-        nullptr,                 //親ウィンドウハンドル
-        nullptr,                 //メニューハンドル
-        wc.hInstance,            //インスタンスハンドル
-        nullptr);                //オプション 
-
-    //ウィンドウを表示する
-    ShowWindow(hwnd, SW_SHOW);
+    // 入力に初期化
+    input = new Input();
+    input->Initialize(wc.hInstance, hwnd);
 
     //デバックレイヤー
 #ifdef _DEBUG
@@ -585,13 +540,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         infoQueue->Release();
     }
 #endif
-
-    // ポインタ
-    Input* input = nullptr;
-    
-    // 入力に初期化
-    input = new Input();
-    input->Initialize(wc.hInstance,hwnd);
     
     //コマンドキューを生成する
     Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue = nullptr;
@@ -1294,7 +1242,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 入力開放
     delete  input;
- 
+    delete winApp;
+
     ///COMの終了
     CoUninitialize();
 
