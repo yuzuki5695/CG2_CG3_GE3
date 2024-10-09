@@ -430,8 +430,7 @@ ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filen
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
 
-    //COMの初期化
-    CoInitializeEx(0, COINIT_MULTITHREADED);
+    HRESULT hr;
 
     //ポインタ
     Input* input = nullptr;
@@ -443,7 +442,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 入力に初期化
     input = new Input();
-    input->Initialize(wc.hInstance, hwnd);
+    input->Initialize(winApp->GetHInstance(), winApp->Gethwnd());
 
     //デバックレイヤー
 #ifdef _DEBUG
@@ -564,15 +563,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //SwapChain(スワップチェーン)を生成する
     Microsoft::WRL::ComPtr <IDXGISwapChain4> swapChain = nullptr;
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-    swapChainDesc.Width = kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
-    swapChainDesc.Height = kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
+    swapChainDesc.Width = ClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
+    swapChainDesc.Height = winApp::kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
     swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//色の形式
     swapChainDesc.SampleDesc.Count = 1;//マルチサンプルしない
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//描画のターゲットとして利用する
     swapChainDesc.BufferCount = 2;//ダブルバッファ
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニタに移したら、中身居を破棄
     //コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-    hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
+    hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), winApp->Gethwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
     assert(SUCCEEDED(hr));
 
     //DescriptorRange作成
