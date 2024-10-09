@@ -430,7 +430,6 @@ ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filen
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
 
-    HRESULT hr;
 
     //ポインタ
     Input* input = nullptr;
@@ -563,8 +562,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //SwapChain(スワップチェーン)を生成する
     Microsoft::WRL::ComPtr <IDXGISwapChain4> swapChain = nullptr;
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-    swapChainDesc.Width = ClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
-    swapChainDesc.Height = winApp::kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
+    swapChainDesc.Width = winApp->kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
+    swapChainDesc.Height = winApp->kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
     swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//色の形式
     swapChainDesc.SampleDesc.Count = 1;//マルチサンプルしない
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//描画のターゲットとして利用する
@@ -956,7 +955,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*------------------------------------------------------------*/
 
     // DepthStencilTextureをウインドウのサイズで作成
-    Microsoft::WRL::ComPtr <ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+    Microsoft::WRL::ComPtr <ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, winApp->kClientWidth, winApp->kClientHeight);
 
     // DSVの設定
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
@@ -1013,8 +1012,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
-    viewport.Width = kClientWidth;
-    viewport.Height = kClientHeight;
+    viewport.Width = winApp->kClientWidth;
+    viewport.Height = winApp->kClientHeight;
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
     viewport.MinDepth = 0.0f;
@@ -1024,9 +1023,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     D3D12_RECT scissorRect{};
     // 基本的にビューポートと同じ矩形が構成されるようにする
     scissorRect.left = 0;
-    scissorRect.right = kClientWidth;
+    scissorRect.right = winApp->kClientWidth;
     scissorRect.top = 0;
-    scissorRect.bottom = kClientHeight;
+    scissorRect.bottom = winApp->kClientHeight;
 
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
@@ -1042,7 +1041,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplWin32_Init(winApp->Gethwnd());
     ImGui_ImplDX12_Init(device.Get(),
         swapChainDesc.BufferCount,
         rtvDesc.Format,
@@ -1102,7 +1101,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
             Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
             Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-            Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+            Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(winApp->kClientWidth) / float(winApp->kClientHeight), 0.1f, 100.0f);
             Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
             transformationMatrixData->World = worludMatrix;
             transformationMatrixData->WVP = worldViewProjectionMatrix;
@@ -1113,7 +1112,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             Matrix4x4 worludMatrixSprite = MakeAftineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
             Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
-            Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+            Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(winApp->kClientWidth), float(winApp->kClientHeight), 0.0f, 100.0f);
             Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worludMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
             transformationMatrixDateSprite->World = worludMatrixSprite;
             transformationMatrixDateSprite->WVP = worldViewProjectionMatrixSprite;
