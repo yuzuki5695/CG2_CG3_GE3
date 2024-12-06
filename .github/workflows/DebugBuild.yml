@@ -1,1 +1,10 @@
 name: DebugBuild
+on:
+ push:
+  branches:
+    - master
+env:
+# リポジトリのルートディレクトリを基点としたソリューションファイルのパス
+    SOLUTION_FILE_PATH_: project/CG2_05.sin
+# Visual Studio の構成(debug / Ralease)
+CONFIGURATION: Debug
