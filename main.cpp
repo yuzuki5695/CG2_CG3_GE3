@@ -1120,6 +1120,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::SliderAngle("SphererRotateX", &transform.rotate.x);
             ImGui::SliderAngle("SphererRotateY", &transform.rotate.y);
             ImGui::SliderAngle("SphererRotateZ", &transform.rotate.z);
+            ImGui::SliderFloat("cameraRotateX", &cameratransform.rotate.x, -0.001f, 0.001f, "%.6f");
+            ImGui::SliderFloat("cameraRotateY", &cameratransform.rotate.y, -0.001f, 0.001f, "%.6f");
+            ImGui::SliderFloat("cameraRotateZ", &cameratransform.rotate.z, -0.001f, 0.001f, "%.6f");
+
+
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
