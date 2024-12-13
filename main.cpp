@@ -16,7 +16,6 @@
 #include"externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include"MatrixVector.h"
-#include"Resource.h"
 #include<fstream>
 #include<sstream>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -24,7 +23,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
-
 
 struct Transform {
     Vector3 scale;
@@ -62,10 +60,112 @@ struct MaterialDate {
 };
 
 
+
 struct ModelDate {
     std::vector<VertexData> vertices;
     MaterialDate material;
 };
+
+/*----------------------------------------------------------------------*/
+/*-------------------------Objファイルを読む関数---------------------------*/
+/*----------------------------------------------------------------------*/
+
+
+MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+    // 1. 中で必要となる変数の宣言
+    MaterialDate materialDate; // 構築するMaterialDate
+    std::string line; // ファイルから読んだ1行を格納するもの
+    std::ifstream file(directoryPath + "/" + filename); // 2.ファイルを開く
+    assert(file.is_open()); // とりあえず開けなかったら止める
+    // 3. 実際にファイルを読み、MaterialDateを構築していく
+    while (std::getline(file, line)) {
+        std::string identifier;
+        std::istringstream s(line);
+        s >> identifier;
+
+        // identifierの応じた処理
+        if (identifier == "map_Kd") {
+            std::string textureFilename;
+            s >> textureFilename;
+            // 連結してファイルパスにする
+            materialDate.textureFilePath = directoryPath + "/" + textureFilename;
+        }
+    }
+    return materialDate;
+}
+
+ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename) {
+    // 1. 中で必要となる変数の宣言
+    ModelDate modelDate; // 構築するModelDate
+    std::vector<Vector4> positions; // 位置
+    std::vector<Vector3> normals; // 法線
+    std::vector<Vector2> texcoords; // テクスチャ座標
+    std::string line; // ファイルから読んだ1桁を格納するもの
+    // 2.  ファイルを開く
+    std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
+    assert(file.is_open()); // とりあえず開けなかったら止める
+
+    // 3. 実際にファイルを読み、ModelDateを構築していく
+    while (std::getline(file, line)) {
+        std::string identifier;
+        std::istringstream s(line);
+        s >> identifier;// 先頭の識別子を読む
+
+        // identifierの応じた処理
+        if (identifier == "v") {
+            Vector4 position;
+            s >> position.x >> position.y >> position.z;
+            position.x *= -1.0f;// 位置のx成分を反転
+            position.w = 1.0f;
+            positions.push_back(position);
+        } else if (identifier == "vt") {
+            Vector2 texcoord;
+            s >> texcoord.x >> texcoord.y;
+            texcoord.y = 1.0f - texcoord.y;
+            texcoords.push_back(texcoord);
+        } else if (identifier == "vn") {
+            Vector3 normal;
+            s >> normal.x >> normal.y >> normal.z;
+            normal.x *= -1.0f;// 法線のx成分を反転
+            normals.push_back(normal);
+        } else if (identifier == "f") {
+            VertexData triangle[3];
+            // 面は三角形限定。その他は未対応
+            for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
+                std::string vertexDefinition;
+                s >> vertexDefinition;
+                // 頂点の要素へのIndexは、[位置/UV/法線]で格納されているので、分解してIndexを取得する
+                std::istringstream v(vertexDefinition);
+                uint32_t elementIndices[3];
+                for (uint32_t element = 0; element < 3; ++element) {
+                    std::string index;
+                    std::getline(v, index, '/');// /区切りでインデックスを読んでいく
+                    elementIndices[element] = std::stoi(index);
+                }
+                // 要素のIndexから、実際の要素の値を取得して、頂点を構築する
+                Vector4 position = positions[elementIndices[0] - 1];
+                Vector2 texcoord = texcoords[elementIndices[1] - 1];
+                Vector3 normal = normals[elementIndices[2] - 1];
+                //VertexData vertex = { position,texcoord,normal };
+                //modelDate.vertices.push_back(vertex);
+                triangle[faceVertex] = { position,texcoord,normal };
+            }
+            // 頂点を逆順で登録することで、回り順を逆にする
+            modelDate.vertices.push_back(triangle[2]);
+            modelDate.vertices.push_back(triangle[1]);
+            modelDate.vertices.push_back(triangle[0]);
+        } else if (identifier == "mtllib") {
+            // materialTemplateLibrarvファイルの名前を取得する
+            std::string materialFilename;
+            s >> materialFilename;
+            // 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
+            modelDate.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
+        }
+    }
+    // 4. ModelDateを返す
+    return modelDate;
+}
+
 
 //ウィンドウプロージャー
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -346,105 +446,106 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
     return handleGPU;
 }
 
-/*----------------------------------------------------------------------*/
-/*-------------------------Objファイルを読む関数---------------------------*/
-/*----------------------------------------------------------------------*/
+#pragma once
+
+// Resourceの関数化
+ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
+
+    //IDXGIのファクトリーの生成
+    IDXGIFactory7* dxgiFactory = nullptr;
+    HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+    //頂点リソース用のヒープの設定
+    D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+    uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+    //頂点リソースの設定
+    D3D12_RESOURCE_DESC vertexResourceDesc{};
+    //バッファリソース、テクスチャの場合はまた別の設定をする
+    vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    vertexResourceDesc.Width = sizeInBytes;
+    //バッファの場合はこれらは１にする
+    vertexResourceDesc.Height = 1;
+    vertexResourceDesc.DepthOrArraySize = 1;
+    vertexResourceDesc.MipLevels = 1;
+    vertexResourceDesc.SampleDesc.Count = 1;
+    //バッファの場合はこれにする
+    vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    //実際に頂点リソースを作る
+    ID3D12Resource* Resource = nullptr;
+    hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
+        &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&Resource));
+    assert(SUCCEEDED(hr));
+    return Resource;
+};
 
 
-MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
-    // 1. 中で必要となる変数の宣言
-    MaterialDate materialDate; // 構築するMaterialDate
-    std::string line; // ファイルから読んだ1行を格納するもの
-    std::ifstream file(directoryPath + "/" + filename); // 2.ファイルを開く
-    assert(file.is_open()); // とりあえず開けなかったら止める
-    // 3. 実際にファイルを読み、MaterialDateを構築していく
-    while (std::getline(file, line)) {
-        std::string identifier;
-        std::istringstream s(line);
-        s >> identifier;
+//DirectX12のTextureResourceを作る
+ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata)
+{
+    //1. metadataを基にResourceの設定
+    D3D12_RESOURCE_DESC resourceDesc{};
+    resourceDesc.Width = UINT(metadata.width);									//Textureの幅
+    resourceDesc.Height = UINT(metadata.height);								//Textureの高さ
+    resourceDesc.MipLevels = UINT16(metadata.mipLevels);						//mipmapの数
+    resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize);					//奥行 or 配列Textureの配列行数
+    resourceDesc.Format = metadata.format;										//TextureのFormat
+    resourceDesc.SampleDesc.Count = 1;											//サンプリングカウント。1固定
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);		//Textureの次元数。普段使っているのは二次元
 
-        // identifierの応じた処理
-        if (identifier == "map_Kd") {
-            std::string textureFilename;
-            s >> textureFilename;
-            // 連結してファイルパスにする
-            materialDate.textureFilePath = directoryPath + "/" + textureFilename;
-        }
-    }
-    return materialDate;
+    //2. 利用するHeapの設定。非常に特殊な運用。02_04exで一般的なケース版がある
+    D3D12_HEAP_PROPERTIES heapProperties{};
+    heapProperties.Type = D3D12_HEAP_TYPE_CUSTOM;								//細かい設定を行う
+    heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;		//WriteBackポリシーでCPUアクセス可能
+    heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;					//プロセッサの近くに配膳
+
+    //3. Resourceを生成する
+    ID3D12Resource* resource = nullptr;
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProperties,														//Heapの設定
+        D3D12_HEAP_FLAG_NONE,													//Heapの特殊な設定。特になし。
+        &resourceDesc,															///Resourceの設定
+        D3D12_RESOURCE_STATE_GENERIC_READ,										//初回のResourceState。Textureは基本読むだけ
+        nullptr,																//Clear最適値。使わないのでnullptr
+        IID_PPV_ARGS(&resource));												//作成するResourceポインタへのポインタ
+    assert(SUCCEEDED(hr));
+    return resource;
 }
 
-ModelDate LoadObjFile(const std::string& directoryPath,const std::string& filename) {
-    // 1. 中で必要となる変数の宣言
-    ModelDate modelDate; // 構築するModelDate
-    std::vector<Vector4> positions; // 位置
-    std::vector<Vector3> normals; // 法線
-    std::vector<Vector2> texcoords; // テクスチャ座標
-    std::string line; // ファイルから読んだ1桁を格納するもの
-    // 2.  ファイルを開く
-    std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
-    assert(file.is_open()); // とりあえず開けなかったら止める
 
-    // 3. 実際にファイルを読み、ModelDateを構築していく
-    while (std::getline(file,line)){
-        std::string identifier;
-        std::istringstream s(line);
-        s >> identifier;// 先頭の識別子を読む
+ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t heigth) {
+    // 生成するResourceの設定
+    D3D12_RESOURCE_DESC resourceDesc{};
+    resourceDesc.Width = width; // Textureの幅
+    resourceDesc.Height = heigth; // Textureの高さ
+    resourceDesc.MipLevels = 1; // mipmapの数
+    resourceDesc.DepthOrArraySize = 1; // 奥行　or 配列のTexture配列数
+    resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // DepthStencilとして利用可能なフォーマット
+    resourceDesc.SampleDesc.Count = 1; // サンプリングカウント 1固定
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; // 2次元
+    resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL; // DepthStencilとして使う通知
 
-        // identifierの応じた処理
-        if (identifier == "v") {
-            Vector4 position;
-            s >> position.x >> position.y >> position.z;
-            position.x *= -1.0f;// 位置のx成分を反転
-            position.w = 1.0f;
-            positions.push_back(position);
-        }else if (identifier == "vt") {
-            Vector2 texcoord;
-            s >> texcoord.x >> texcoord.y;
-            texcoord.y = 1.0f - texcoord.y;
-            texcoords.push_back(texcoord);
-        } else if (identifier == "vn") {
-            Vector3 normal;
-            s >> normal.x >> normal.y >> normal.z;
-            normal.x *= -1.0f;// 法線のx成分を反転
-            normals.push_back(normal);
-        } else if (identifier == "f") {
-            VertexData triangle[3];
-            // 面は三角形限定。その他は未対応
-            for (int32_t faceVertex = 0; faceVertex < 3;++faceVertex) {
-                std::string vertexDefinition;
-                s >> vertexDefinition;
-                // 頂点の要素へのIndexは、[位置/UV/法線]で格納されているので、分解してIndexを取得する
-                std::istringstream v(vertexDefinition);
-                uint32_t elementIndices[3];
-                for (uint32_t element = 0; element < 3;++element) {
-                    std::string index;
-                    std::getline(v, index, '/');// /区切りでインデックスを読んでいく
-                    elementIndices[element] = std::stoi(index);
-                }
-                // 要素のIndexから、実際の要素の値を取得して、頂点を構築する
-                Vector4 position = positions[elementIndices[0] - 1];
-                Vector2 texcoord = texcoords[elementIndices[1] - 1];
-                Vector3 normal = normals[elementIndices[2] - 1];
-                //VertexData vertex = { position,texcoord,normal };
-                //modelDate.vertices.push_back(vertex);
-                triangle[faceVertex] = { position,texcoord,normal };
-            }
-            // 頂点を逆順で登録することで、回り順を逆にする
-            modelDate.vertices.push_back(triangle[2]);
-            modelDate.vertices.push_back(triangle[1]);
-            modelDate.vertices.push_back(triangle[0]);
-        } else if (identifier == "mtllib") {
-            // materialTemplateLibrarvファイルの名前を取得する
-            std::string materialFilename;
-            s >> materialFilename;
-            // 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
-            modelDate.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
-        }
-    }
-    // 4. ModelDateを返す
-    return modelDate;
+    // 利用Heapの設定
+    D3D12_HEAP_PROPERTIES heapProperies{};
+    heapProperies.Type = D3D12_HEAP_TYPE_DEFAULT; // VRAW上に作る
+
+    // 深度値のクリア設定
+    D3D12_CLEAR_VALUE depthClearValue{};
+    depthClearValue.DepthStencil.Depth = 1.0f; // 1.0f (最大値)でクリア
+    depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // フォーマット。 Resourceと合わせる
+
+
+    //3. Resourceを生成する
+    ID3D12Resource* resource = nullptr;
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProperies, //Heapの設定
+        D3D12_HEAP_FLAG_NONE, //Heapの特殊な設定。特になし。
+        &resourceDesc, //Resourceの設定
+        D3D12_RESOURCE_STATE_DEPTH_WRITE, //深度値を書き込む状態にしておく
+        &depthClearValue, //Clear最適値
+        IID_PPV_ARGS(&resource)); //作成するResourceポインタへのポインタ
+    assert(SUCCEEDED(hr));
+    return resource;
 }
+
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -732,22 +833,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     directionalLightDate->intensity = 1.0f;
 
     /*-------------------------------------------------------*/
-   /*----------------------球のデータ-------------------------*/
-   /*-------------------------------------------------------*/
+/*----------------------球のデータ-------------------------*/
+/*-------------------------------------------------------*/
 
     const uint32_t kSubdivision = 16; //球の分割数
 
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
-    // モデル読み込み
-    ModelDate modelDate = LoadObjFile("resources", "axis.obj");
+    // モデル読み込み(axis or plane)
+    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
 
     // 関数化したResouceで作成
     ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
 
-    /*-----------------------------------------------------*/
-    /*-----------------------球の描画-----------------------*/
-    /*-----------------------------------------------------*/
+    // 関数化したResouceで作成
+    //ID3D12Resource* vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
 
     //頂点バッファビューを作成する
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -755,6 +855,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
     // 使用するリソースのサイズはの頂点のサイズ
     vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelDate.vertices.size());
+
+    //vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
+
     // 1頂点当たりのサイズ
     vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -765,8 +868,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 頂点データをリソースにコピー
     std::memcpy(vertexData, modelDate.vertices.data(), sizeof(VertexData) * modelDate.vertices.size());
 
-    // 球の頂点にデータを入力
-   // DrawSphere(kSubdivision, vertexData);
+    //// 球の頂点にデータを入力
+    //DrawSphere(kSubdivision, vertexData);
 
     /*-------------------------------------------------------*/
     /*----------------------spriteのデータ---------------------*/
@@ -959,10 +1062,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UploadTextureData(textureResource, mipImages);
 
     //2枚目のTextureを読んで転送する
+    //DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
+
     DirectX::ScratchImage mipImages2 = LoadTexture(modelDate.material.textureFilePath);
     const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
     ID3D12Resource* textureResource2 = CreateTextureResource(device, metadata2);
     UploadTextureData(textureResource2, mipImages2);
+
 
     //metaDataを基にSRVの設定
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -1053,7 +1159,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
     assert(SUCCEEDED(hr));
 
-   
     // ビューポート
     D3D12_VIEWPORT viewport{};
     //クライアント領域のサイズと一緒にして画面全体に表示
@@ -1072,7 +1177,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     scissorRect.top = 0;
     scissorRect.bottom = kClientHeight;
 
-    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
 
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
@@ -1114,10 +1219,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ShowDemoWindow();
 
             ImGui::Begin("Sprite");
+            ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
+            ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-            ImGui::SliderAngle("SphererRotateX", &transform.rotate.x);
-            ImGui::SliderAngle("SphererRotateY", &transform.rotate.y);
-            ImGui::SliderAngle("SphererRotateZ", &transform.rotate.z);
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
@@ -1125,7 +1229,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("SpriteTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
             ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-            ImGui::SliderAngle ("UVRotate", &uvTransformSprite.rotate.z);
+            ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
             ImGui::End();
 
             ImGui::Render();
@@ -1213,7 +1317,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
+            //commandList->DrawInstanced(vertexCount, 1, 0, 0);
+
+            // 描画！(今回は球) 
             commandList->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
+
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
@@ -1230,7 +1338,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // TransformationMatrixBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
             // 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
-           // commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+           //commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド終了---------------*/
@@ -1300,12 +1408,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     pixelShaderBlob->Release();
     vertexShaderBlob->Release();
     wvpResource->Release();
-    rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
     textureResource->Release();
     textureResource2->Release();
     depthStencilResource->Release();
+    indexResourceSprite->Release();
     transformationMatrixResourceSprite->Release();
     mipImages.Release();
     mipImages2.Release();
@@ -1313,13 +1421,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialResourceSprite->Release();
     directionalLightResource->Release();
 
+    dxcUtils->Release();
+    dxcCompiler->Release();
+    includeHandler->Release();
 #ifdef _DEBUG
     debugController->Release();
 
 #endif
     vertexResoruce->Release();
     vertexResoruceSprite->Release();
-    indexResourceSprite->Release();
     graphicsPipelineState->Release();
     signatureBlob->Release();
     if (errorBlob) {
