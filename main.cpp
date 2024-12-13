@@ -1005,7 +1005,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("SpriteTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
             ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-            ImGui::SliderAngle ("UVRotate", &uvTransformSprite.rotate.z);
+            ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
             ImGui::End();
 
             ImGui::Render();
@@ -1180,12 +1180,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     pixelShaderBlob->Release();
     vertexShaderBlob->Release();
     wvpResource->Release();
-    rtvDescriptorHeap->Release();
     srvDescriptorHeap->Release();
     dsvDescriptorHeap->Release();
     textureResource->Release();
     textureResource2->Release();
     depthStencilResource->Release();
+    indexResourceSprite->Release();
     transformationMatrixResourceSprite->Release();
     mipImages.Release();
     mipImages2.Release();
@@ -1193,6 +1193,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialResourceSprite->Release();
     directionalLightResource->Release();
 
+    dxcUtils->Release();
+    dxcCompiler->Release();
+    includeHandler->Release();
 #ifdef _DEBUG
     debugController->Release();
 
