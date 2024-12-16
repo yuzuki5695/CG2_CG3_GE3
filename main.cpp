@@ -841,7 +841,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み(axis or plane)
-    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
+    ModelDate modelDate = LoadObjFile("Resources", "plane.obj");
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
@@ -1056,7 +1056,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*------------------------------------------------------------*/
 
     //Textureを読んで転送する
-    DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+    DirectX::ScratchImage mipImages = LoadTexture("Resources/uvChecker.png");
     const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
     Microsoft::WRL::ComPtr <ID3D12Resource> textureResource = CreateTextureResource(device, metadata);
     UploadTextureData(textureResource, mipImages);
@@ -1129,9 +1129,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*----------------------------------------------------------------------------------*/
 
      //======== ShaderをCompile ===========// 
-    Microsoft::WRL::ComPtr <IDxcBlob> vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+    Microsoft::WRL::ComPtr <IDxcBlob> vertexShaderBlob = CompileShader(L"Resources/shaders/Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
     assert(vertexShaderBlob != nullptr);
-    Microsoft::WRL::ComPtr <IDxcBlob> pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+    Microsoft::WRL::ComPtr <IDxcBlob> pixelShaderBlob = CompileShader(L"Resources/shaders/Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
     assert(pixelShaderBlob != nullptr);
 
     //========== PSO生成 =============//
