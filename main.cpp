@@ -1,4 +1,3 @@
-#include<Windows.h>
 #include<cstdint>
 #include<string>
 #include<format>
@@ -19,6 +18,7 @@
 #include<fstream>
 #include<sstream>
 #include"ResourceObject.h"
+#include "Input.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -548,6 +548,14 @@ Microsoft::WRL::ComPtr <ID3D12Resource> CreateDepthStencilTextureResource(Micros
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
 
+    // ポインタ
+    Input* input = nullptr;
+
+
+
+    // ウィンドウ作成
+
+
     //COMの初期化
     CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -588,6 +596,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //ウィンドウを表示する
     ShowWindow(hwnd, SW_SHOW);
 
+
+
+
+    // DirectXの初期化
+
+
+
+
+
+    // 汎用機能の初期化 
+
+
+
+    // 入力の初期化
+    input = new Input();
+    input->Initialize(wc.hInstance, hwnd);
+
+
+
+    // シーンの初期化
+
+
+
+
+
+
+
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
 
@@ -602,7 +637,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         debugController->SetEnableGPUBasedValidation(TRUE);
     }
 #endif // _DEBUG
-
 
     /*D3D12Device生成*/
     Microsoft::WRL::ComPtr <ID3D12Device> device = nullptr;
@@ -1211,6 +1245,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             // ゲームの処理
 
+            // 入力の更新
+            input->Update();
+
             ImGui_ImplDX12_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
@@ -1384,6 +1421,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         }
     }
 
+
+
+    // シーンの解放
+
+
+
+
+    // 汎用機能の解放
+
+
+
+    // 入力解放
+    delete input;
+
+
+    // DirectXの解放
+
+
+
+    // ウィンドウ解放
+
+
+
+
     ///COMの終了
     CoUninitialize();
 
@@ -1396,6 +1457,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     mipImages.Release();
     mipImages2.Release();
     CloseHandle(fenceEvent);
+
 
     return 0;
 }
