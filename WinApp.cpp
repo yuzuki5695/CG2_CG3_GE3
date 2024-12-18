@@ -1,8 +1,4 @@
 #include "WinApp.h"
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
-#include <cstdint>
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // メインスレッドではなくMTAでCOM使用
 HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -42,10 +38,6 @@ void WinApp::Initialize() {
     ShowWindow(hwnd, SW_SHOW);
 }
 
-void WinApp::Update() {
-
-}
-
 //ウィンドウプロージャー
 LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     //メッセージ二応じてゲーム固有の処理を行う
@@ -69,4 +61,22 @@ void WinApp::Finalize() {
     CloseWindow(hwnd);
     ///COMの終了
     CoUninitialize();
+}
+
+bool WinApp::ProcessMessage() {
+    
+    MSG msg{};
+
+    // Windowにメッセージが来ていたら最優先で処理させる
+    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) 
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    if (msg.message == WM_QUIT) 
+    {  
+        return true;
+    }    
+    return false;
 }
