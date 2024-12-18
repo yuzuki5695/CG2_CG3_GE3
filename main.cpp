@@ -20,7 +20,6 @@
 #include"ResourceObject.h"
 #include "Input.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-#pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
@@ -1248,6 +1247,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 入力の更新
             input->Update();
 
+            // 0を押している間true
+            if (input->Pushkey(DIK_0)) {
+                OutputDebugStringA("Hit 0 \n");
+                transform.translate.x += 0.1f;
+            }
 
 
             ImGui_ImplDX12_NewFrame();
