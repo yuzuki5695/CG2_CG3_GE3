@@ -1,4 +1,6 @@
 #include "WinApp.h"
+#include"externals/imgui/imgui.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // メインスレッドではなくMTAでCOM使用
 HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
