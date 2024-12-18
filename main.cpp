@@ -12,7 +12,6 @@
 #include<sstream>
 #include"ResourceObject.h"
 #include "Input.h"
-#include "WinApp.h"
 #include "DirectXCommon.h"
 #include"externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -506,7 +505,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // DirectXの初期化
     dxCommon = new DirectXCommon();
-    dxCommon->Initialize();
+    dxCommon->Initialize(winApp);
 
 
 
@@ -538,41 +537,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
-
-    //コマンドキューを生成する
-    Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue = nullptr;
-    D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-    hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
-    //コマンドキューの生成がうまくいかなかったので起動できない
-    assert(SUCCEEDED(hr));
-
-    //コマンドアロケーターを生成する
-    Microsoft::WRL::ComPtr <ID3D12CommandAllocator> commandAllocator = nullptr;
-    hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-    //コマンドアロケータの生成がうまくいかなかったので起動できない
-    assert(SUCCEEDED(hr));
-
-    //コマンドリストを生成する
-    Microsoft::WRL::ComPtr <ID3D12GraphicsCommandList> commandList = nullptr;
-    hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr,
-        IID_PPV_ARGS(&commandList));
-    //コマンドリストの生成がうまくいかなかったので起動できない
-    assert(SUCCEEDED(hr));
-
-    //SwapChain(スワップチェーン)を生成する
-    Microsoft::WRL::ComPtr <IDXGISwapChain4> swapChain = nullptr;
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-    swapChainDesc.Width = WinApp::kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
-    swapChainDesc.Height = WinApp::kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
-    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//色の形式
-    swapChainDesc.SampleDesc.Count = 1;//マルチサンプルしない
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//描画のターゲットとして利用する
-    swapChainDesc.BufferCount = 2;//ダブルバッファ
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニタに移したら、中身居を破棄
-    //コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-    hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), winApp->Gethwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
-    assert(SUCCEEDED(hr));
 
     //DescriptorRange作成
     D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};

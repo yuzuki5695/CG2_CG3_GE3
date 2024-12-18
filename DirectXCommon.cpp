@@ -8,8 +8,11 @@
 
 using namespace Microsoft::WRL;
 
-void DirectXCommon::Initialize() {
-
+void DirectXCommon::Initialize(WinApp* winApp){
+    // NULL検出
+    assert(winApp);
+    // メンバ変数に記録
+    this->winApp_ = winApp;
 
 	// デバイスの初期化
 	DebugInitialize();
@@ -39,8 +42,11 @@ void DirectXCommon::Initialize() {
 
 void DirectXCommon::DebugInitialize() {
 
+    HRESULT hr;
 
-    //デバックレイヤー
+    ///---------------------------------------------------------------------///
+    ///-----------------------デバックレイヤーをオン----------------------------///
+    ///---------------------------------------------------------------------///
 #ifdef _DEBUG
     ComPtr <ID3D12Debug1> debugController = nullptr;
 
@@ -52,13 +58,20 @@ void DirectXCommon::DebugInitialize() {
     }
 #endif // _DEBUG
 
-    //HRESULTはWindows系のエラーコードであり、
-  //関数が成功したかどうかをSUCCEEDEDマクロで判定できる
-    HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+    ///---------------------------------------------------------------------///
+    ///----------------------IDXGIのファクトリー生成---------------------------///
+    ///---------------------------------------------------------------------///
+
+    // HRESULTはWindows系のエラーコードであり、
+    // 関数が成功したかどうかをSUCCEEDEDマクロで判定できる
+    hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
     //初期化の根本的な部分でエラーが出た場合はプログラムが間違っているか、どうにもできない場合が
-  //多いのでassertにする
+    //多いのでassertにする
     assert(SUCCEEDED(hr));
 
+    ///---------------------------------------------------------------------///
+    ///--------------------------アダプターの列挙------------------------------///
+    ///---------------------------------------------------------------------///
     //仕様するアダプター用の変数。最初にnullptrを入れておく
     ComPtr <IDXGIAdapter4> useAdapter = nullptr;
     //良い順にアダプターを頼む
@@ -79,6 +92,11 @@ void DirectXCommon::DebugInitialize() {
     }
     //適切なアダプタが見つからないので起動できない
     assert(useAdapter != nullptr);
+
+    ///---------------------------------------------------------------------///
+    ///---------------------------デバイスの生成------------------------------///
+    ///---------------------------------------------------------------------///
+
     //機能レベルとログ出力用の文字列
     D3D_FEATURE_LEVEL featureLevels[] = {
       D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
@@ -99,6 +117,9 @@ void DirectXCommon::DebugInitialize() {
     assert(device != nullptr);
     Logger::Log("Complete create D3D12Device!!!\n");//初期化完了のログを出す
 
+    ///---------------------------------------------------------------------///
+    ///-------------------------エラー時にブレ―ク-----------------------------///
+    ///--------------------------------------------------------------------///
 #ifdef _DEBUG
     ID3D12InfoQueue* infoQueue = nullptr;
     if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -130,3 +151,60 @@ void DirectXCommon::DebugInitialize() {
 #endif
 }
 
+void DirectXCommon::CommandInitialize() {
+
+    HRESULT hr;
+
+    ///---------------------------------------------------------------------///
+    ///------------------------コマンドキューを生成する-------------------------///
+    ///---------------------------------------------------------------------///
+    D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
+    hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
+    //コマンドキューの生成がうまくいかなかったので起動できない
+    assert(SUCCEEDED(hr));
+
+    ///---------------------------------------------------------------------///
+    ///---------------------コマンドアロケータを生成する-------------------------///
+    ///---------------------------------------------------------------------///
+    //コマンドアロケーターを生成する
+    hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
+    //コマンドアロケータの生成がうまくいかなかったので起動できない
+    assert(SUCCEEDED(hr));
+
+    ///---------------------------------------------------------------------///
+    ///------------------------コマンドリストを生成する-------------------------///
+    ///---------------------------------------------------------------------///
+    //コマンドリストを生成する
+    hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
+    //コマンドリストの生成がうまくいかなかったので起動できない
+    assert(SUCCEEDED(hr));
+}
+
+void DirectXCommon::SwapChainGenerate() {
+
+    HRESULT hr;
+
+    ///---------------------------------------------------------------------///
+    ///--------------SwapChain(スワップチェーン)を設定する----------------------///
+    ///---------------------------------------------------------------------///
+    DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
+    swapChainDesc.Width = WinApp::kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
+    swapChainDesc.Height = WinApp::kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
+    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//色の形式
+    swapChainDesc.SampleDesc.Count = 1;//マルチサンプルしない
+    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//描画のターゲットとして利用する
+    swapChainDesc.BufferCount = 2;//ダブルバッファ
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニタに移したら、中身居を破棄
+    
+    ///---------------------------------------------------------------------///
+    ///--------------SwapChain(スワップチェーン)を生成する----------------------///
+    ///---------------------------------------------------------------------///
+    hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), winApp->Gethwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
+    assert(SUCCEEDED(hr));
+}
+
+void DirectXCommon::CreateDepthStencilGenerate() {
+
+
+
+}

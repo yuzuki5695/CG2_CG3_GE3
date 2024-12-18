@@ -2,6 +2,7 @@
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<wrl.h>
+#include"WinApp.h"
 
 // Directx基盤
 class DirectXCommon
@@ -9,7 +10,7 @@ class DirectXCommon
 public: // メンバ関数
 
 	// 初期化
-	void Initialize();
+	void Initialize(WinApp* winApp);
 
 private: // プライベートメンバ関数
 	// デバイスの初期化
@@ -39,11 +40,18 @@ private: // プライベートメンバ関数
 
 
 private: // メンバ変数
-
+	// ポインタ
+	WinApp* winApp_ = nullptr;
 	// Devicex12デバイス
 	Microsoft::WRL::ComPtr <ID3D12Device> device;
 	// DXGIファクトリ
 	Microsoft::WRL::ComPtr <IDXGIFactory7> dxgiFactory;
-
-
+	// コマンドアロケータ
+	Microsoft::WRL::ComPtr <ID3D12CommandAllocator> commandAllocator = nullptr;
+	// コマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
+	// コマンドキュー
+	Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue;
+	// SwapChain(スワップチェーン)
+	Microsoft::WRL::ComPtr <IDXGISwapChain4> swapChain;
 };
