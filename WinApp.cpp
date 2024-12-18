@@ -63,3 +63,10 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
     //標準のメッセージ処理を行う
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
+void WinApp::Finalize() {
+    // CloseHandle(fenceEvent);
+    CloseWindow(hwnd);
+    ///COMの終了
+    CoUninitialize();
+}
