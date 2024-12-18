@@ -1,5 +1,6 @@
 #pragma once
 #include<Windows.h>
+#include"externals/imgui/imgui.h"
 
 // WindowsAPI
 class WinApp
@@ -12,4 +13,18 @@ public: // メンバ関数
 	void Initialize();
 	// 更新
 	void Update();
+public: // 定数
+	//クライアント領域のサイズ
+	static const int32_t kClientWidth = 1280;
+	static const int32_t kClientHeight = 720;
+private: // メンバ変数
+	// ウィンドウハンドル
+	HWND hwnd = nullptr;
+	// ウィンドウクラスの設定
+	WNDCLASS wc{};
+
+public:
+	// getter
+	HWND Gethwnd() const { return hwnd; }
+	HINSTANCE GetHInstance() const { return wc.hInstance; }
 };
