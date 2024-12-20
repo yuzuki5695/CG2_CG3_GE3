@@ -5,7 +5,14 @@
 #include"WinApp.h"
 #include<array>
 #include<dxcapi.h>
+#include "Logger.h"
+#include "StringUtility.h"
+#include "externals/DirectXTex/DirectXTex.h"
 #pragma comment(lib,"dxcompiler.lib")
+#include"externals/imgui/imgui.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include"externals/imgui/imgui_impl_dx12.h"
+#include"externals/imgui/imgui_impl_win32.h"
 
 // Directx基盤
 class DirectXCommon

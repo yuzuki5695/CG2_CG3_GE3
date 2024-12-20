@@ -1,12 +1,7 @@
 #include "DirectXCommon.h"
 #include<cassert>
 #include <format>
-#include "Logger.h"
-#include "StringUtility.h"
-#include"externals/imgui/imgui.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
@@ -125,7 +120,7 @@ void DirectXCommon::DebugInitialize() {
     ///-------------------------エラー時にブレ―ク-----------------------------///
     ///--------------------------------------------------------------------///
 #ifdef _DEBUG
-    ID3D12InfoQueue* infoQueue = nullptr;
+    ComPtr<ID3D12InfoQueue> infoQueue = nullptr;
     if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
         //ヤバイエラー時に止まる
         infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
@@ -148,9 +143,6 @@ void DirectXCommon::DebugInitialize() {
         filter.DenyList.pSeverityList = severities;
         //指定したメッセージの表示を抑制
         infoQueue->PushStorageFilter(&filter);
-
-        //解放
-        infoQueue->Release();
     }
 #endif
 }
@@ -158,7 +150,6 @@ void DirectXCommon::DebugInitialize() {
 void DirectXCommon::CommandInitialize() {
 
     HRESULT hr;
-
     ///---------------------------------------------------------------------///
     ///------------------------コマンドキューを生成する-------------------------///
     ///---------------------------------------------------------------------///
@@ -362,13 +353,13 @@ void DirectXCommon::DxCompilerGenerate() {
 }
 
 void DirectXCommon::ImguiInitialize() {
-
-    //-----------------------------//
-    //-------ImGuiの初期化-----------//
-    //-----------------------------//
+    // バージョンチェック
     IMGUI_CHECKVERSION();
+    // コンテキストの生成
     ImGui::CreateContext();
+    // スタイルの設定
     ImGui::StyleColorsDark();
+    // 初期化
     ImGui_ImplWin32_Init(winApp_->Gethwnd());
     ImGui_ImplDX12_Init(device.Get(),
         swapChainDesc.BufferCount,
