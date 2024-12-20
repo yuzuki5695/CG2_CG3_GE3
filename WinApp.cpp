@@ -1,6 +1,7 @@
 #include "WinApp.h"
 #include"externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#pragma comment(lib,"winmm.lib")
 
 // メインスレッドではなくMTAでCOM使用
 HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -38,6 +39,8 @@ void WinApp::Initialize() {
 
     //ウィンドウを表示する
     ShowWindow(hwnd, SW_SHOW);
+    // システムタイマーの分解度を上げる
+    timeBeginPeriod(1);
 }
 
 //ウィンドウプロージャー

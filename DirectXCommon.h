@@ -2,9 +2,10 @@
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<wrl.h>
-#include"WinApp.h"
 #include<array>
 #include<dxcapi.h>
+#include<chrono>
+#include"WinApp.h"
 #include "Logger.h"
 #include "StringUtility.h"
 #include "externals/DirectXTex/DirectXTex.h"
@@ -103,6 +104,11 @@ private: // プライベートメンバ関数
 	/// </summary>
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorsize, uint32_t index);
 	
+	// FPS固定初期化
+	void InitializeFizFPS();
+	//  FPS固定更新
+	void UpdateFixFPS();
+
 private: // メンバ変数
 	// ポインタ
 	WinApp* winApp_ = nullptr;
@@ -163,6 +169,8 @@ private: // メンバ変数
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 	// DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	// 記録時間(FPS固定)
+	std::chrono::steady_clock::time_point reference_;
 public:
 	// getter
 	Microsoft::WRL::ComPtr <ID3D12Device> GetDevice() const { return device.Get(); }
