@@ -191,7 +191,6 @@ void DirectXCommon::SwapChainGenerate() {
     ///---------------------------------------------------------------------///
     ///--------------SwapChain(スワップチェーン)を設定する----------------------///
     ///---------------------------------------------------------------------///
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
     swapChainDesc.Width = WinApp::kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
     swapChainDesc.Height = WinApp::kClientHeight;//画面の高さ。ウィンドウのクライアント領域を同じものにしておく
     swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//色の形式
@@ -279,10 +278,16 @@ void DirectXCommon::RenderviewInitialize() {
     rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2Dテクスチャとして読み込む
     //ディスクリプタの先頭を取得する
     D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, descriptorsizeRTV, 0);
+    
     // ハンドルの数だけ作成する
     for (uint32_t i = 0; i < rtvHandlenum; ++i) {
+        // ハンドルを設定
         rtvHandles[i] = rtvStartHandle;
+        // RTVを作成
         device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
+        assert(SUCCEEDED(hr));
+        // 次のハンドルに進む
+        rtvStartHandle.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
 }
 
@@ -294,7 +299,7 @@ void DirectXCommon::DepthstealthviewInitialization() {
     /*------------------------------------------------------------*/
 
     // DepthStencilTextureをウインドウのサイズで作成
-    Microsoft::WRL::ComPtr <ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device,WinApp::kClientWidth, WinApp::kClientHeight);
+    depthStencilResource = CreateDepthStencilTextureResource(device,WinApp::kClientWidth, WinApp::kClientHeight);
 
     // DSVの設定
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
@@ -318,11 +323,9 @@ void DirectXCommon::FenceInitialize() {
     HRESULT hr;
 
     //初期値0でFenceを作る
-    uint64_t fenceValue = 0;
-    hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+    hr = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
     assert(SUCCEEDED(hr));
     //FenceのSignalを待つためのイベントを作成する
-    HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     assert(fenceEvent != nullptr);
 }
 
@@ -363,7 +366,7 @@ void DirectXCommon::ImguiInitialize() {
     //-----------------------------//
     //-------ImGuiの初期化-----------//
     //-----------------------------//
-  /*  IMGUI_CHECKVERSION();
+    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(winApp_->Gethwnd());
@@ -372,17 +375,75 @@ void DirectXCommon::ImguiInitialize() {
         rtvDesc.Format,
         srvDescriptorHeap.Get(),
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());*/
+        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+}
+
+void DirectXCommon::PreDraw() {
+    // ここから書き込むバックバッファのインデックスを取得
+    UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+    // 今回のバリアはTransition
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    // Noneにしておく
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    // バリアを張る対象のリソース。現在のバックバッファに対して行う
+    barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
+    // 遷移前のResourceState
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    // 遷移後のResourceState
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    // TransitionBarrierを張る
+    commandList->ResourceBarrier(1, &barrier);
+    // 描画先のRTVとDSVを設定する
+    dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+    // 描画先のRTVを指定する
+    commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+    // 指定した色で画面全体をクリアする
+    float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
+    commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+    commandList->RSSetViewports(1, &viewport);
+    commandList->RSSetScissorRects(1, &scissorRect);
+    // 指定した深度で画面全体をクリアする
+    commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 
-
-
-
-
-
-
-
+void DirectXCommon::PostDrow() {
+    HRESULT hr;
+    // バックバッファの番号を取得
+    UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
+    // 画面に描く処理はすべて終わり、画面に移すので、状態を遷移
+    // 今回はRenderTargetからPresentにする
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    // TransitionBarrierを張る
+    commandList->ResourceBarrier(1, &barrier);
+    // コマンドリストの内容を確定させる。全てのコマンドを積んでからCloseすること
+    hr = commandList->Close();
+    assert(SUCCEEDED(hr));
+    // GPUにコマンドリストのリストの実行を行わせる
+    ID3D12CommandList* commandLists[] = { commandList.Get() };
+    commandQueue->ExecuteCommandLists(1, commandLists);
+    // GPUとOSに画面の交換を行うように通知する
+    swapChain->Present(1, 0);
+    // Fenceの値の更新
+    fenceVal++;
+    // GPUがここまでたどり着いたときに、Fenceの値に代入するようにSignalを送る
+    commandQueue->Signal(fence.Get(), fenceVal);
+    // Fenceの値が指定したSignal値にたどり着いているか確認する
+    // GetCompletedValueの初期値はFence作成時に渡した初期値
+    if (fence->GetCompletedValue() < fenceVal)
+    {
+        // 指定したSignalにたどりついていないので、たどり着くまで待つようにイベントを設定する
+        fence->SetEventOnCompletion(fenceVal, fenceEvent);
+        //イベントを待つ
+        WaitForSingleObject(fenceEvent, INFINITE);
+    }
+    // 次のフレーム用のコマンドリストを準備
+    hr = commandAllocator->Reset();
+    assert(SUCCEEDED(hr));
+    hr = commandList->Reset(commandAllocator.Get(), nullptr);
+    assert(SUCCEEDED(hr));
+}
 
 
 

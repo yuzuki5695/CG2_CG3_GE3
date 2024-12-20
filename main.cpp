@@ -900,34 +900,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
        //// ID3D12DescriptorHeap* descriptorHeap[] = { srvDescriptorHeap.Get() };
        //// commandList->SetDescriptorHeaps(1, descriptorHeap);
 
-       //// // ここから書き込むバックバッファのインデックスを取得
-       //// UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-       //// // TransitionBarrierの設定
-       //// D3D12_RESOURCE_BARRIER barrier{};
-       //// // 今回のバリアはTransition
-       //// barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-       //// // Noneにしておく
-       //// barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-       //// // バリアを張る対象のリソース。現在のバックバッファに対して行う
-       //// barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
-       //// // 遷移前のResourceState
-       //// barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-       //// // 遷移後のResourceState
-       //// barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-       //// // TransitionBarrierを張る
-       //// commandList->ResourceBarrier(1, &barrier);
 
-       //// // 描画先のRTVとDSVを設定する
-       //// D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-       //// // 描画先のRTVを指定する
-       //// commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-       //// // 指定した色で画面全体をクリアする
-       //// float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
-       //// commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-       //// commandList->RSSetViewports(1, &viewport);
-       //// commandList->RSSetScissorRects(1, &scissorRect);
-       //// // 指定した深度で画面全体をクリアする
-       //// commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        // 描画前処理
+        dxCommon->PreDraw();
+
        //// // RootSignatureを設定。PSOに設定しているけど別途設定が必要
        //// commandList->SetGraphicsRootSignature(rootSignature.Get());
        //// commandList->SetPipelineState(graphicsPipelineState.Get());
@@ -975,42 +951,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
        //// //実際のcommandListのImGuiの描画コマンドを積む
        //// ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
 
-
-       //// // 画面に描く処理はすべて終わり、画面に移すので、状態を遷移
-       //// // 今回はRenderTargetからPresentにする
-       //// barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-       //// barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-       //// // TransitionBarrierを張る
-       //// commandList->ResourceBarrier(1, &barrier);
-       //// // コマンドリストの内容を確定させる。全てのコマンドを積んでからCloseすること
-       //// hr = commandList->Close();
-       //// assert(SUCCEEDED(hr));
-
-       //// // GPUにコマンドリストのリストの実行を行わせる
-       //// ID3D12CommandList* commandLists[] = { commandList.Get() };
-       //// commandQueue->ExecuteCommandLists(1, commandLists);
-       //// // GPUとOSに画面の交換を行うように通知する
-       //// swapChain->Present(1, 0);
-       //// // Fenceの値の更新
-       //// fenceValue++;
-       //// // GPUがここまでたどり着いたときに、Fenceの値に代入するようにSignalを送る
-       //// commandQueue->Signal(fence.Get(), fenceValue);
-       //// // Fenceの値が指定したSignal値にたどり着いているか確認する
-       //// // GetCompletedValueの初期値はFence作成時に渡した初期値
-       //// if (fence->GetCompletedValue() < fenceValue)
-       //// {
-       ////     // 指定したSignalにたどりついていないので、たどり着くまで待つようにイベントを設定する
-       ////     fence->SetEventOnCompletion(fenceValue, fenceEvent);
-       ////     //イベントを待つ
-       ////     WaitForSingleObject(fenceEvent, INFINITE);
-       //// }
-       //// // 次のフレーム用のコマンドリストを準備
-       //// hr = commandAllocator->Reset();
-       //// assert(SUCCEEDED(hr));
-       //// hr = commandList->Reset(commandAllocator.Get(), nullptr);
-       //// assert(SUCCEEDED(hr));
-
-
+        // 描画後処理
+        dxCommon->PostDrow();
     }
 
     // シーンの解放

@@ -14,6 +14,10 @@ public: // メンバ関数
 
 	// 初期化
 	void Initialize(WinApp* winApp);
+	// 描画前処理
+	void PreDraw();
+	// 描画後処理
+	void PostDrow();
 
 	/// <summary>
 	/// デスクリプタヒープを生成する
@@ -84,6 +88,8 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue;
 	// SwapChain(スワップチェーン)
 	Microsoft::WRL::ComPtr <IDXGISwapChain4> swapChain;
+	// スワップチェーン生成
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	// 深度バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthbufferresource;
 	// RTV用のヒープでディスクリプタ
@@ -105,8 +111,14 @@ private: // メンバ変数
 	//RTVを2つ作るのでディスクリプタハンドルを2つ用意
 	const uint32_t rtvHandlenum = 2;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
+	// DepthStencilTextureをウインドウのサイズ
+	Microsoft::WRL::ComPtr <ID3D12Resource> depthStencilResource;
 	// フェンスの生成
 	Microsoft::WRL::ComPtr <ID3D12Fence> fence = nullptr;
+	// 初期値0でFenceを作る
+	UINT64 fenceVal = 0;
+	//FenceのSignalを待つためのイベントを作成する
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	// ビューポート
 	D3D12_VIEWPORT viewport{};
 	// シザー短形
@@ -115,4 +127,8 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr <IDxcUtils> dxcUtils = nullptr;
 	Microsoft::WRL::ComPtr <IDxcCompiler3> dxcCompiler = nullptr;
 	Microsoft::WRL::ComPtr <IDxcIncludeHandler> includeHandler = nullptr;
+	// TransitionBarrierの設定
+	D3D12_RESOURCE_BARRIER barrier{};
+	// 描画先のRTVとDSVを設定する
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 };
