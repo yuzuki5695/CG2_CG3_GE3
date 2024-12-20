@@ -41,6 +41,33 @@ public: // メンバ関数
 	/// </summary>
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
 
+	// コンパイルシェーダー
+	Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(const std::wstring& filePath, const wchar_t* profile);
+
+	/// <summary>
+	/// バッファリソースの生成
+	/// </summary>
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+
+	/// <summary>
+	/// テクスチャリソースの生成
+	/// </summary>
+	Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(const Microsoft::WRL::ComPtr <ID3D12Device>& device, const DirectX::TexMetadata& metadata);
+
+	/// <summary>
+	/// テクスチャデータの輸送
+	/// </summary>
+	/// <param name="texture"></param>
+	/// <param name="mipImages"></param>
+	void UploadTextureData(Microsoft::WRL::ComPtr <ID3D12Resource>& texture, const DirectX::ScratchImage& mipImages);
+
+	/// <summary>
+	/// テクスチャファイルの読み込み
+	/// </summary>
+	/// <param name="filePath"テクスチャファイルのパス></param>
+	/// <returns>画面イメージデータ</param>
+	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
+
 private: // プライベートメンバ関数
 	// デバイスの初期化
 	void DebugInitialize();
@@ -138,4 +165,11 @@ private: // メンバ変数
 	D3D12_RESOURCE_BARRIER barrier{};
 	// 描画先のRTVとDSVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
+	// DepthStencilStateの設定
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+public:
+	// getter
+	Microsoft::WRL::ComPtr <ID3D12Device> GetDevice() const { return device.Get(); }
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
+	D3D12_DEPTH_STENCIL_DESC GetdepthStencilDesc() { return depthStencilDesc; }
 };
