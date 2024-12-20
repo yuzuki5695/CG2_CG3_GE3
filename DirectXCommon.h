@@ -9,10 +9,6 @@
 #include "StringUtility.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #pragma comment(lib,"dxcompiler.lib")
-#include"externals/imgui/imgui.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
 
 // Directx基盤
 class DirectXCommon
@@ -40,6 +36,9 @@ public: // メンバ関数
 	/// SRV指定番号のGPUディスクリプタハンドルの取得をする
 	/// </summary>
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
+
+	// リソース
+	Microsoft::WRL::ComPtr <ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr <ID3D12Device>& device, int32_t width, int32_t heigth);
 
 	// コンパイルシェーダー
 	Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(const std::wstring& filePath, const wchar_t* profile);
@@ -104,9 +103,6 @@ private: // プライベートメンバ関数
 	/// </summary>
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorsize, uint32_t index);
 	
-	// リソース
-	Microsoft::WRL::ComPtr <ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr <ID3D12Device>& device, int32_t width, int32_t heigth);
-
 private: // メンバ変数
 	// ポインタ
 	WinApp* winApp_ = nullptr;
@@ -172,4 +168,5 @@ public:
 	Microsoft::WRL::ComPtr <ID3D12Device> GetDevice() const { return device.Get(); }
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
 	D3D12_DEPTH_STENCIL_DESC GetdepthStencilDesc() { return depthStencilDesc; }
+	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> GetsrvDescriptorHeap() { return srvDescriptorHeap.Get(); }
 };

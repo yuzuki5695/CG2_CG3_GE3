@@ -1,7 +1,9 @@
 #include "DirectXCommon.h"
 #include<cassert>
-#include <format>
-
+#include<format>
+#include"externals/imgui/imgui.h"
+#include"externals/imgui/imgui_impl_dx12.h"
+#include"externals/imgui/imgui_impl_win32.h"
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
@@ -201,8 +203,8 @@ void DirectXCommon::CreateDepthStencilGenerate() {
 
     // 生成するResourceの設定
     D3D12_RESOURCE_DESC resourceDesc{};
-    resourceDesc.Width = winApp_->kClientWidth; // Textureの幅
-    resourceDesc.Height = winApp_->kClientHeight; // Textureの高さ
+    resourceDesc.Width = WinApp::kClientWidth; // Textureの幅
+    resourceDesc.Height = WinApp::kClientHeight; // Textureの高さ
     resourceDesc.MipLevels = 1; // mipmapの数
     resourceDesc.DepthOrArraySize = 1; // 奥行　or 配列のTexture配列数
     resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // DepthStencilとして利用可能なフォーマット
@@ -264,7 +266,6 @@ void DirectXCommon::RenderviewInitialize() {
     /*------------------------------------------------------------*/
     
     //RTVの設定
-    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
     rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGB2変換して書き込む
     rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2Dテクスチャとして読み込む
     //ディスクリプタの先頭を取得する
@@ -365,7 +366,7 @@ void DirectXCommon::ImguiInitialize() {
         rtvDesc.Format,
         srvDescriptorHeap.Get(),
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()); 
 }
 
 void DirectXCommon::PreDraw() {
