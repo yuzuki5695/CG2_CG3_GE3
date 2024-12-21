@@ -7,6 +7,7 @@
 #include<d3d12.h>
 #include<wrl.h>
 #include<cstdint>
+#include<fstream>
 
 class SpriteCommon;
 
@@ -35,7 +36,7 @@ public: // メンバ関数
 
 public: // メンバ関数
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon);
+	void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath);
 	// 更新処理
 	void Update();
 	// 描画処理
@@ -71,6 +72,8 @@ private: // メンバ変数
 	Vector2 position = { 0.0f,0.0f };
 	float rotation = 0.0f;
 	Vector2 size = { 90.0f,90.0f };
+	// テクスチャ番号
+	uint32_t textureindex = 0;
 public: 
 	// getter
 	const Vector2& GetPosition() const { return position; }

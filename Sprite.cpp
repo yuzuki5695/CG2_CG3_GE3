@@ -2,8 +2,9 @@
 #include"SpriteCommon.h"
 #include <cassert>
 #include "MatrixVector.h"
+#include "TextureManager.h"
 
-void Sprite::Initialize(SpriteCommon* spriteCommon) {
+void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath) {
 	// NULL検出
 	assert(spriteCommon);
 	// 引数で受け取ってメンバ変数に記録する
@@ -14,6 +15,9 @@ void Sprite::Initialize(SpriteCommon* spriteCommon) {
 	MaterialGenerate();
 	// WVP,World用のリソースの生成、初期化
 	TransformationMatrixGenerate();
+	// 単位行列を書き込んでおく
+	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
+
 }
 
 void Sprite::VertexDatacreation() {
@@ -121,6 +125,8 @@ void Sprite::Draw() {
 	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixBufferの場所を設定
 	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	// SRVのDescriptortableの先頭を設定
+	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureindex));
 	// 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
 	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }

@@ -15,6 +15,9 @@
 class DirectXCommon
 {
 public: // メンバ関数
+	
+	// 最大SRV数(最大テクスチャ枚数)
+	static const uint32_t kMaxSRVCount;
 
 	// 初期化
 	void Initialize(WinApp* winApp);
@@ -60,13 +63,6 @@ public: // メンバ関数
 	/// <param name="texture"></param>
 	/// <param name="mipImages"></param>
 	void UploadTextureData(Microsoft::WRL::ComPtr <ID3D12Resource>& texture, const DirectX::ScratchImage& mipImages);
-
-	/// <summary>
-	/// テクスチャファイルの読み込み
-	/// </summary>
-	/// <param name="filePath"テクスチャファイルのパス></param>
-	/// <returns>画面イメージデータ</param>
-	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
 private: // プライベートメンバ関数
 	// デバイスの初期化
