@@ -1,8 +1,11 @@
 #include "SpriteCommon.h"
+#include <cassert>
 
 using namespace Microsoft::WRL;
 
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
+    // NULL検出
+    assert(dxCommon);
     // 引数を受け取ってメンバ変数に記録する
     dxCommon_ = dxCommon;
     // グラフィックスパイプラインの生成
