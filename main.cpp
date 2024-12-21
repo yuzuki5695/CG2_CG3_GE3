@@ -13,6 +13,7 @@
 #include"ResourceObject.h"
 #include "Input.h"
 #include "DirectXCommon.h"
+#include"D3DResourceLeakChecker.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -759,7 +760,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // TransformationMatrixBufferの場所を設定
         dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
         // 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
-       //  dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+        dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
         /*---------------------------------------------------*/
         /*-------------------2dの描画コマンド終了---------------*/
