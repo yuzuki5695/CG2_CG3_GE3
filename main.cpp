@@ -19,12 +19,7 @@
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
-
-struct Transform {
-    Vector3 scale;
-    Vector3 rotate;
-    Vector3 translate;
-};
+#include"Transform.h"
 
 struct VertexData
 {
@@ -239,8 +234,6 @@ void DrawSphere(const uint32_t ksubdivision, VertexData* vertexdata) {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
     
-    HRESULT hr;
-    
     // ポインタ
     Input* input = nullptr;
     WinApp* winApp = nullptr;
@@ -310,7 +303,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // Lightingするのでtrueを設定する
     materialData->endbleLighting = true;
     // 単位行列を書き込んでおく
-    materialData->uvTransform = MakeIdentity4x4();
+    materialData->uvTransform = MatrixVector::MakeIdentity4x4();
 
     /*------------------------------------------------------------------*/
     /*----------------TransformationMatrix用のResource-------------------*/
@@ -323,8 +316,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 書き込むためのアドレスを取得
     wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
     // 単位行列を書き込んでおく
-    transformationMatrixData->WVP = MakeIdentity4x4();
-    transformationMatrixData->World = MakeIdentity4x4();
+    transformationMatrixData->WVP = MatrixVector::MakeIdentity4x4();
+    transformationMatrixData->World = MatrixVector::MakeIdentity4x4();
 
     /*------------------------------------------------------------------*/
     /*------------------------Sprite用のResource-------------------------*/
@@ -341,7 +334,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // SpriteはLightingしないでfalseを設定する
     materialSpriteDate->endbleLighting = false;
     // 単位行列を書き込んでおく
-    materialSpriteDate->uvTransform = MakeIdentity4x4();
+    materialSpriteDate->uvTransform = MatrixVector::MakeIdentity4x4();
 
     /*------------------------------------------------------------------*/
     /*-----------------------平行光源用のResource-------------------------*/
@@ -452,8 +445,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 書き込むためのアドレスを取得
     transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDateSprite));
     // 単位行列を書き込んでおく
-    transformationMatrixDateSprite->World = MakeIdentity4x4();
-    transformationMatrixDateSprite->WVP = MakeIdentity4x4();
+    transformationMatrixDateSprite->World = MatrixVector::MakeIdentity4x4();
+    transformationMatrixDateSprite->WVP = MatrixVector::MakeIdentity4x4();
 
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -570,11 +563,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
        // transform.rotate.y += 0.01f;
 
-        Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
-        Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
-        Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-        Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-        Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
+        Matrix4x4 worludMatrix = MatrixVector::MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+        Matrix4x4 cameraMatrix = MatrixVector::MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
+        Matrix4x4 viewMatrix = MatrixVector::Inverse(cameraMatrix);
+        Matrix4x4 projectionMatrix = MatrixVector::MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
+        Matrix4x4 worldViewProjectionMatrix = MatrixVector::Multiply(worludMatrix, MatrixVector::Multiply(viewMatrix, projectionMatrix));
         transformationMatrixData->World = worludMatrix;
         transformationMatrixData->WVP = worldViewProjectionMatrix;
 
@@ -582,10 +575,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*---Sprite用のWrldViewProjectionMatrixを作る---*/
         /*--------------------------------------------*/
 
-        Matrix4x4 worludMatrixSprite = MakeAftineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-        Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
-        Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
-        Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worludMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+        Matrix4x4 worludMatrixSprite = MatrixVector::MakeAftineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+        Matrix4x4 viewMatrixSprite = MatrixVector::MakeIdentity4x4();
+        Matrix4x4 projectionMatrixSprite = MatrixVector::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
+        Matrix4x4 worldViewProjectionMatrixSprite = MatrixVector::Multiply(worludMatrixSprite, MatrixVector::Multiply(viewMatrixSprite, projectionMatrixSprite));
         transformationMatrixDateSprite->World = worludMatrixSprite;
         transformationMatrixDateSprite->WVP = worldViewProjectionMatrixSprite;
 
@@ -593,9 +586,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*---------UVTransform用の行列を作る--------*/
         /*----------------------------------------*/
 
-        Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
-        uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
-        uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+        Matrix4x4 uvTransformMatrix = MatrixVector::MakeScaleMatrix(uvTransformSprite.scale);
+        uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeRotateZMatrix(uvTransformSprite.rotate.z));
+        uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransformSprite.translate));
         materialSpriteDate->uvTransform = uvTransformMatrix;
 
         // 描画用のDescriptorHeapの設定
