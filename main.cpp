@@ -14,10 +14,12 @@
 #include "Input.h"
 #include "DirectXCommon.h"
 #include"D3DResourceLeakChecker.h"
-#include "Sprite.h"
-#include "SpriteCommon.h"
 #include"Transform.h"
 #include "TextureManager.h"
+#include "SpriteCommon.h"
+#include "Sprite.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -216,10 +218,13 @@ void DrawSphere(const uint32_t ksubdivision, Sprite::VertexData* vertexdata) {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
     
-    // ポインタ
+#pragma region ポインタ
     Input* input = nullptr;
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
+    SpriteCommon* spriteCommon = nullptr;
+    Object3dCommon* object3dCommon = nullptr;
+#pragma endregion ポインタ
 
     // ウィンドウ作成
     
@@ -248,29 +253,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 基盤システムの初期化
 
-    SpriteCommon* spriteCommon = nullptr;
-
     // スプライト共通部の初期化
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
 
+    // 3Dオブジェクト共通部の初期化
+    object3dCommon = new Object3dCommon;
+    object3dCommon->Initialize();
+
 #pragma endregion 基盤システムの初期化
 
-
-    // シーンの初期化
-
 #pragma region 最初のシーンの初期化
-
+    
+    // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
 
-#pragma endregion 最初のシーンの初期化
+    // 3Dオブジェクトの初期化
+    Object3d* object3d = new Object3d;
+    object3d->Initialize();
+
+#pragma endregion 最初のシーンの終了
 
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
-
   
     /*------------------------------------------------------------------------------------*/
     /*----------------------------------Resourceの作成-------------------------------------*/
@@ -546,17 +553,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         dxCommon->PostDrow();
     }
 
+#pragma region 各処理の解放
+
+    // ImGuiの終了処理。
+    ImGui_ImplDX12_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+
     // シーンの解放
     delete  spriteCommon;
+    delete  object3dCommon;
     
     // 汎用機能の解放
-    delete  sprite;
-    
-    //sprites.clear();
 
+    // スプライトの解放
+    delete  sprite;
     for (Sprite* sprite : sprites) {
         delete sprite;
     }
+    // 3Dオブジェクトの解放
+    delete  object3d;
 
     // 入力解放
     delete input;
@@ -572,16 +588,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     winApp->Finalize();
     // WindowsAPIの解放
     delete winApp;
-
-    //// ComPtrを扱っていないものの解放処理
-    //mipImages.Release();
-    //mipImages2.Release();
-   // CloseHandle(fenceEvent);
-
-    // ImGuiの終了処理。
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-
+#pragma endregion 各処理の解放
     return 0;
 }
