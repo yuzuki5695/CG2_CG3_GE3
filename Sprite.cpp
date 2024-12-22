@@ -15,6 +15,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	MaterialGenerate();
 	// WVP,World用のリソースの生成、初期化
 	TransformationMatrixGenerate();
+	// テクスチャサイズをイメージに合わせる
+	AdjustTextureSize();
 	// 単位行列を書き込んでおく
 	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
 
@@ -70,19 +72,41 @@ void Sprite::TransformationMatrixGenerate() {
 }
 
 void Sprite::Update() {
-	// バーテックスリソースにデータを書き込む
-	// 左下
-	vertexData[0].position = { 0.0f,1.0f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	// 右上
-	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.0f,0.0f };
-	// 右下
-	vertexData[2].position = { 1.0f,1.0f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
-	// 左上
-	vertexData[3].position = { 1.0f,0.0f,0.0f,1.0f };
-	vertexData[3].texcoord = { 1.0f,0.0f };
+	// アンカーポイント
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	// フリップ
+	if (isFlipX_) {
+		left = -left;
+		right = -right;
+	}
+	if (isFlipY_) {
+		top = -top;
+		bottom = -bottom;
+	}
+
+	// 頂点にデータを書き込む
+	vertexData[0].position = { left,bottom,0.0f,1.0f };    // 左下
+	vertexData[1].position = { left,top,0.0f,1.0f };    // 右上
+	vertexData[2].position = { right,bottom,0.0f,1.0f };    // 右下
+	vertexData[3].position = { right,top,0.0f,1.0f };    // 左上
+
+	// テクスチャ範囲指定
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
+	// UV座標系に変換する
+	float tex_left = textureLeftTop.x / metadata.width;
+	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
+	float tex_top = textureLeftTop.y / metadata.height;
+	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
+
+	// 頂点にデータを書き込む
+	vertexData[0].texcoord = { tex_left,tex_bottom };    // 左下
+	vertexData[1].texcoord = { tex_left,tex_top };    // 右上
+	vertexData[2].texcoord = { tex_right,tex_bottom };    // 右下
+	vertexData[3].texcoord = { tex_right,tex_top };    // 左上
 
 	for (int i = 0; i < 4; i++) {
 		vertexData[i].normal = { 0.0f,0.0f,-1.0f };
@@ -136,4 +160,13 @@ void Sprite::SetTexture(const std::string& textureFilePath) {
 	uint32_t newTextureIndex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
 	// テクスチャインデックスを更新
 	this->textureindex = newTextureIndex;
+}
+
+void Sprite::AdjustTextureSize() {
+	// テクスチャメタデータを取得
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
+	textureSize.x = static_cast<float>(metadata.width);
+	textureSize.y = static_cast<float>(metadata.height);
+	// 画像サイズをテクスチャサイズに合わせる
+	size = textureSize;
 }

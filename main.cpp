@@ -446,8 +446,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*---------------------------------------Spriteの更新処理----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
 
-        //// 更新処理
-        //sprite->Update();
+        // 更新処理
+        sprite->Update();
 
         ///*--------Spriteの移動--------*/
         //// 現在の座標を変数で受ける
@@ -459,7 +459,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //sprite->SetPosition(position);
 
 
-        ///*--------Spriteの回転--------*/
+        /////*--------Spriteの回転--------*/
         //// 角度を変化させるテスト
         //float rotation = sprite->GetRotation();
         //rotation += 0.01f;
@@ -484,10 +484,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         /*----------------------------複数Sprite----------------------------*/
         
-        // 更新処理
-        for (Sprite* sprite : sprites) {
-            sprite->Update();
-        }
+        //// 更新処理
+        //for (Sprite* sprite : sprites) {
+        //    sprite->Update();
+        //}
 
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -528,12 +528,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //// Spriteの描画は常にuvCheckerにする
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-        //sprite->Draw();
+        sprite->Draw();
 
-        /*--------複数Spriteの描画--------*/
-        for (Sprite* sprite : sprites) {
-            sprite->Draw();
-        }
+        ///*--------複数Spriteの描画--------*/
+        //for (Sprite* sprite : sprites) {
+        //    sprite->Draw();
+        //}
 
         /*---------------------------------------------------*/
         /*-------------------2dの描画コマンド終了---------------*/

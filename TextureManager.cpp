@@ -66,13 +66,13 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	uint32_t srvIndex = static_cast<uint32_t>(textureDatas.size() - 1) + KSRVIndexTop;
 	textureData.srvHandleCPU = dxCommon_->GetSRVCPUDescriptorHandle(srvIndex);
 	textureData.srvHandleGPU = dxCommon_->GetSRVGPUDescriptorHandle(srvIndex);
-	//metaDataを基にSRVの設定
+	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = textureData.matadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;				//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = UINT(textureData.matadata.mipLevels);
-	//SRVの生成
+	// SRVの生成
 	dxCommon_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
 }
 
@@ -98,3 +98,10 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureinde
 	TextureData& textureData = textureDatas.at(textureindex);
 	return textureData.srvHandleGPU;
 }
+
+const DirectX::TexMetadata& TextureManager::GetMetaData(uint32_t textureIndex) {
+	// 範囲外指定違反チェック
+	assert(textureIndex < textureDatas.size());
+	TextureData& textureData = textureDatas.at(textureIndex);
+	return  textureData.matadata;
+};

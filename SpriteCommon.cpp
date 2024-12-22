@@ -78,7 +78,7 @@ void SpriteCommon::RootSignatureGenerate() {
         Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
         assert(false);
     }
-    //バイナリを元に作成
+    // バイナリを元に作成
     hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
     assert(SUCCEEDED(hr));
 }
@@ -120,9 +120,11 @@ void SpriteCommon::GraphicsPipelineGenerate() {
 
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
-    //裏面(時計回り)を表示しない
-    rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-    //三角形の中を塗りつぶす
+    // 裏面(時計回り)を表示しない
+    //rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+    // 裏面(時計回り)を表紙する
+    rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+    // 三角形の中を塗りつぶす
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     /*----------------------------------------------------------------------------------*/
@@ -146,7 +148,7 @@ void SpriteCommon::GraphicsPipelineGenerate() {
     // 書き込むRTVの情報
     graphicsPipelineStateDesc.NumRenderTargets = 1;
     graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-    //利用するトポロジ(形状)のタイプ
+    // 利用するトポロジ(形状)のタイプ
     graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     // どのように画面に色を打ち込むかの設定(気にしなくて良い)
     graphicsPipelineStateDesc.SampleDesc.Count = 1;
