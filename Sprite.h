@@ -41,6 +41,8 @@ public: // メンバ関数
 	void Update();
 	// 描画処理
 	void Draw();
+
+	void SetTexture(const std::string& textureFilePath);
 private:
 	// 頂点データ作成
 	void VertexDatacreation();

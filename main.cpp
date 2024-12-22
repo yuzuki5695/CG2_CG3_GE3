@@ -235,13 +235,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // テクスチャマネージャーの初期化
     TextureManager::GetInstance()->Initialize(dxCommon);
 
-    //TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
-
-    //uint32_t UVtexture = TextureManager::GetInstance()->GetTextureindexByFilePath("Resources/uvChecker.png");
-
-    //D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = TextureManager::GetInstance()->GetSrvHandleGPU(UVtexture);
-
-
+    TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
+    std::string TexturePath01 = "Resources/uvChecker.png";
+    std::string TexturePath02 = "Resources/monsterBall.png";
 
     // 汎用機能の初期化 
 
@@ -264,7 +261,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 最初のシーンの初期化
 
-    Sprite* sprite = new Sprite;;
+    Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
 
 #pragma endregion 最初のシーンの初期化
@@ -367,74 +364,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //DrawSphere(kSubdivision, vertexData);
 
 
-    /*-----------------------------------------------------------------------------------*/
-    /*--------------------------------Resourceの作成終了-----------------------------------*/
-    /*-----------------------------------------------------------------------------------*/
-
-
-
-    /*------------------------------------------------------------*/
-    /*--------------------------SRVの設定--------------------------*/
-    /*------------------------------------------------------------*/
-
-    ////Textureを読んで転送する
-    //DirectX::ScratchImage mipImages = dxCommon->LoadTexture("Resources/uvChecker.png");
-    //const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-    //Microsoft::WRL::ComPtr <ID3D12Resource> textureResource = dxCommon->CreateTextureResource(dxCommon->GetDevice(), metadata);
-    //dxCommon->UploadTextureData(textureResource, mipImages);
-
-    ////2枚目のTextureを読んで転送する
-    ////DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
-
-    //DirectX::ScratchImage mipImages2 = dxCommon->LoadTexture(modelDate.material.textureFilePath);
-    //const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
-    //Microsoft::WRL::ComPtr <ID3D12Resource> textureResource2 = dxCommon->CreateTextureResource(dxCommon->GetDevice(), metadata2);
-    //dxCommon->UploadTextureData(textureResource2, mipImages2);
-
-
-    ////metaDataを基にSRVの設定
-    //D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-    //srvDesc.Format = metadata.format;
-    //srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    //srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;				//2Dテクスチャ
-    //srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
-
-    //D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-    //srvDesc2.Format = metadata2.format;
-    //srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    //srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;				//2Dテクスチャ
-    //srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
-
-    ////SRVを作成するDescriptorHeapの場所を決める
-    //D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = dxCommon->GetSRVCPUDescriptorHandle(0);
-    //D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = dxCommon->GetSRVGPUDescriptorHandle(0);
-    ////先頭はImGuiが使っているのでその次を使う
-    //textureSrvHandleCPU.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    //textureSrvHandleGPU.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    ////SRVの生成
-    //dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
-
-    ////SRVを作成するDescriptorHeapの場所を決める
-    //D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = dxCommon->GetSRVCPUDescriptorHandle(1);
-    //D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = dxCommon->GetSRVGPUDescriptorHandle(1);
-    ////先頭はImGuiが使っているのでその次を使う
-    //textureSrvHandleCPU2.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    //textureSrvHandleGPU2.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    ////SRVの生成
-    //dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
-
-
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
 
     bool useMonsterBall = true;
-
+    
     std::vector<Sprite*> sprites;
-    float Position[5]{};
-    for (uint32_t i = 0; i < 5; ++i) {
+    const uint32_t spritesize = 6;
+    float Position[spritesize]{};
+    for (uint32_t i = 0; i < spritesize; ++i) {
         Position[i] = 180.0f * i;
         Sprite* sprite = new Sprite();
-        sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
+        sprite->Initialize(spriteCommon, TexturePath01);
+        if (i % 2 == 1 ) {
+            sprite->SetTexture(TexturePath02);
+        }
+        // 現在の位置を取得
+        Vector2 position = sprite->GetPosition();
+        // 位置を変更する
+        position.x = Position[i];
+        position.y = 100.0f;
+        // 変更した座標を設定
+        sprite->SetPosition(position);
+        // 情報を転送
         sprites.push_back(sprite);
     }
 
@@ -535,18 +487,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 更新処理
         for (Sprite* sprite : sprites) {
             sprite->Update();
-        }
-
-        /*--------複数Spriteの座標--------*/
-        // 現在の座標を変数で受ける
-        for (uint32_t i = 0; i < sprites.size(); ++i) {
-            Sprite* sprite = sprites[i];
-            // 現在の位置を取得
-            Vector2 position = sprite->GetPosition();
-            // 位置を変更する
-            position.x = Position[i];
-            // 変更した座標を設定
-            sprite->SetPosition(position);
         }
 
         /*----------------------------------------------------------------------------------------------------*/

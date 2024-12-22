@@ -130,3 +130,10 @@ void Sprite::Draw() {
 	// 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
 	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
+
+void Sprite::SetTexture(const std::string& textureFilePath) {
+	// テクスチャインデックスを取得
+	uint32_t newTextureIndex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
+	// テクスチャインデックスを更新
+	this->textureindex = newTextureIndex;
+}
