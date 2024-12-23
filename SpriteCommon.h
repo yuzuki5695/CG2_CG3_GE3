@@ -1,7 +1,6 @@
 #pragma once
 #include"DirectXCommon.h"
 
-// スプライト共通部
 class SpriteCommon
 {
 public: // メンバ関数
