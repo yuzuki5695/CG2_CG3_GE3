@@ -17,6 +17,8 @@
 #include "Sprite.h"
 #include "Object3dCommon.h"
 #include "Object3d.h"
+#include "ModelCommon.h"
+#include "Model.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -31,6 +33,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     DirectXCommon* dxCommon = nullptr;
     SpriteCommon* spriteCommon = nullptr;
     Object3dCommon* object3dCommon = nullptr;
+    ModelCommon* modelCommon = nullptr;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -64,6 +67,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
 
+    // 3Dモデル共通部の初期化
+    modelCommon = new ModelCommon;
+    modelCommon->Initialize(dxCommon);
+
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
     object3dCommon->Initialize(dxCommon);
@@ -76,9 +83,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
 
+    // 3Dモデルの初期化
+    Model* model = new Model;;
+    model->Initialize(modelCommon);
+
     // 3Dオブジェクトの初期化
     Object3d* object3d = new Object3d;
     object3d->Initialize(object3dCommon);
+    // モデルを結びつける
+    object3d->SetModel(model);
 
 #pragma endregion 最初のシーンの終了
 
@@ -106,6 +119,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         sprite->SetPosition(position);
         // 情報を転送
         sprites.push_back(sprite);
+    }
+
+    std::vector<Object3d*> objects;
+    const uint32_t objectize = 2;
+    for (uint32_t i = 0; i < objectize; ++i) {
+        Object3d* object3d = new Object3d();
+        object3d->Initialize(object3dCommon);
+        object3d->SetModel(model);
+       
+        // 情報を転送
+        objects.push_back(object3d);
     }
 
     // ウィンドウの×ボタンが押されるまでループ
@@ -151,8 +175,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*------------------------------------------------------------------------------------------------------*/
 
         // 更新処理
-        object3d->Update();
+       // object3d->Update();
 
+        for (Object3d* object3d : objects) {
+            object3d->Update();
+        }
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -225,7 +252,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         object3dCommon->Commondrawing();
 #pragma region 全てのObject3d個々の描画
 
-        object3d->Draw();
+       // object3d->Draw();
+
+        for (Object3d* object3d : objects) {
+            object3d->Draw();
+        }
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
@@ -272,7 +303,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // シーンの解放
     delete  spriteCommon;
     delete  object3dCommon;
-
+    delete modelCommon;
     // 汎用機能の解放
 
     // スプライトの解放
@@ -280,9 +311,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Sprite* sprite : sprites) {
         delete sprite;
     }
+    // 3Dモデルの解放
+    delete model;
     // 3Dオブジェクトの解放
     delete  object3d;
-
+    for (Object3d* object3d : objects) {
+        delete object3d;
+    }
     // 入力解放
     delete input;
 
