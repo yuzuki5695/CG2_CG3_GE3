@@ -102,9 +102,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     std::vector<Sprite*> sprites;
     const uint32_t spritesize = 6;
-    float Position[spritesize]{};
+    float spritesPosition[spritesize]{};
     for (uint32_t i = 0; i < spritesize; ++i) {
-        Position[i] = 180.0f * i;
+        spritesPosition[i] = 180.0f * i;
         Sprite* sprite = new Sprite();
         sprite->Initialize(spriteCommon, TexturePath01);
         if (i % 2 == 1) {
@@ -113,7 +113,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 現在の位置を取得
         Vector2 position = sprite->GetPosition();
         // 位置を変更する
-        position.x = Position[i];
+        position.x = spritesPosition[i];
         position.y = 100.0f;
         // 変更した座標を設定
         sprite->SetPosition(position);
@@ -123,11 +123,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     std::vector<Object3d*> objects;
     const uint32_t objectize = 2;
+    float objectsPosition[spritesize]{};
+    objectsPosition[0] = 2.0f;
+    objectsPosition[1] = -2.0f;
     for (uint32_t i = 0; i < objectize; ++i) {
         Object3d* object3d = new Object3d();
         object3d->Initialize(object3dCommon);
         object3d->SetModel(model);
-       
+        // 現在の位置を取得
+        Vector3 position = object3d->GetTranslate();
+        position.x = objectsPosition[i];
+        // 変更した座標を設定
+        object3d->SetTranslate(position);
         // 情報を転送
         objects.push_back(object3d);
     }
@@ -177,8 +184,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 更新処理
        // object3d->Update();
 
+        size_t index = 0;
+        size_t maxIterations = 2;
         for (Object3d* object3d : objects) {
+            if (index >= maxIterations) {
+                break; // 指定回数を超えたらループを終了
+            }
             object3d->Update();
+            Vector3 rotation = object3d->GetRotate();
+            if (index == 0) {
+                rotation.z += 0.01f;
+            } else if (index == 1) {
+                rotation.y += 0.01f;
+            }
+            object3d->SetRotate(rotation);
+            // インクリメントして次へ
+            ++index;
         }
 
         /*-------------------------------------------------------------------------------------------------------*/

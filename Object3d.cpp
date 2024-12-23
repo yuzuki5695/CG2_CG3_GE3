@@ -21,9 +21,6 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
 }
 
 void Object3d::Update() {
-    
-     transform.rotate.y += 0.01f;
-
     Matrix4x4 worludMatrix = MatrixVector::MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
     Matrix4x4 cameraMatrix = MatrixVector::MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
     Matrix4x4 viewMatrix = MatrixVector::Inverse(cameraMatrix);
