@@ -259,7 +259,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
-    object3dCommon->Initialize(dxCommon);
+    object3dCommon->Initialize();
 
 #pragma endregion 基盤システムの初期化
 
