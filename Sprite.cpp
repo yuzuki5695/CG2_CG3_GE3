@@ -22,6 +22,90 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 
 }
 
+void Sprite::Update() {
+	// アンカーポイント
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	// フリップ
+	if (isFlipX_) {
+		left = -left;
+		right = -right;
+	}
+	if (isFlipY_) {
+		top = -top;
+		bottom = -bottom;
+	}
+
+	// 頂点にデータを書き込む
+	vertexData[0].position = { left,bottom,0.0f,1.0f };    // 左下
+	vertexData[1].position = { left,top,0.0f,1.0f };    // 右上
+	vertexData[2].position = { right,bottom,0.0f,1.0f };    // 右下
+	vertexData[3].position = { right,top,0.0f,1.0f };    // 左上
+
+	// テクスチャ範囲指定
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
+	// UV座標系に変換する
+	float tex_left = textureLeftTop.x / metadata.width;
+	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
+	float tex_top = textureLeftTop.y / metadata.height;
+	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
+
+	// 頂点にデータを書き込む
+	vertexData[0].texcoord = { tex_left,tex_bottom };    // 左下
+	vertexData[1].texcoord = { tex_left,tex_top };    // 右上
+	vertexData[2].texcoord = { tex_right,tex_bottom };    // 右下
+	vertexData[3].texcoord = { tex_right,tex_top };    // 左上
+
+	for (int i = 0; i < 4; i++) {
+		vertexData[i].normal = { 0.0f,0.0f,-1.0f };
+	}
+
+	// インデックスリソースにデータを書き込む
+	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
+	indexData[0] = 0; indexData[1] = 1; indexData[2] = 2;
+	indexData[3] = 1; indexData[4] = 3; indexData[5] = 2;
+
+	/*--------------------------------------------*/
+	/*-------WrldViewProjectionMatrixを作る--------*/
+	/*--------------------------------------------*/
+	Matrix4x4 worludMatrixSprite = MatrixVector::MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+	Matrix4x4 viewMatrixSprite = MatrixVector::MakeIdentity4x4();
+	Matrix4x4 projectionMatrixSprite = MatrixVector::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
+	Matrix4x4 worldViewProjectionMatrixSprite = MatrixVector::Multiply(worludMatrixSprite, MatrixVector::Multiply(viewMatrixSprite, projectionMatrixSprite));
+	transformationMatrixData->World = worludMatrixSprite;
+	transformationMatrixData->WVP = worldViewProjectionMatrixSprite;
+
+	/*----------------------------------------*/
+	/*---------UVTransform用の行列を作る--------*/
+	/*----------------------------------------*/
+	//Matrix4x4 uvTransformMatrix = MatrixVector::MakeScaleMatrix(uvTransformSprite.scale);
+	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeRotateZMatrix(uvTransformSprite.rotate.z));
+	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransformSprite.translate));
+	//materialSpriteDate->uvTransform = uvTransformMatrix;
+
+
+	transform.translate = { position.x,position.y,0.0f };
+	transform.rotate = { 0.0f,0.0f,rotation };
+	transform.scale = { size.x,size.y,1.0f };
+}
+
+void Sprite::Draw() {
+	// wvp用のCBufferの場所を設定
+	spriteCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	spriteCommon_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);//IBVを設定
+	// Spriteの描画。変更が必要なものだけ変更する
+	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	// TransformationMatrixBufferの場所を設定
+	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	// SRVのDescriptortableの先頭を設定
+	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureindex));
+	// 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
+	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
 void Sprite::VertexDatacreation() {
 
 	// 頂点リソースを作る
@@ -69,90 +153,6 @@ void Sprite::TransformationMatrixGenerate() {
 	// 単位行列を書き込んでおく
 	transformationMatrixData->World = MatrixVector::MakeIdentity4x4();
 	transformationMatrixData->WVP = MatrixVector::MakeIdentity4x4();
-}
-
-void Sprite::Update() {
-	// アンカーポイント
-	float left = 0.0f - anchorPoint.x;
-	float right = 1.0f - anchorPoint.x;
-	float top = 0.0f - anchorPoint.y;
-	float bottom = 1.0f - anchorPoint.y;
-
-	// フリップ
-	if (isFlipX_) {
-		left = -left;
-		right = -right;
-	}
-	if (isFlipY_) {
-		top = -top;
-		bottom = -bottom;
-	}
-
-	// 頂点にデータを書き込む
-	vertexData[0].position = { left,bottom,0.0f,1.0f };    // 左下
-	vertexData[1].position = { left,top,0.0f,1.0f };    // 右上
-	vertexData[2].position = { right,bottom,0.0f,1.0f };    // 右下
-	vertexData[3].position = { right,top,0.0f,1.0f };    // 左上
-
-	// テクスチャ範囲指定
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
-	// UV座標系に変換する
-	float tex_left = textureLeftTop.x / metadata.width;
-	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
-	float tex_top = textureLeftTop.y / metadata.height;
-	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
-
-	// 頂点にデータを書き込む
-	vertexData[0].texcoord = { tex_left,tex_bottom };    // 左下
-	vertexData[1].texcoord = { tex_left,tex_top };    // 右上
-	vertexData[2].texcoord = { tex_right,tex_bottom };    // 右下
-	vertexData[3].texcoord = { tex_right,tex_top };    // 左上
-
-	for (int i = 0; i < 4; i++) {
-		vertexData[i].normal = { 0.0f,0.0f,-1.0f };
-	}
-	
-	// インデックスリソースにデータを書き込む
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	indexData[0] = 0; indexData[1] = 1; indexData[2] = 2;
-	indexData[3] = 1; indexData[4] = 3; indexData[5] = 2;
-	
-	/*--------------------------------------------*/
-	/*-------WrldViewProjectionMatrixを作る--------*/
-	/*--------------------------------------------*/
-	Matrix4x4 worludMatrixSprite = MatrixVector::MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
-	Matrix4x4 viewMatrixSprite = MatrixVector::MakeIdentity4x4();
-	Matrix4x4 projectionMatrixSprite = MatrixVector::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
-	Matrix4x4 worldViewProjectionMatrixSprite = MatrixVector::Multiply(worludMatrixSprite, MatrixVector::Multiply(viewMatrixSprite, projectionMatrixSprite));
-	transformationMatrixData->World = worludMatrixSprite;
-	transformationMatrixData->WVP = worldViewProjectionMatrixSprite;
-
-	/*----------------------------------------*/
-	/*---------UVTransform用の行列を作る--------*/
-	/*----------------------------------------*/
-	//Matrix4x4 uvTransformMatrix = MatrixVector::MakeScaleMatrix(uvTransformSprite.scale);
-	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeRotateZMatrix(uvTransformSprite.rotate.z));
-	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransformSprite.translate));
-	//materialSpriteDate->uvTransform = uvTransformMatrix;
-
-
-	transform.translate = { position.x,position.y,0.0f };
-	transform.rotate = { 0.0f,0.0f,rotation };
-	transform.scale = { size.x,size.y,1.0f };
-}
-
-void Sprite::Draw() {
-	// wvp用のCBufferの場所を設定
-	spriteCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-	spriteCommon_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);//IBVを設定
-	// Spriteの描画。変更が必要なものだけ変更する
-	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-	// TransformationMatrixBufferの場所を設定
-	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
-	// SRVのDescriptortableの先頭を設定
-	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureindex));
-	// 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
-	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Sprite::SetTexture(const std::string& textureFilePath) {

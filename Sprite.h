@@ -14,26 +14,25 @@ class SpriteCommon;
 class Sprite
 {
 public: // メンバ関数
+	// 頂点データ
 	struct VertexData
 	{
 		Vector4 position;
 		Vector2 texcoord;
 		Vector3 normal;
 	};
-
+	// マテリアルデータ
 	struct Material {
 		Vector4 color;
 		int32_t endbleLighting;
 		float padding[3];
 		Matrix4x4 uvTransform;
 	};
-
-
+	// 座標変換行列データ
 	struct TransformationMatrix {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 	};
-
 public: // メンバ関数
 	// 初期化
 	void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath);
@@ -49,6 +48,7 @@ private:
 	// リソース
 	// マテリアル
 	void MaterialGenerate();
+	// トランスフォームマトリックス
 	void TransformationMatrixGenerate();
 	// テクスチャサイズをイメージに合わせる
 	void AdjustTextureSize();
@@ -73,7 +73,7 @@ private: // メンバ変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	// Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-	Vector2 position = { 100.0f,100.0f };
+	Vector2 position = { 0.0f,0.0f };
 	float rotation = 0.0f;
 	Vector2 size = { 360.0f,360.0f };
 	// テクスチャ番号
