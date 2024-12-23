@@ -217,7 +217,7 @@ void DrawSphere(const uint32_t ksubdivision, Sprite::VertexData* vertexdata) {
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
-    
+
 #pragma region ポインタ
     Input* input = nullptr;
     WinApp* winApp = nullptr;
@@ -227,7 +227,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion ポインタ
 
     // ウィンドウ作成
-    
+
     // WindowsAPIの初期化
     winApp = new WinApp();
     winApp->Initialize();
@@ -259,12 +259,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
-    object3dCommon->Initialize();
+    object3dCommon->Initialize(dxCommon);
 
 #pragma endregion 基盤システムの初期化
 
 #pragma region 最初のシーンの初期化
-    
+
     // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
@@ -278,7 +278,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-  
+
     /*------------------------------------------------------------------------------------*/
     /*----------------------------------Resourceの作成-------------------------------------*/
     /*------------------------------------------------------------------------------------*/
@@ -314,7 +314,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     transformationMatrixData->WVP = MatrixVector::MakeIdentity4x4();
     transformationMatrixData->World = MatrixVector::MakeIdentity4x4();
 
- 
+
 
     /*------------------------------------------------------------------*/
     /*-----------------------平行光源用のResource-------------------------*/
@@ -331,9 +331,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
     directionalLightDate->intensity = 1.0f;
 
-/*-------------------------------------------------------*/
-/*----------------------球のデータ-------------------------*/
-/*-------------------------------------------------------*/
+    /*-------------------------------------------------------*/
+    /*----------------------球のデータ-------------------------*/
+    /*-------------------------------------------------------*/
 
     const uint32_t kSubdivision = 16; //球の分割数
 
@@ -375,7 +375,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
 
     bool useMonsterBall = true;
-    
+
     std::vector<Sprite*> sprites;
     const uint32_t spritesize = 6;
     float Position[spritesize]{};
@@ -383,7 +383,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         Position[i] = 180.0f * i;
         Sprite* sprite = new Sprite();
         sprite->Initialize(spriteCommon, TexturePath01);
-        if (i % 2 == 1 ) {
+        if (i % 2 == 1) {
             sprite->SetTexture(TexturePath02);
         }
         // 現在の位置を取得
@@ -487,10 +487,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //size.x += 0.1f;
         //size.y += 0.1f;
         //sprite->SetSize(size);
-        
+
 
         /*----------------------------複数Sprite----------------------------*/
-        
+
         //// 更新処理
         //for (Sprite* sprite : sprites) {
         //    sprite->Update();
@@ -507,9 +507,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //  DirectXの描画準備。全ての描画に共通のグラフィックスコマンドを積む
         dxCommon->PreDraw();
 
-        // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-        spriteCommon->Commondrawing();
+        /*------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------3Dオブジェクトの描画処理開始--------------------------------------------*/
+        /*-----------------------------------------------------------------------------------------------------*/
 
+        // 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
+        object3dCommon->Commondrawing();
+#pragma region 全てのObject3d個々の描画
 
         //dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
         //// マテリアルCBufferの場所を設定
@@ -528,9 +532,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 描画！(今回は球) 
         //dxCommon->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 
-        /*---------------------------------------------------*/
-        /*-------------------2dの描画コマンド開始---------------*/
-        /*---------------------------------------------------*/
+#pragma endregion 全てのObject3d個々の描画
+        /*------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/
+        /*-----------------------------------------------------------------------------------------------------*/
+
+        /*----------------------------------------------------------------------------------------------------*/
+        /*------------------------------------Spriteの描画処理開始----------------------------------------------*/
+        /*---------------------------------------------------------------------------------------------------*/
+
+        // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
+        spriteCommon->Commondrawing();
+#pragma region 全てのSprite個々の描画
+
 
         //// Spriteの描画は常にuvCheckerにする
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
@@ -541,10 +555,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //for (Sprite* sprite : sprites) {
         //    sprite->Draw();
         //}
-
-        /*---------------------------------------------------*/
-        /*-------------------2dの描画コマンド終了---------------*/
-        /*---------------------------------------------------*/
+#pragma endregion 全てのSprite個々の描画
+        /*----------------------------------------------------------------------------------------------------*/
+        /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
+        /*---------------------------------------------------------------------------------------------------*/
 
         //実際のcommandListのImGuiの描画コマンドを積む
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
@@ -563,7 +577,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // シーンの解放
     delete  spriteCommon;
     delete  object3dCommon;
-    
+
     // 汎用機能の解放
 
     // スプライトの解放
@@ -576,7 +590,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 入力解放
     delete input;
-    
+
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
 
