@@ -1104,6 +1104,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;         // すでに書き込まれている色 (デストカラー)
 
+    //// 加算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
+
+    //// 減算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;         // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;    // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;              // すでに書き込まれている色 (デストカラー)
+
+    //// 乗算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;           // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_SRC_COLOR;    // すでに書き込まれている色 (デストカラー)
+
+    //// スクリーン合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_INV_DEST_COLOR;    // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;             // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;              // すでに書き込まれている色 (デストカラー)
+
+
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
     //裏面(時計回り)を表示しない
@@ -1129,7 +1150,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
     // 比較関数はLessEqual。つまり、近ければ描画される
     depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
     /*----------------------------------------------------------------------------------*/
     /*----------------------------各Descriptorの設定終了----------------------------------*/
     /*----------------------------------------------------------------------------------*/
