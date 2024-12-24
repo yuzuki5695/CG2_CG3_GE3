@@ -852,8 +852,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
-    // モデル読み込み(axis or plane)
-    ModelDate modelDate = LoadObjFile("resources", "plane.obj");
+    // モデル読み込み(axis or plane or fence)
+    ModelDate modelDate = LoadObjFile("Resources", "fence.obj");
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
@@ -1147,7 +1147,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // Depthの機能を有効化する
     depthStencilDesc.DepthEnable = true;
     // 書き込みする
-    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    //depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    // 書き込みしない
+    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
     // 比較関数はLessEqual。つまり、近ければ描画される
     depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
     /*----------------------------------------------------------------------------------*/
