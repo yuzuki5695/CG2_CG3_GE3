@@ -1095,8 +1095,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UploadTextureData(textureResource, mipImages);
 
     //2枚目のTextureを読んで転送する
-    //DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
-
+    //DirectX::ScratchImage mipImages2 = LoadTexture("Resources/monsterBall.png");
+    
+    modelDate.material.textureFilePath = "Resources/circle.png";
     DirectX::ScratchImage mipImages2 = LoadTexture(modelDate.material.textureFilePath);
     const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
     Microsoft::WRL::ComPtr <ID3D12Resource> textureResource2 = CreateTextureResource(device, metadata2);
@@ -1192,7 +1193,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 加算合成
     blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
     blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
-    blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
+    blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
 
     //// 減算合成
     //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;         // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
