@@ -35,7 +35,7 @@ PixeShaderOutput main(VertexShaderOutput input)
     float4 TransformesUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(gSampler, TransformesUV.xy);
 
-    output.color = gMaterial.color * textureColor;
+    output.color = gMaterial.color * textureColor * input.color;
     if (output.color.a == 0.0)
     {
         discard;

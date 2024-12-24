@@ -19,11 +19,15 @@
 #include<fstream>
 #include<sstream>
 #include"ResourceObject.h"
+#include<random>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxcompiler.lib")
+
+std::random_device seedGenerator;
+std::mt19937 randomEngine(seedGenerator());
 
 struct Transform {
     Vector3 scale;
@@ -60,11 +64,24 @@ struct MaterialDate {
     std::string textureFilePath;
 };
 
-
-
 struct ModelDate {
     std::vector<VertexData> vertices;
     MaterialDate material;
+};
+
+struct Particle {
+    Transform transform;
+    Vector3 velocity;
+    Vector4 color;
+    float lifetime;
+    float cuttentTime;
+};
+
+struct ParticleForGRU
+{
+    Matrix4x4 WVP;
+    Matrix4x4 World;
+    Vector4 color;
 };
 
 /*----------------------------------------------------------------------*/
@@ -544,6 +561,26 @@ Microsoft::WRL::ComPtr <ID3D12Resource> CreateDepthStencilTextureResource(Micros
 }
 
 
+Particle MakeNewParticle(std::mt19937& randomEngine)
+{
+    std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+    std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
+    std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
+    Particle particle;
+    particle.transform.scale = { 1.0f,1.0f,1.0f };
+    particle.transform.rotate = { 0.0f,3.0f,0.0f };
+    // 位置と速度を[-1,1]でランダムに初期化
+    particle.transform.translate = { distribution(randomEngine), distribution(randomEngine) , distribution(randomEngine) };
+    particle.velocity = { distribution(randomEngine), distribution(randomEngine) , distribution(randomEngine) };
+    // 色を[0,1]でランダムに初期化
+    particle.color = { distColor(randomEngine), distColor(randomEngine) , distColor(randomEngine),1.0f };
+    // 1.0秒 ~ 3.0秒の間でランダムに生存する時間を初期化
+    particle.lifetime = distTime(randomEngine);
+    particle.cuttentTime = 0;
+    return particle;
+}
+
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
@@ -861,16 +898,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*--------------------Instancing用のResource----------------------*/
     /*---------------------------------------------------------------*/
 
-    const uint32_t kNumInstance = 10; // インスタンスを作る
+    const uint32_t kNumMaxInstance = 10; // インスタンスを作る
     // Instancing用のTransformationMatrixリソースを作る
-    Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(TransformationMatrix) * kNumInstance);
+    Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(ParticleForGRU) * kNumMaxInstance);
     // 書き込むためのアドレスを取得
-    TransformationMatrix* instanceingDate = nullptr;
+    ParticleForGRU* instanceingDate = nullptr;
     instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instanceingDate));
     // 単位行列を書き込んでおく
-    for (uint32_t index = 0; index < kNumInstance; ++index) {
+    for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
         instanceingDate[index].WVP = MakeIdentity4x4();
         instanceingDate[index].World = MakeIdentity4x4();
+        instanceingDate[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     /*-------------------------------------------------------*/
@@ -1051,7 +1089,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*------------------------------------------------------------*/
 
     //Textureを読んで転送する
-    DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+    DirectX::ScratchImage mipImages = LoadTexture("Resources/uvChecker.png");
     const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
     Microsoft::WRL::ComPtr <ID3D12Resource> textureResource = CreateTextureResource(device, metadata);
     UploadTextureData(textureResource, mipImages);
@@ -1106,8 +1144,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
     instancingSrvDesc.Buffer.FirstElement = 0;
     instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-    instancingSrvDesc.Buffer.NumElements = kNumInstance;
-    instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+    instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
+    instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGRU);
 
     D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 3);
     D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, 3);
@@ -1151,10 +1189,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;         // すでに書き込まれている色 (デストカラー)
 
-    //// 加算合成
-    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
-    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
-    //blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
+    // 加算合成
+    blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
 
     //// 減算合成
     //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;         // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
@@ -1196,7 +1234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 書き込みする
     //depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
     // 書き込みしない
-    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // Depthの書き込みを行わない
     // 比較関数はLessEqual。つまり、近ければ描画される
     depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
     /*----------------------------------------------------------------------------------*/
@@ -1278,12 +1316,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
     Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-    Transform transforms[kNumInstance];
-    for (uint32_t index = 0; index < kNumInstance; ++index) {
-        transforms[index].scale = { 1.0f,1.0f,1.0f };
-        transforms[index].rotate = { 0.0f,3.0f,0.0f };
-        transforms[index].translate = { index * -0.1f,index * 0.1f,index * 0.1f };
+    Particle particles[kNumMaxInstance];
+    for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+        particles[index] = MakeNewParticle(randomEngine);
     }
+
+    // △tを定義。とりあえず60fpsで固定しているが、実時間を計測して可変fpsで動かせるようにしておくとなお良い
+    const float kDeltaTime = 1.0f / 60.0f;
+    bool update = false;
 
     bool useMonsterBall = true;
 
@@ -1310,6 +1350,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
             ImGui::ColorEdit4("color", reinterpret_cast<float*>(materialData));
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
+            ImGui::Checkbox("update", &update);
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
             ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
@@ -1335,12 +1376,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             /*--------------------------------------------------*/
             /*----------InstanceのTransforms用の行列を作る--------*/
             /*-------------------------------------------------*/
-            for (uint32_t index = 0; index < kNumInstance; ++index) {
-                Matrix4x4 worldMatrix = MakeAftineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate); 
+            
+            uint32_t numInstance = 0;// 描画すべきインスタンス数
+            
+            for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+                if (particles[index].lifetime <= particles[index].cuttentTime) {  // 生存時間を過ぎていたら更新せず描画対象にしない
+                    continue;
+                }
+                Matrix4x4 worldMatrix = MakeAftineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
                 Matrix4x4  viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
                 Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+                // 更新処理
+                if (update) {
+                    particles[index].transform.translate.x += particles[index].velocity.x * kDeltaTime;
+                    particles[index].transform.translate.y += particles[index].velocity.y * kDeltaTime;
+                    particles[index].transform.translate.z += particles[index].velocity.z * kDeltaTime;
+                    particles[index].cuttentTime += kDeltaTime;// 経過時間を足す 
+                } 
                 instanceingDate[index].WVP = worldViewProjectionMatrix;
                 instanceingDate[index].World = worldMatrix;
+                instanceingDate[index].color = particles[index].color;
+                // 徐々に消えていく
+                float alpha = 1.0f - (particles[index].cuttentTime / particles[index].lifetime);
+                instanceingDate[numInstance].color.w = alpha;
+                ++numInstance; // // 生きているparticleの数を1つカウントする 
             }
 
             /*-------------------------------------------*/
@@ -1415,9 +1474,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             //commandList->DrawInstanced(vertexCount, 1, 0, 0);
             
             // 描画！6頂点の板ポリゴンを、kNumInstance(今回は10)だけInstance描画を行う
-            commandList->DrawInstanced(UINT(modelDate.vertices.size()), kNumInstance, 0, 0);
-
-
+            commandList->DrawInstanced(UINT(modelDate.vertices.size()), numInstance, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
