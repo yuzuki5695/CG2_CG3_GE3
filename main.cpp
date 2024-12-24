@@ -19,6 +19,7 @@
 #include "Object3d.h"
 #include "ModelCommon.h"
 #include "Model.h"
+#include"ModelManager.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -32,8 +33,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
     SpriteCommon* spriteCommon = nullptr;
-    Object3dCommon* object3dCommon = nullptr;
-    ModelCommon* modelCommon = nullptr;
+    Object3dCommon* object3dCommon = nullptr;;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -47,13 +47,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
 
-    // テクスチャマネージャーの初期化
+    // テクスチャマネージャの初期化
     TextureManager::GetInstance()->Initialize(dxCommon);
+    // 3Dモデルマネージャの初期化
+    ModelManager::GetInstance()->Initialize(dxCommon);
 
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
     std::string TexturePath01 = "Resources/uvChecker.png";
     std::string TexturePath02 = "Resources/monsterBall.png";
+   
+    // .objファイルからモデルを読み込む
+    ModelManager::GetInstance()->LoadTexture("plane.obj");
+    ModelManager::GetInstance()->LoadTexture("axis.obj");
+    std::string ModelPath01 = "plane.obj";
+    std::string ModelPath02 = "axis.obj";
+
 
     // 汎用機能の初期化 
 
@@ -66,10 +75,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライト共通部の初期化
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
-
-    // 3Dモデル共通部の初期化
-    modelCommon = new ModelCommon;
-    modelCommon->Initialize(dxCommon);
 
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
@@ -344,7 +349,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
-
+    // 3Dモデルマネージャの終了
+    ModelManager::GetInstance()->Finalize();
     // DirectXの解放
     delete dxCommon;
 

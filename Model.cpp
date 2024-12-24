@@ -3,14 +3,14 @@
 #include "TextureManager.h"
 #include "MatrixVector.h"
 
-void Model::Initialize(ModelCommon* modelCommon) {
+void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename) {
     // NULL検出
     assert(modelCommon);
     // 引数で受け取ってメンバ変数に記録する
     this->modelCommon = modelCommon;
 
     // モデル読み込み
-    modelDate = LoadObjFile("resources", "plane.obj");
+    modelDate = LoadObjFile(directorypath, filename);
 
     // 頂点データの作成
     VertexDatacreation();
