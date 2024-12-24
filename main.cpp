@@ -606,106 +606,106 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     /*D3D12Device生成*/
     Microsoft::WRL::ComPtr <ID3D12Device> device = nullptr;
-    //IDXGIのファクトリー生成
+    // IDXGIのファクトリー生成
     Microsoft::WRL::ComPtr <IDXGIFactory7> dxgiFactory = nullptr;
-    //HRESULTはWindows系のエラーコードであり、
-  //関数が成功したかどうかをSUCCEEDEDマクロで判定できる
+    // HRESULTはWindows系のエラーコードであり、
+    // 関数が成功したかどうかをSUCCEEDEDマクロで判定できる
     HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-    //初期化の根本的な部分でエラーが出た場合はプログラムが間違っているか、どうにもできない場合が
-  //多いのでassertにする
+    // 初期化の根本的な部分でエラーが出た場合はプログラムが間違っているか、どうにもできない場合が
+    // 多いのでassertにする
     assert(SUCCEEDED(hr));
 
-    //仕様するアダプター用の変数。最初にnullptrを入れておく
+    // 仕様するアダプター用の変数。最初にnullptrを入れておく
     Microsoft::WRL::ComPtr <IDXGIAdapter4> useAdapter = nullptr;
-    //良い順にアダプターを頼む
+    // 良い順にアダプターを頼む
     for (UINT i = 0; dxgiFactory->EnumAdapterByGpuPreference(i,
         DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&useAdapter)) !=
         DXGI_ERROR_NOT_FOUND; ++i) {
-        //アダプターの情報を取得する
+        // アダプターの情報を取得する
         DXGI_ADAPTER_DESC3 adapterDesc{};
         hr = useAdapter->GetDesc3(&adapterDesc);
         assert(SUCCEEDED(hr));//取得できないのは一大事
-        //ソフトウェアアダプターでなければ採用
+        // ソフトウェアアダプターでなければ採用
         if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
             //採用したアダプタの情報をログに出力。wstringの方なので注意
             Log(ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
             break;
         }
-        useAdapter = nullptr;//ソフトウェアアダプタの場合は見なかったことにする
+        useAdapter = nullptr;// ソフトウェアアダプタの場合は見なかったことにする
     }
-    //適切なアダプタが見つからないので起動できない
+    // 適切なアダプタが見つからないので起動できない
     assert(useAdapter != nullptr);
-    //機能レベルとログ出力用の文字列
+    // 機能レベルとログ出力用の文字列
     D3D_FEATURE_LEVEL featureLevels[] = {
       D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
     };
     const char* featureLevelStrings[] = { "12.2","12.1","12.0" };
-    //高い順に生成できるか試す
+    // 高い順に生成できるか試す
     for (size_t i = 0; i < _countof(featureLevels); ++i) {
-        //採用したアダプターでデバイスを生成
+        // 採用したアダプターでデバイスを生成
         hr = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&device));
-        //指定した機能レベルでデバイスが生成できたか確認
+        // 指定した機能レベルでデバイスが生成できたか確認
         if (SUCCEEDED(hr)) {
             //生成できたのでログ出力を行ってループを抜ける
             Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
             break;
         }
     }
-    //デバイスの生成がうまくいかなかったので起動できない
+    // デバイスの生成がうまくいかなかったので起動できない
     assert(device != nullptr);
     Log("Complete create D3D12Device!!!\n");//初期化完了のログを出す
 
 #ifdef _DEBUG
     ID3D12InfoQueue* infoQueue = nullptr;
     if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
-        //ヤバイエラー時に止まる
+        // ヤバイエラー時に止まる
         infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-        //エラー時に止まる
+        // エラー時に止まる
         infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-        //警告時に止まる
+        // 警告時に止まる
         infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-        //抑制するメッセージのID
+        // 抑制するメッセージのID
         D3D12_MESSAGE_ID denyIds[] = {
             //Windows11でのDXGIデバッグレイヤーとDX12デバッグレイヤーの相互作用バグによるエラーメッセージ
             //https://stackoverflow.com/questions/69805245/directx-12-application-is-crashing-in-windows-11
             D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
         };
-        //抑制するレベル
+        // 抑制するレベル
         D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
         D3D12_INFO_QUEUE_FILTER filter{};
         filter.DenyList.NumIDs = _countof(denyIds);
         filter.DenyList.pIDList = denyIds;
         filter.DenyList.NumSeverities = _countof(severities);
         filter.DenyList.pSeverityList = severities;
-        //指定したメッセージの表示を抑制
+        // 指定したメッセージの表示を抑制
         infoQueue->PushStorageFilter(&filter);
 
-        //解放
+        // 解放
         infoQueue->Release();
     }
 #endif
 
-    //コマンドキューを生成する
+    // コマンドキューを生成する
     Microsoft::WRL::ComPtr <ID3D12CommandQueue> commandQueue = nullptr;
     D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
     hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
-    //コマンドキューの生成がうまくいかなかったので起動できない
+    // コマンドキューの生成がうまくいかなかったので起動できない
     assert(SUCCEEDED(hr));
 
-    //コマンドアロケーターを生成する
+    // コマンドアロケーターを生成する
     Microsoft::WRL::ComPtr <ID3D12CommandAllocator> commandAllocator = nullptr;
     hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-    //コマンドアロケータの生成がうまくいかなかったので起動できない
+    // コマンドアロケータの生成がうまくいかなかったので起動できない
     assert(SUCCEEDED(hr));
 
-    //コマンドリストを生成する
+    // コマンドリストを生成する
     Microsoft::WRL::ComPtr <ID3D12GraphicsCommandList> commandList = nullptr;
     hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr,
         IID_PPV_ARGS(&commandList));
-    //コマンドリストの生成がうまくいかなかったので起動できない
+    // コマンドリストの生成がうまくいかなかったので起動できない
     assert(SUCCEEDED(hr));
 
-    //SwapChain(スワップチェーン)を生成する
+    // SwapChain(スワップチェーン)を生成する
     Microsoft::WRL::ComPtr <IDXGISwapChain4> swapChain = nullptr;
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
     swapChainDesc.Width = kClientWidth;//画面の幅。ウィンドウのクライアント領域を同じものにしておく
@@ -715,18 +715,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//描画のターゲットとして利用する
     swapChainDesc.BufferCount = 2;//ダブルバッファ
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニタに移したら、中身居を破棄
-    //コマンドキュー、ウィンドウハンドル、設定を渡して生成する
+    // コマンドキュー、ウィンドウハンドル、設定を渡して生成する
     hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
     assert(SUCCEEDED(hr));
 
-    //DescriptorRange作成
+    // DescriptorRange作成
     D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
     descriptorRange[0].BaseShaderRegister = 0;
     descriptorRange[0].NumDescriptors = 1;
     descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-    //RootParameter作成
+    // RootParameter作成
     D3D12_ROOT_PARAMETER rootParameters[4] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
@@ -745,13 +745,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[3].Descriptor.ShaderRegister = 1;// レジスタ番号1を使う
 
-    //RootSignature作成
+    // RootSignature作成
     D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
     descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
     descriptionRootSignature.pParameters = rootParameters;// ルートパラメータ配列へのポインタ
     descriptionRootSignature.NumParameters = _countof(rootParameters);// 配列の長さ
 
-    //Samplerの設定
+    // Samplerの設定
     D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
     staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;//バイリニアフィルタ	
     staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//0～1の範囲外をリピート		
@@ -764,6 +764,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptionRootSignature.pStaticSamplers = staticSamplers;
     descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
+    // シリアライズしてバイナリにする
+    Microsoft::WRL::ComPtr <ID3DBlob> signatureBlob = nullptr;
+    Microsoft::WRL::ComPtr <ID3DBlob> errorBlob = nullptr;
+    hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+    if (FAILED(hr)) {
+        Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
+        assert(false);
+    }
+    // バイナリを元に作成
+    Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature = nullptr;
+    hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+    assert(SUCCEEDED(hr));
 
     /*------------------------------------------------------------------------------------*/
     /*----------------------------------Resourceの作成-------------------------------------*/
@@ -833,8 +845,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     directionalLightDate->intensity = 1.0f;
 
     /*-------------------------------------------------------*/
-/*----------------------球のデータ-------------------------*/
-/*-------------------------------------------------------*/
+    /*----------------------球のデータ-------------------------*/
+    /*-------------------------------------------------------*/
 
     const uint32_t kSubdivision = 16; //球の分割数
 
@@ -932,52 +944,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
     /*-----------------------------------------------------------------------------------*/
-
-     //シリアライズしてバイナリにする
-    Microsoft::WRL::ComPtr <ID3DBlob> signatureBlob = nullptr;
-    Microsoft::WRL::ComPtr <ID3DBlob> errorBlob = nullptr;
-    hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-    if (FAILED(hr)) {
-        Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-        assert(false);
-    }
-    //バイナリを元に作成
-    Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature = nullptr;
-    hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-    assert(SUCCEEDED(hr));
-
-    //======== InputLayout設定 ==========//
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
-    inputElementDescs[0].SemanticName = "POSITION";
-    inputElementDescs[0].SemanticIndex = 0;
-    inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-    inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-    inputElementDescs[1].SemanticName = "TEXCOORD";
-    inputElementDescs[1].SemanticIndex = 0;
-    inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-    inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-    inputElementDescs[2].SemanticName = "NORMAL";
-    inputElementDescs[2].SemanticIndex = 0;
-    inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-    inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-    D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-    inputLayoutDesc.pInputElementDescs = inputElementDescs;
-    inputLayoutDesc.NumElements = _countof(inputElementDescs);
-
-    //======= BlendStateの設定 =========//
-    D3D12_BLEND_DESC blendDesc{};
-    //全ての色要素を書き込む
-    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-    //===== RasterizerStateの設定を行う ======//   
-    D3D12_RASTERIZER_DESC rasterizerDesc{};
-    //裏面(時計回り)を表示しない
-    rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-    //三角形の中を塗りつぶす
-    rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     /*----------------------------------------------------------------------------*/
     /*---------------------------DescriptorHeap-----------------------------------*/
@@ -1105,6 +1071,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*--------------------------DSVの設定--------------------------*/
     /*------------------------------------------------------------*/
 
+    //======== InputLayout設定 ==========//
+    D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
+    inputElementDescs[0].SemanticName = "POSITION";
+    inputElementDescs[0].SemanticIndex = 0;
+    inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+    inputElementDescs[1].SemanticName = "TEXCOORD";
+    inputElementDescs[1].SemanticIndex = 0;
+    inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+    inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+    inputElementDescs[2].SemanticName = "NORMAL";
+    inputElementDescs[2].SemanticIndex = 0;
+    inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+    D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+    inputLayoutDesc.pInputElementDescs = inputElementDescs;
+    inputLayoutDesc.NumElements = _countof(inputElementDescs);
+
+    //======= BlendStateの設定 =========//
+    D3D12_BLEND_DESC blendDesc{};
+    //全ての色要素を書き込む
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;           // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;         // すでに書き込まれている色 (デストカラー)
+
+    //===== RasterizerStateの設定を行う ======//   
+    D3D12_RASTERIZER_DESC rasterizerDesc{};
+    //裏面(時計回り)を表示しない
+    rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+    //三角形の中を塗りつぶす
+    rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
     // DepthStencilTextureをウインドウのサイズで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
@@ -1178,11 +1184,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     scissorRect.bottom = kClientHeight;
 
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
-
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
-
     Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
     //-----------------------------//
@@ -1222,6 +1225,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
             ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
+            ImGui::ColorEdit4("color", reinterpret_cast<float*>(materialData));
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
@@ -1319,7 +1323,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 描画！(今回は球) 
             //commandList->DrawInstanced(vertexCount, 1, 0, 0);
 
-            // 描画！(今回は球) 
+            // 描画！(今回はモデル) 
             commandList->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 
 
