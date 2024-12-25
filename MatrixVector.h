@@ -224,3 +224,18 @@ Matrix4x4 MakeAftineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 
     return result;
 };
+
+Vector3 ExtractEulerAnglesFromMatrix(const Matrix4x4& matrix) {
+    Vector3 euler;
+
+    // Y軸回りの回転（pitch）
+    euler.x = atan2f(-matrix.m[2][1], matrix.m[1][1]);
+
+    // Z軸回りの回転（yaw）
+    euler.y = atan2f(matrix.m[0][2], matrix.m[0][0]);
+
+    // X軸回りの回転（roll）
+    euler.z = asinf(matrix.m[0][1]);
+
+    return euler;
+}

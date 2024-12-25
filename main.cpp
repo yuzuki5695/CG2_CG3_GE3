@@ -20,6 +20,7 @@
 #include<sstream>
 #include"ResourceObject.h"
 #include<random>
+#include<numbers>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -568,7 +569,7 @@ Particle MakeNewParticle(std::mt19937& randomEngine)
     std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
     Particle particle;
     particle.transform.scale = { 1.0f,1.0f,1.0f };
-    particle.transform.rotate = { 0.0f,3.0f,0.0f };
+    particle.transform.rotate = { -5.0f,3.0f,0.0f };
     // 位置と速度を[-1,1]でランダムに初期化
     particle.transform.translate = { distribution(randomEngine), distribution(randomEngine) , distribution(randomEngine) };
     particle.velocity = { distribution(randomEngine), distribution(randomEngine) , distribution(randomEngine) };
@@ -1315,6 +1316,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
+    // Transform  cameratransform{ {1.0f,1.0f,1.0f},{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},{0.0f,0.0f,-500.0f} };
     Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
     Particle particles[kNumMaxInstance];
@@ -1325,6 +1327,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // △tを定義。とりあえず60fpsで固定しているが、実時間を計測して可変fpsで動かせるようにしておくとなお良い
     const float kDeltaTime = 1.0f / 60.0f;
     bool update = false;
+    bool useBillboard = false; // ビルボード処理のオン/オフを切り替えるフラグ
 
     bool useMonsterBall = true;
 
@@ -1352,6 +1355,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ColorEdit4("color", reinterpret_cast<float*>(materialData));
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("update", &update);
+            ImGui::Checkbox("useBillboard", &useBillboard);
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
             ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
@@ -1359,6 +1363,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
             ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
             ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+            ImGui::Text("Camera");
+            ImGui::SliderFloat3("camera : translate", &cameratransform.translate.x, -10.0f, 10.0f);
+            ImGui::SliderFloat("camera : rotateX", &cameratransform.rotate.x,0.000f, 0.01f);
+            ImGui::SliderFloat("camera : rotateY", &cameratransform.rotate.y, 0.000f, 0.01f);
+            ImGui::SliderFloat("camera : rotateZ", &cameratransform.rotate.z, 0.000f, 0.01f);
             ImGui::End();
 
             ImGui::Render();
@@ -1379,14 +1388,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             /*-------------------------------------------------*/
             
             uint32_t numInstance = 0;// 描画すべきインスタンス数
-            
+
             for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
                 if (particles[index].lifetime <= particles[index].cuttentTime) {  // 生存時間を過ぎていたら更新せず描画対象にしない
                     continue;
                 }
-                Matrix4x4 worldMatrix = MakeAftineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+                Matrix4x4 worldMatrix;
+
+                if (useBillboard) {
+                    // ビルボード行列を作成して適用
+                    Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+                    Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
+
+                    // 平行移動成分を無効化
+                    billboardMatrix.m[3][0] = 0.0f;
+                    billboardMatrix.m[3][1] = 0.0f;
+                    billboardMatrix.m[3][2] = 0.0f;
+
+                    // ビルボード行列から回転を抽出（オイラー角に変換）
+                    Vector3 billboardRotation = ExtractEulerAnglesFromMatrix(billboardMatrix);
+
+                    // ワールド行列をビルボード回転で構築
+                    worldMatrix = MakeAftineMatrix(particles[index].transform.scale, billboardRotation, particles[index].transform.translate);
+                } else {
+                    worldMatrix = MakeAftineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+                }
+
                 Matrix4x4  viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
                 Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+
                 // 更新処理
                 if (update) {
                     particles[index].transform.translate.x += particles[index].velocity.x * kDeltaTime;
