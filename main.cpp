@@ -91,6 +91,29 @@ struct Emitter {
     float frequency;
     float frequencyTime;
 };
+
+struct AABB {
+    Vector3 min; //!< 最小点
+    Vector3 max; //!< 最大点
+};
+
+struct AccelerationField {
+    Vector3 scceleration;   //!< 加速度
+    AABB area; //!<範囲
+};
+
+// Fieldの範囲内のパーティクルには加速度を適用する
+bool  IsCollision(const AABB& aabb1, const  Vector3& point) {
+    // AABBの最小値と最大値
+    const Vector3& min = aabb1.min;
+    const Vector3& max = aabb1.max;
+
+    // 点がAABBの範囲内にあるかチェック
+    return (point.x >= min.x && point.x <= max.x &&
+        point.y >= min.y && point.y <= max.y &&
+        point.z >= min.z && point.z <= max.z);
+}
+
 /*----------------------------------------------------------------------*/
 /*-------------------------Objファイルを読む関数---------------------------*/
 /*----------------------------------------------------------------------*/
@@ -1209,10 +1232,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;         // すでに書き込まれている色 (デストカラー)
 
-    // 加算合成
-    blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
-    blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
-    blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
+    //// 加算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
 
     //// 減算合成
     //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;         // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
@@ -1333,13 +1356,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
+    Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-800.0f} };
     // Transform  cameratransform{ {1.0f,1.0f,1.0f},{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},{0.0f,0.0f,-500.0f} };
     Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
+    bool useMonsterBall = true;
+
     Emitter emitter{};
     emitter.count = 3;
-    emitter.frequency = 7.0f; // 秒ごとに発生
+    emitter.frequency = 5.0f; // 秒ごとに発生
     emitter.frequencyTime = 0.0f; // 発生頻度用の時刻、0で初期化
 
     emitter.transform.translate = { 0.0f,0.0f,0.0f };
@@ -1353,7 +1378,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     bool update = false;
     bool useBillboard = false; // ビルボード処理のオン/オフを切り替えるフラグ
 
-    bool useMonsterBall = true;
+    // Filed
+    AccelerationField accelerationField{};
+    accelerationField.area.max = { 15.0f,0.0f,0.0f };
+    accelerationField.area.min = { -1.0f,-1.0f,-1.0f };
+    accelerationField.scceleration = { 1.0f,1.0f,1.0f };
+    bool fieldscceleration = false;
 
     MSG msg{};
     // ウィンドウの×ボタンが押されるまでループ
@@ -1394,6 +1424,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 particles.splice(particles.end(), Emit(emitter, randomEngine));
             }
             ImGui::Checkbox("update", &update);
+            ImGui::Checkbox("fieldscceleration", &fieldscceleration);
             ImGui::Checkbox("useBillboard", &useBillboard);
             ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
 
@@ -1457,9 +1488,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
                     // 更新処理
                     if (update) {
-                        particleIterator->transform.translate.x += particleIterator->velocity.x * kDeltaTime;
-                        particleIterator->transform.translate.y += particleIterator->velocity.y * kDeltaTime;
-                        particleIterator->transform.translate.z += particleIterator->velocity.z * kDeltaTime;
+                        if (fieldscceleration) {
+                            // Fieldの範囲内のパーティクルには加速度を適用する
+                            if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
+                                (*particleIterator).velocity.x += accelerationField.scceleration.x * kDeltaTime;
+                                (*particleIterator).velocity.y += accelerationField.scceleration.y * kDeltaTime;
+                                (*particleIterator).velocity.z += accelerationField.scceleration.z * kDeltaTime;
+                            }
+                        }
+                        // 速度を適用。すでにあるコード
+                        (*particleIterator).transform.translate.x += (*particleIterator).velocity.x * kDeltaTime;
+                        (*particleIterator).transform.translate.y += (*particleIterator).velocity.y * kDeltaTime;
+                        (*particleIterator).transform.translate.z += (*particleIterator).velocity.z * kDeltaTime;
                         particleIterator->cuttentTime += kDeltaTime; // 経過時間を足す
                     }
 
