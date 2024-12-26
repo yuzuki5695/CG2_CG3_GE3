@@ -15,6 +15,7 @@
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
+#include "Camera.h"
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -72,6 +73,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     object3dCommon = new Object3dCommon;
     object3dCommon->Initialize(dxCommon);
 
+    // カメラの初期化
+    Camera* camera = new Camera();
+    camera->SetRotate({ 0.0f,0.0f,0.0f });
+    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    object3dCommon->SetDefaultCamera(camera);
+
 #pragma endregion 基盤システムの初期化
 
 #pragma region 最初のシーンの初期化
@@ -91,7 +98,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     object3d->SetModel(ModelPath01);
 
 #pragma endregion 最初のシーンの終了
-
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
@@ -140,6 +146,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         objects.push_back(object3d);
     }
 
+
+    // カメラの現在の位置と回転を取得
+    Vector3 Cameraposition = camera->GetTranslate();
+    Vector3 Camerarotation = camera->GetRotate();
+
+
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -175,8 +187,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
         //  ImGui::End();
 
+        ImGui::Begin("Camera");
+        // カメラの位置を編集
+        ImGui::Text("Camera Transform");
+        ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
+        ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
+        ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
+        ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
+        ImGui::End();
+
           //ImGuiの描画コマンドを生成
         ImGui::Render();
+
+        /*-------------------------------------------*/
+        /*--------------カメラの更新処理---------------*/
+        /*------------------------------------------*/
+        camera->Update();
+
+        camera->SetTranslate(Cameraposition);
+        camera->SetRotate(Camerarotation);
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
@@ -208,8 +237,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*------------------------------------------------------------------------------------------------------*/
 
 
-        /*--------------------------------------------------------------------------------------------------------*/
-        /*---------------------------------------priteの更新処理の開始----------------------------------------------*/
+        /*-------------------------------------------------------------------------------------------------------*/
+        /*--------------------------------------Spriteの更新処理の開始----------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------*/
 
         // 更新処理

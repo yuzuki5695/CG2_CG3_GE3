@@ -6,6 +6,8 @@
 #include "MatrixVector.h"
 #include "ModelManager.h"
 
+using namespace MatrixVector;
+
 void Object3d::Initialize(Object3dCommon* object3dCommon) {
 	// NULL検出
 	assert(object3dCommon);
@@ -17,16 +19,19 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
     DirectionalLightGenerate();
 
     // transform変数を作る
-    transform = { {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,-0.5f,0.0f} };  
-    cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-900.0f} };
+    transform = { {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,-0.5f,0.0f} };
+    this->camera = object3dCommon->GetDefaultCamera();
 }
 
 void Object3d::Update() {
-    Matrix4x4 worludMatrix = MatrixVector::MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
-    Matrix4x4 cameraMatrix = MatrixVector::MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-    Matrix4x4 viewMatrix = MatrixVector::Inverse(cameraMatrix);
-    Matrix4x4 projectionMatrix = MatrixVector::MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-    Matrix4x4 worldViewProjectionMatrix = MatrixVector::Multiply(worludMatrix, MatrixVector::Multiply(viewMatrix, projectionMatrix));
+    Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+    Matrix4x4 worldViewProjectionMatrix;
+    if (camera) {
+        const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
+        worldViewProjectionMatrix = Multiply(worludMatrix, viewProjectionMatrix);
+    } else {
+        worldViewProjectionMatrix = worludMatrix;
+    }
     transformationMatrixData->World = worludMatrix;
     transformationMatrixData->WVP = worldViewProjectionMatrix;
 }
@@ -49,8 +54,8 @@ void Object3d::TransformationMatrixGenerate() {
     // データを書き込むためのアドレスを取得
     transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
     // 単位行列を書き込んでおく
-    transformationMatrixData->WVP = MatrixVector::MakeIdentity4x4();
-    transformationMatrixData->World = MatrixVector::MakeIdentity4x4();
+    transformationMatrixData->WVP = MakeIdentity4x4();
+    transformationMatrixData->World = MakeIdentity4x4();
 }
 
 void Object3d::DirectionalLightGenerate() {

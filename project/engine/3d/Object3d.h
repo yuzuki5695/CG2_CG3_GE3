@@ -1,5 +1,6 @@
 #pragma once
 #include"Model.h"
+#include"Camera.h"
 
 class Object3dCommon;
 
@@ -37,6 +38,7 @@ private:
 	// ポインタ
 	Object3dCommon* object3dCommon = nullptr;
 	Model* model = nullptr;
+	Camera* camera = nullptr;
 	// バッファリソース
 	Microsoft::WRL::ComPtr <ID3D12Resource> transformationMatrixResource;
 	Microsoft::WRL::ComPtr <ID3D12Resource> directionalLightResource;
@@ -45,7 +47,6 @@ private:
 	DirectionalLight* directionalLightDate = nullptr;
 
 	Transform transform;
-	Transform  cameraTransform;
 public:
 	// getter
 	const Vector3& GetScale() const { return transform.scale; }
@@ -57,4 +58,5 @@ public:
 	void SetScale(const Vector3& scale) { this->transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { this->transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { this->transform.translate = translate; }
+	void SetCamera(Camera* camera) { this->camera = camera; }
 };
