@@ -16,7 +16,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	// WVP,World用のリソースの生成、初期化
 	TransformationMatrixGenerate();
 	// テクスチャサイズをイメージに合わせる
-	AdjustTextureSize();
+	//AdjustTextureSize();
 	// 単位行列を書き込んでおく
 	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
 

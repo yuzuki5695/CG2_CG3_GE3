@@ -18,7 +18,7 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
 
     // transform変数を作る
     transform = { {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,-0.5f,0.0f} };  
-    cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-700.0f} };
+    cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-900.0f} };
 }
 
 void Object3d::Update() {

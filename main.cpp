@@ -90,13 +90,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 3Dモデルの初期化
     Model* model = new Model;;
-    model->Initialize(modelCommon);
+    model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
     // 3Dオブジェクトの初期化
     Object3d* object3d = new Object3d;
     object3d->Initialize(object3dCommon);
     // モデルを結びつける
-    object3d->SetModel(model);
+    object3d->SetModel(ModelPath01);
 
 #pragma endregion 最初のシーンの終了
 
@@ -134,7 +134,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (uint32_t i = 0; i < objectize; ++i) {
         Object3d* object3d = new Object3d();
         object3d->Initialize(object3dCommon);
-        object3d->SetModel(model);
+        if (i % 2 == 0) {
+            object3d->SetModel(ModelPath02);
+        } else {
+            object3d->SetModel(ModelPath01);
+        }
         // 現在の位置を取得
         Vector3 position = object3d->GetTranslate();
         position.x = objectsPosition[i];
@@ -329,7 +333,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // シーンの解放
     delete  spriteCommon;
     delete  object3dCommon;
-    delete modelCommon;
     // 汎用機能の解放
 
     // スプライトの解放

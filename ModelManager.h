@@ -37,5 +37,8 @@ private: // メンバ変数
 	// モデルデータ
 	std::map<std::string, std::unique_ptr<Model>> models;
 	// ポインタ
-	ModelCommon* modelCommon = nullptr
+	ModelCommon* modelCommon = nullptr;
+public:
+	// getter
+	ModelCommon* GetModelCommon() const { return modelCommon; }
 };
