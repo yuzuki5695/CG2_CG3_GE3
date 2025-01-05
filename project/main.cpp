@@ -168,9 +168,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // プレイヤーの更新処理
         player->Update();
 
+        Vector3 plaposition = player->GetTranslate();
 
 
+        if (input->Pushkey(DIK_D)) {
+            plaposition.x += 0.01f;
+        }
 
+        if (input->Pushkey(DIK_A)) {
+            plaposition.x -= 0.01f;
+        }
+        if (input->Pushkey(DIK_W)) {
+            plaposition.y += 0.01f;
+        }
+
+        if (input->Pushkey(DIK_S)) {
+            plaposition.y -= 0.01f;
+        }
+
+        player->SetTranslate(plaposition);
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
