@@ -38,10 +38,18 @@ void Player::Update() {
 	object3d_->Update();
 
 	if (input_->Pushkey(DIK_D)) {
-		transform.translate.x += 0.02f;
+		transform.translate.x += 0.05f;
 	}
 	if (input_->Pushkey(DIK_A)) {
-		transform.translate.x -= 0.02f;
+		transform.translate.x -= 0.05f;
+	}
+
+	if (input_->Pushkey(DIK_W)) {
+		transform.translate.y += 0.05f;
+	}
+
+	if (input_->Pushkey(DIK_S)) {
+		transform.translate.y -= 0.05f;
 	}
 
 	// プレイヤーの位置を設定

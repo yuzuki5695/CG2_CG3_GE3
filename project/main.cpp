@@ -17,6 +17,7 @@
 #include"externals/imgui/imgui_impl_win32.h"
 #include "Camera.h"
 #include "Player.h"
+#include "Enemy.h"
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -27,7 +28,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
     SpriteCommon* spriteCommon = nullptr;
-    Object3dCommon* object3dCommon = nullptr;;
+    Object3dCommon* object3dCommon = nullptr;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -106,6 +107,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     player->Initialize(object3dCommon, ModelPath03, input);
 
     // 敵の初期化
+    Enemy* enemy = new Enemy;
+    enemy->Initialize(object3dCommon, ModelPath03);
 
 
 #pragma endregion 最初のシーンの終了
@@ -142,14 +145,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
        // ImGui::ShowDemoWindow();
 
-        ImGui::Begin("Camera");
-        // カメラの位置を編集
-        ImGui::Text("Camera Transform");
-        ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
-        ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
-        ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
-        ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
-        ImGui::End();
+        //ImGui::Begin("Camera");
+        //// カメラの位置を編集
+        //ImGui::Text("Camera Transform");
+        //ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
+        //ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
+        //ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
+        //ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
+        //ImGui::End();
 
           //ImGuiの描画コマンドを生成
         ImGui::Render();
@@ -170,25 +173,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // プレイヤーの更新処理
         player->Update();
 
-        Vector3 plaposition = player->GetTranslate();
+        // 敵の更新
+        enemy->Update();
 
-
-        if (input->Pushkey(DIK_D)) {
-            plaposition.x += 0.01f;
-        }
-
-        if (input->Pushkey(DIK_A)) {
-            plaposition.x -= 0.01f;
-        }
-        if (input->Pushkey(DIK_W)) {
-            plaposition.y += 0.01f;
-        }
-
-        if (input->Pushkey(DIK_S)) {
-            plaposition.y -= 0.01f;
-        }
-
-        player->SetTranslate(plaposition);
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -223,7 +210,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // プレイヤーの描画処理
         player->Draw();
 
-
+        // 敵の描画処理
+        enemy->Draw();
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
@@ -273,6 +261,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     delete player;
 
+    delete enemy;
 
     // 入力解放
     delete input;
