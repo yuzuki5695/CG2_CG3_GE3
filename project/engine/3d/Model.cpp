@@ -32,7 +32,7 @@ void Model::Draw() {
     //SRVを切り替えて画像を変えるS
     modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelDate.material.textureindex));
 
-    // 描画！(今回は球)
+    // 描画!
     modelCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 }
 
@@ -62,7 +62,7 @@ void Model::MaterialGenerate() {
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
     // マテリアルデータの初期値を書き込む
     materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    materialData->endbleLighting = true;
+    materialData->endbleLighting = false;
     materialData->uvTransform = MatrixVector::MakeIdentity4x4();
 }
 
