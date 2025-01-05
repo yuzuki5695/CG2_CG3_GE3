@@ -16,6 +16,7 @@
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
 #include "Camera.h"
+#include "Player.h"
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -97,54 +98,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // モデルを結びつける
     object3d->SetModel(ModelPath01);
 
+    // プレイヤーの初期化
+    Player* player = new Player;
+    player->Initialize(object3dCommon, ModelPath01, input);
+
+    // 敵の初期化
+
+
 #pragma endregion 最初のシーンの終了
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
-
-    std::vector<Sprite*> sprites;
-    const uint32_t spritesize = 6;
-    float spritesPosition[spritesize]{};
-    for (uint32_t i = 0; i < spritesize; ++i) {
-        spritesPosition[i] = 180.0f * i;
-        Sprite* sprite = new Sprite();
-        sprite->Initialize(spriteCommon, TexturePath01);
-        if (i % 2 == 1) {
-            sprite->SetTexture(TexturePath02);
-        }
-        // 現在の位置を取得
-        Vector2 position = sprite->GetPosition();
-        // 位置を変更する
-        position.x = spritesPosition[i];
-        position.y = 100.0f;
-        // 変更した座標を設定
-        sprite->SetPosition(position);
-        // 情報を転送
-        sprites.push_back(sprite);
-    }
-
-    std::vector<Object3d*> objects;
-    const uint32_t objectize = 2;
-    float objectsPosition[spritesize]{};
-    objectsPosition[0] = 2.0f;
-    objectsPosition[1] = -2.0f;
-    for (uint32_t i = 0; i < objectize; ++i) {
-        Object3d* object3d = new Object3d();
-        object3d->Initialize(object3dCommon);
-        if (i % 2 == 0) {
-            object3d->SetModel(ModelPath02);
-        } else {
-            object3d->SetModel(ModelPath01);
-        }
-        // 現在の位置を取得
-        Vector3 position = object3d->GetTranslate();
-        position.x = objectsPosition[i];
-        // 変更した座標を設定
-        object3d->SetTranslate(position);
-        // 情報を転送
-        objects.push_back(object3d);
-    }
 
 
     // カメラの現在の位置と回転を取得
@@ -174,18 +138,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::NewFrame();
 
         // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-        ImGui::ShowDemoWindow();
-
-        //ImGui::Begin("Sprite");
-       /* ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
-        ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
-        ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-        ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
-        ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-        ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
-        ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
-        ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
-        //  ImGui::End();
+       // ImGui::ShowDemoWindow();
 
         ImGui::Begin("Camera");
         // カメラの位置を編集
@@ -211,26 +164,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
         /*------------------------------------------------------------------------------------------------------*/
 
-        // 更新処理
-       // object3d->Update();
 
-        size_t index = 0;
-        size_t maxIterations = 2;
-        for (Object3d* object3d : objects) {
-            if (index >= maxIterations) {
-                break; // 指定回数を超えたらループを終了
-            }
-            object3d->Update();
-            Vector3 rotation = object3d->GetRotate();
-            if (index == 0) {
-                rotation.z += 0.01f;
-            } else if (index == 1) {
-                rotation.y += 0.01f;
-            }
-            object3d->SetRotate(rotation);
-            // インクリメントして次へ
-            ++index;
-        }
+        // プレイヤーの更新処理
+        player->Update();
+
+
+
+
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -241,48 +181,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*--------------------------------------Spriteの更新処理の開始----------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------*/
 
-        // 更新処理
-        sprite->Update();
-
-        ///*--------Spriteの移動--------*/
-        //// 現在の座標を変数で受ける
-        //Vector2 position = sprite->GetPosition();
-        //// 座標を変更する
-        //position.x += 0.1f;
-        //position.y += 0.1f;
-        //// 変更を反映する
-        //sprite->SetPosition(position);
-
-
-        /////*--------Spriteの回転--------*/
-        //// 角度を変化させるテスト
-        //float rotation = sprite->GetRotation();
-        //rotation += 0.01f;
-        //sprite->SetRotation(rotation);
-
-        ///*--------Spriteの色--------*/
-        //// 色を変化させるテスト
-        //Vector4 color = sprite->GetColor();
-        //color.x += 0.01f;
-        //if (color.w > 1.0f) {
-        //    color.x -= 1.0f;
-        //}
-        //sprite->SetColor(color);
-
-        ///*--------Spriteのサイズ--------*/
-        //// サイズを変化させるテスト
-        //Vector2 size = sprite->GetSize();
-        //size.x += 0.1f;
-        //size.y += 0.1f;
-        //sprite->SetSize(size);
-
-
-        /*----------------------------複数Sprite----------------------------*/
-
-        //// 更新処理
-        //for (Sprite* sprite : sprites) {
-        //    sprite->Update();
-        //}
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理の終了----------------------------------------------*/
@@ -303,11 +201,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         object3dCommon->Commondrawing();
 #pragma region 全てのObject3d個々の描画
 
-       // object3d->Draw();
 
-        for (Object3d* object3d : objects) {
-            object3d->Draw();
-        }
+        // プレイヤーの描画処理
+        player->Draw();
+
+
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
@@ -323,15 +221,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 全てのSprite個々の描画
 
 
-        //// Spriteの描画は常にuvCheckerにする
-        //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-        sprite->Draw();
-
-        ///*--------複数Spriteの描画--------*/
-        //for (Sprite* sprite : sprites) {
-        //    sprite->Draw();
-        //}
 #pragma endregion 全てのSprite個々の描画
         /*----------------------------------------------------------------------------------------------------*/
         /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
@@ -358,16 +248,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // スプライトの解放
     delete  sprite;
-    for (Sprite* sprite : sprites) {
-        delete sprite;
-    }
     // 3Dモデルの解放
     delete model;
     // 3Dオブジェクトの解放
     delete  object3d;
-    for (Object3d* object3d : objects) {
-        delete object3d;
-    }
+
+    delete player;
+
+
     // 入力解放
     delete input;
 

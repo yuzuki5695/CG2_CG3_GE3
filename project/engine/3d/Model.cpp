@@ -62,7 +62,7 @@ void Model::MaterialGenerate() {
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
     // マテリアルデータの初期値を書き込む
     materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    materialData->endbleLighting = true;
+    materialData->endbleLighting = false;
     materialData->uvTransform = MatrixVector::MakeIdentity4x4();
 }
 
