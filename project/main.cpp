@@ -54,10 +54,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadTexture("plane.obj");
     ModelManager::GetInstance()->LoadTexture("axis.obj");
+    ModelManager::GetInstance()->LoadTexture("cube.obj");
+    ModelManager::GetInstance()->LoadTexture("skydome.obj");
     std::string ModelPath01 = "plane.obj";
     std::string ModelPath02 = "axis.obj";
-
-
+    std::string ModelPath03 = "cube.obj";
+    std::string ModelPath04 = "skydome.obj";
+    
     // 汎用機能の初期化 
 
     // 入力の初期化
@@ -100,7 +103,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // プレイヤーの初期化
     Player* player = new Player;
-    player->Initialize(object3dCommon, ModelPath01, input);
+    player->Initialize(object3dCommon, ModelPath03, input);
 
     // 敵の初期化
 
@@ -109,7 +112,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
 
     // カメラの現在の位置と回転を取得
     Vector3 Cameraposition = camera->GetTranslate();
