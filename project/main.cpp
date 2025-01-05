@@ -120,6 +120,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector3 Cameraposition = camera->GetTranslate();
     Vector3 Camerarotation = camera->GetRotate();
 
+    std::vector<Object3d*> enemys;
+    const uint32_t enemysize = 3;
+    float enemysPosition[enemysize]{};
+    enemysPosition[0] = 5.0f;
+    enemysPosition[1] = 10.0f;
+    enemysPosition[2] = 15.0f;
+    for (uint32_t i = 0; i < enemys; ++i) {
+        Object3d* object3d = new Object3d();
+        object3d->Initialize(object3dCommon);
+        // 現在の位置を取得
+        Vector3 position = object3d->GetTranslate();
+        position.x = enemysPosition[i];
+        // 変更した座標を設定
+        object3d->SetTranslate(position);
+        // 情報を転送
+        enemys.push_back(object3d);
+    }
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -175,6 +192,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         // 敵の更新
         enemy->Update();
+
+
+        //size_t index = 0;
+        //size_t maxIterations = 2;
+        //for (Object3d* object3d : objects) {
+        //    if (index >= maxIterations) {
+        //        break; // 指定回数を超えたらループを終了
+        //    }
+        //    object3d->Update();
+        //    Vector3 rotation = object3d->GetRotate();
+        //    if (index == 0) {
+        //        rotation.z += 0.01f;
+        //    } else if (index == 1) {
+        //        rotation.y += 0.01f;
+        //    }
+        //    object3d->SetRotate(rotation);
+        //    // インクリメントして次へ
+        //    ++index;
+        //}
 
 
         /*-------------------------------------------------------------------------------------------------------*/
