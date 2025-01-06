@@ -22,13 +22,12 @@
 
 // AABB同士の衝突判定
 bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
-    // X軸方向での重なりを確認
+    // X軸方向
     bool overlapX = (box1.left < box2.right) && (box1.right > box2.left);
-
-    // Y軸方向での重なりを確認
+    // Y軸方向
     bool overlapY = (box1.top < box2.bottom) && (box1.bottom > box2.top);
 
-    // 両方の条件を満たせば衝突
+    // 両方の条件を満たして衝突
     return overlapX && overlapY;
 }
 
