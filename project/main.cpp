@@ -19,6 +19,20 @@
 #include "Player.h"
 #include "Enemy.h"
 
+// AABB同士の衝突判定
+bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
+    // X軸方向での重なりを確認
+    bool overlapX = (box1.left < box2.right) && (box1.right > box2.left);
+
+    // Y軸方向での重なりを確認
+    bool overlapY = (box1.top < box2.bottom) && (box1.bottom > box2.top);
+
+    // 両方の条件を満たせば衝突
+    return overlapX && overlapY;
+}
+
+
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
@@ -81,7 +95,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // カメラの初期化
     Camera* camera = new Camera();
     camera->SetRotate({ 0.0f,0.0f,0.0f });
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    camera->SetTranslate({ 0.0f,0.0f,-5000.0f });
     object3dCommon->SetDefaultCamera(camera);
 
 #pragma endregion 基盤システムの初期化
@@ -110,7 +124,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Enemy* enemy = new Enemy;
     enemy->Initialize(object3dCommon, ModelPath03);
 
-
 #pragma endregion 最初のシーンの終了
 
     //リソースリークチェック
@@ -137,7 +150,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 情報を転送
         enemys.push_back(object3d);
     }
-
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -194,9 +206,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 敵の更新
         enemy->Update();
 
+
+        AABB playerBox = player->GetAABB();  // プレイヤーのAABB
+        AABB enemyBox = enemy->GetAABB();   // 敵のAABB
+
         // プレイヤーと敵が衝突した場合の処理
-        if (player->CheckCollisionWithEnemy(enemy)) {
-            player->OnCollision(); // プレイヤーが衝突した際の処理
+        if (CheckCollisionAABB(playerBox, enemyBox)) {
             enemy->OnCollision();  // 敵が衝突した際の処理
         }
 
@@ -266,7 +281,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
         spriteCommon->Commondrawing();
 #pragma region 全てのSprite個々の描画
-
 
 
 #pragma endregion 全てのSprite個々の描画

@@ -23,7 +23,7 @@ void Enemy::Initialize(Object3dCommon* object3dCommon, const std::string& filena
 	transform.rotate = object3d_->GetRotate();
 	transform.translate = object3d_->GetTranslate();
 
-	transform = { 1.0f,1.0f,1.0f,0.0f,0.0f,0.0f,5.0f,0.0f,2000.0f };
+	transform = { 1.0f,1.0f,1.0f,0.0f,0.0f,0.0f,5.0f,0.0f,0.0f };
 
 	// 初期位置を設定
 	object3d_->SetScale(transform.scale);
