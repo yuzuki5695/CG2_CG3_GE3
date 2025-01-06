@@ -21,7 +21,7 @@
 #include "Skydome.h"
 
 // AABB同士の衝突判定
-bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
+static bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
     // X軸方向
     bool overlapX = (box1.left < box2.right) && (box1.right > box2.left);
     // Y軸方向
@@ -132,7 +132,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     skydome->Initialize(object3dCommon, ModelPath04);
 
 #pragma endregion 最初のシーンの終了
-
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
 
@@ -157,7 +156,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         input->Update();
 
         // 0を押している間true
-        if (input->Pushkey(DIK_0)) {
+        if (enemycount == 5 &&input->Pushkey(DIK_R)) {
             OutputDebugStringA("Hit 0 \n");
         }
 
