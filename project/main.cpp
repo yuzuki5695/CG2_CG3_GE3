@@ -106,23 +106,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
 
-    // 3Dモデルの初期化
-    Model* model = new Model;;
-    model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
-
-    // 3Dオブジェクトの初期化
-    Object3d* object3d = new Object3d;
-    object3d->Initialize(object3dCommon);
-    // モデルを結びつける
-    object3d->SetModel(ModelPath01);
-
     // プレイヤーの初期化
     Player* player = new Player;
     player->Initialize(object3dCommon, ModelPath03, input);
 
     // 敵の初期化
-    Enemy* enemy = new Enemy;
-    enemy->Initialize(object3dCommon, ModelPath03);
+    const uint32_t enemysize = 5;
+    std::vector<Enemy*> enemys;
+    float enemysPosition[enemysize] = { 5.0f ,10.0f ,15.0f,20.0f,25.0f };
+
+    for (uint32_t i = 0; i < enemysize; ++i) {
+        Enemy* enemy = new Enemy;
+        enemy->Initialize(object3dCommon, ModelPath03);
+        // 現在の位置を取得
+        Vector3 position = enemy->GetTranslate();
+        position.x = enemysPosition[i];
+        // 変更した座標を設定
+        enemy->SetTranslate(position);
+        // ベクターに追加
+        enemys.push_back(enemy);
+    }
+
 
 #pragma endregion 最初のシーンの終了
 
@@ -133,23 +137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector3 Cameraposition = camera->GetTranslate();
     Vector3 Camerarotation = camera->GetRotate();
 
-    std::vector<Object3d*> enemys;
-    const uint32_t enemysize = 3;
-    float enemysPosition[enemysize]{};
-    enemysPosition[0] = 5.0f;
-    enemysPosition[1] = 10.0f;
-    enemysPosition[2] = 15.0f;
-    for (uint32_t i = 0; i < enemysize; ++i) {
-        Object3d* object3d = new Object3d();
-        object3d->Initialize(object3dCommon);
-        // 現在の位置を取得
-        Vector3 position = object3d->GetTranslate();
-        position.x = enemysPosition[i];
-        // 変更した座標を設定
-        object3d->SetTranslate(position);
-        // 情報を転送
-        enemys.push_back(object3d);
-    }
+    int enemycount = 0;
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -175,16 +163,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
        // ImGui::ShowDemoWindow();
 
-        //ImGui::Begin("Camera");
+        ImGui::Begin("Camera");
+        ImGui::InputInt("Enemy kill", &enemycount);
         //// カメラの位置を編集
         //ImGui::Text("Camera Transform");
         //ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
         //ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
         //ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
         //ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
-        //ImGui::End();
+        ImGui::End();
 
-          //ImGuiの描画コマンドを生成
+        //ImGuiの描画コマンドを生成
         ImGui::Render();
 
         /*-------------------------------------------*/
@@ -202,36 +191,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         // プレイヤーの更新処理
         player->Update();
+        
+        AABB playerBox = player->GetAABB();  // プレイヤーのAABB
 
         // 敵の更新
-        enemy->Update();
+        size_t index = 0;
+        size_t maxIterations = enemysize;
+        for (Enemy* enemy : enemys) {
+            if (index >= maxIterations) {
+                break; // 指定回数を超えたらループを終了
+            }
 
+            // 敵のAABBを取得
+            AABB enemyBox = enemy->GetAABB();
 
-        AABB playerBox = player->GetAABB();  // プレイヤーのAABB
-        AABB enemyBox = enemy->GetAABB();   // 敵のAABB
-
-        // プレイヤーと敵が衝突した場合の処理
-        if (CheckCollisionAABB(playerBox, enemyBox)) {
-            enemy->OnCollision();  // 敵が衝突した際の処理
-        }
-
-        //size_t index = 0;
-        //size_t maxIterations = 2;
-        //for (Object3d* object3d : objects) {
-        //    if (index >= maxIterations) {
-        //        break; // 指定回数を超えたらループを終了
-        //    }
-        //    object3d->Update();
-        //    Vector3 rotation = object3d->GetRotate();
-        //    if (index == 0) {
-        //        rotation.z += 0.01f;
-        //    } else if (index == 1) {
-        //        rotation.y += 0.01f;
-        //    }
-        //    object3d->SetRotate(rotation);
-        //    // インクリメントして次へ
-        //    ++index;
-        //}
+            // プレイヤーと敵が衝突した場合の処理
+            if (CheckCollisionAABB(playerBox, enemyBox) && !enemy->GetisDead()) {
+                enemy->OnCollision();  // 敵が衝突した際の処理
+                enemycount++;
+            }
+            enemy->Update();
+            // インクリメントして次へ
+            ++index;
+        } 
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -242,6 +224,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*--------------------------------------Spriteの更新処理の開始----------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------*/
 
+        sprite->Update();
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理の終了----------------------------------------------*/
@@ -267,7 +250,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         player->Draw();
 
         // 敵の描画処理
-        enemy->Draw();
+        for (Enemy* enemy : enemys) {
+            enemy->Draw();
+        }
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
@@ -282,6 +267,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         spriteCommon->Commondrawing();
 #pragma region 全てのSprite個々の描画
 
+        if (enemycount == enemysize) {
+            sprite->Draw();
+        }
 
 #pragma endregion 全てのSprite個々の描画
         /*----------------------------------------------------------------------------------------------------*/
@@ -310,16 +298,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライトの解放
     delete  sprite;
     // 3Dモデルの解放
-    delete model;
+    // delete model;
     // 3Dオブジェクトの解放
-    delete  object3d;
+    // delete  object3d;
 
     delete player;
 
-    delete enemy;
-
-    for (Object3d* object3d : enemys) {
-        delete object3d;
+    for (Enemy* enemy : enemys) {
+        delete enemy;
     }
 
     // 入力解放

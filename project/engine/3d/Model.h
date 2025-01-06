@@ -67,5 +67,10 @@ private:
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	Material* materialData = nullptr;
+public:
+	// getter
+	const Vector4& GetMaterialColor() const { return materialData->color; };
+	// setter
+	void SetMaterialColor(const Vector4& color) { this->materialData->color = color; }
 };
 

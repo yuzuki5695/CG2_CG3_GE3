@@ -39,20 +39,37 @@ void Player::Initialize(Object3dCommon* object3dCommon, const std::string& filen
 
 void Player::Update() {
 	object3d_->Update();
-
-	if (input_->Pushkey(DIK_D)) {
-		transform.translate.x += 0.1f;
+	if (transform.translate.x < 34.0f) {
+		if (input_->Pushkey(DIK_D)) {
+			transform.translate.x += 0.1f;
+		}	
 	}
-	if (input_->Pushkey(DIK_A)) {
-		transform.translate.x -= 0.1f;
+	if (transform.translate.x > -34.0f) {
+		if (input_->Pushkey(DIK_A)) {
+			transform.translate.x -= 0.1f;
+		}
 	}
-
-	if (input_->Pushkey(DIK_W)) {
-		transform.translate.y += 0.1f;
+	if (transform.translate.x <= -34.0f) {
+		transform.translate.x = -34.0f + 0.1f;
 	}
-
-	if (input_->Pushkey(DIK_S)) {
-		transform.translate.y -= 0.1f;
+	if (transform.translate.x >= 34.0f) {
+		transform.translate.x = 34.0f - 0.1f;
+	}
+	if (transform.translate.y < 19.0f) {
+		if (input_->Pushkey(DIK_W)) {
+			transform.translate.y += 0.1f;
+		}
+	}
+	if (transform.translate.y >= 19.0f) {
+		transform.translate.y = 19.0f - 0.1f;
+	}
+	if (transform.translate.y > -19.0f) {
+		if (input_->Pushkey(DIK_S)) {
+			transform.translate.y -= 0.1f;
+		}
+	}
+	if (transform.translate.y <= -19.0f) {
+		transform.translate.y = -19.0f + 0.1f;
 	}
 
 	// プレイヤーの位置を設定
