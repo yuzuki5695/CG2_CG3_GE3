@@ -3,6 +3,7 @@
 #include "Object3d.h"
 
 class Input;
+class Enemy;
 
 class Player
 {
@@ -18,6 +19,9 @@ public: // メンバ関数
 
 	/// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision();
+
+	AABB GetAABB();
+	bool CheckCollisionWithEnemy(Enemy* enemy);
 
 private: // メンバ変数
 	Object3d* object3d_ = nullptr;

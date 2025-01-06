@@ -41,5 +41,17 @@ void Enemy::Update() {
 }
 
 void Enemy::Draw() {
-	object3d_->Draw();
+	if (!isDead_) {
+		object3d_->Draw();
+	}
+}
+
+AABB Enemy::GetAABB() {
+	AABB box;
+	// プレイヤーの位置とスケールを基にAABBを計算
+	box.left = transform.translate.x - (object3d_->GetScale().x * 0.5f);
+	box.right = transform.translate.x + (object3d_->GetScale().x * 0.5f);
+	box.top = transform.translate.y - (object3d_->GetScale().y * 0.5f);
+	box.bottom = transform.translate.y + (object3d_->GetScale().y * 0.5f);
+	return box;
 }

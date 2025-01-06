@@ -1,6 +1,7 @@
 #pragma once
 #include"Model.h"
 #include"Camera.h"
+#include"AABB.h"
 
 class Object3dCommon;
 
@@ -27,6 +28,8 @@ public: // メンバ関数
 	void Update();
 	// 描画処理
 	void Draw();
+
+	bool CheckCollisionAABB(const AABB& box1, const AABB& box2);
 
 private:
 	// リソース

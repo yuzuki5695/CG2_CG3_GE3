@@ -17,6 +17,8 @@ public: // メンバ関数
 	/// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision();
 
+	AABB GetAABB();
+
 private: // メンバ変数
 	Object3d* object3d_ = nullptr;
 	Transform transform{};

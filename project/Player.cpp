@@ -1,5 +1,6 @@
 #include "Player.h"
 #include"Input.h"
+#include"Enemy.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -63,4 +64,37 @@ void Player::Update() {
 
 void Player::Draw() {
 	object3d_->Draw();
+}
+
+// プレイヤーのAABBを取得するメソッド
+AABB Player::GetAABB() {
+	AABB box;
+	// プレイヤーの位置とスケールを基にAABBを計算
+	box.left = transform.translate.x - (object3d_->GetScale().x * 0.5f);
+	box.right = transform.translate.x + (object3d_->GetScale().x * 0.5f);
+	box.top = transform.translate.y - (object3d_->GetScale().y * 0.5f);
+	box.bottom = transform.translate.y + (object3d_->GetScale().y * 0.5f);
+	return box;
+}
+
+// AABB同士の衝突判定
+bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
+	// X軸方向での重なりを確認
+	bool overlapX = (box1.left < box2.right) && (box1.right > box2.left);
+
+	// Y軸方向での重なりを確認
+	bool overlapY = (box1.top < box2.bottom) && (box1.bottom > box2.top);
+
+	// 両方の条件を満たせば衝突
+	return overlapX && overlapY;
+}
+
+// プレイヤーと敵の衝突判定
+bool Player::CheckCollisionWithEnemy(Enemy* enemy) {
+	// プレイヤーと敵のAABBを取得
+	AABB playerBox = this->GetAABB();  // プレイヤーのAABB
+	AABB enemyBox = enemy->GetAABB();   // 敵のAABB
+
+	// AABB同士の衝突をチェック
+	return CheckCollisionAABB(playerBox, enemyBox);
 }

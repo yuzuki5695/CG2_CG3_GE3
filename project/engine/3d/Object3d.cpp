@@ -73,3 +73,14 @@ void Object3d::SetModel(const std::string& filePath) {
     // モデルを検索してセットする
     model = ModelManager::GetInstance()->FindModel(filePath);
 }
+
+// AABB同士の当たり判定関数
+bool Object3d::CheckCollisionAABB(const AABB& box1, const AABB& box2) {
+    // X軸方向での重なりを確認
+    bool overlapX = (box1.left < box2.right) && (box1.right > box2.left);
+    // Y軸方向での重なりを確認
+    bool overlapY = (box1.top < box2.bottom) && (box1.bottom > box2.top);
+
+    // 両方の条件を満たせば衝突
+    return overlapX && overlapY;
+}

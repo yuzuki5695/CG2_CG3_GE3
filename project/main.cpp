@@ -138,6 +138,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         enemys.push_back(object3d);
     }
 
+
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -193,6 +194,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 敵の更新
         enemy->Update();
 
+        // プレイヤーと敵が衝突した場合の処理
+        if (player->CheckCollisionWithEnemy(enemy)) {
+            player->OnCollision(); // プレイヤーが衝突した際の処理
+            enemy->OnCollision();  // 敵が衝突した際の処理
+        }
 
         //size_t index = 0;
         //size_t maxIterations = 2;
@@ -211,7 +217,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //    // インクリメントして次へ
         //    ++index;
         //}
-
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
