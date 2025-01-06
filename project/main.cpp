@@ -18,6 +18,7 @@
 #include "Camera.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "Skydome.h"
 
 // AABB同士の衝突判定
 bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
@@ -127,6 +128,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         enemys.push_back(enemy);
     }
 
+    // 天球の初期化
+    Skydome* skydome = new Skydome;
+    skydome->Initialize(object3dCommon, ModelPath04);
 
 #pragma endregion 最初のシーンの終了
 
@@ -138,6 +142,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector3 Camerarotation = camera->GetRotate();
 
     int enemycount = 0;
+
+    Vector3 pos = skydome->GetScale();
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -165,6 +171,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         ImGui::Begin("Camera");
         ImGui::InputInt("Enemy kill", &enemycount);
+        ImGui::DragFloat3("skyPos", &pos.x, 0.1f);
+        skydome->SetScale(pos);
         //// カメラの位置を編集
         //ImGui::Text("Camera Transform");
         //ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
@@ -191,7 +199,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         // プレイヤーの更新処理
         player->Update();
-        
+
         AABB playerBox = player->GetAABB();  // プレイヤーのAABB
 
         // 敵の更新
@@ -213,7 +221,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             enemy->Update();
             // インクリメントして次へ
             ++index;
-        } 
+        }
+
+        // 天球の更新
+        skydome->Update();
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -245,6 +256,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         object3dCommon->Commondrawing();
 #pragma region 全てのObject3d個々の描画
 
+        // 天球の描画
+        skydome->Draw();
 
         // プレイヤーの描画処理
         player->Draw();
@@ -253,6 +266,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         for (Enemy* enemy : enemys) {
             enemy->Draw();
         }
+
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
@@ -307,6 +321,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Enemy* enemy : enemys) {
         delete enemy;
     }
+
+    delete skydome;
 
     // 入力解放
     delete input;
