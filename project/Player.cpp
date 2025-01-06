@@ -11,6 +11,8 @@ Player::~Player() {
 	}
 }
 
+void Player::OnCollision() { isDead_ = true; }
+
 void Player::Initialize(Object3dCommon* object3dCommon, const std::string& filename, Input* input) {
 	if (object3d_ == nullptr) {
 		object3d_ = new Object3d;

@@ -126,7 +126,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     enemysPosition[0] = 5.0f;
     enemysPosition[1] = 10.0f;
     enemysPosition[2] = 15.0f;
-    for (uint32_t i = 0; i < enemys; ++i) {
+    for (uint32_t i = 0; i < enemysize; ++i) {
         Object3d* object3d = new Object3d();
         object3d->Initialize(object3dCommon);
         // 現在の位置を取得
@@ -298,6 +298,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     delete player;
 
     delete enemy;
+
+    for (Object3d* object3d : enemys) {
+        delete object3d;
+    }
 
     // 入力解放
     delete input;

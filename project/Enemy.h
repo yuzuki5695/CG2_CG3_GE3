@@ -14,9 +14,14 @@ public: // メンバ関数
 	// 描画処理
 	void Draw();
 
+	/// 衝突を検出したら呼び出されるコールバック関数
+	void OnCollision();
+
 private: // メンバ変数
 	Object3d* object3d_ = nullptr;
 	Transform transform{};
+	// デスフラグ
+	bool isDead_ = false;
 public:
 	// getter
 	const Vector3& GetScale() const { return transform.scale; }
