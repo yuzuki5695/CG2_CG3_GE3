@@ -181,7 +181,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Vector3 pos = skydome->GetScale();
 
-    int name = 1;
+    int name = 0;
     bool enemyfige = false;
 
     enum Direction {
@@ -225,15 +225,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
         /*------------------------------------------------------------------------------------------------------*/
 
-
         size_t enemyscount = 0;
 
         switch (name) {
-        case Title:
-            // シーン移動
-            if (input->Pushkey(DIK_RETURN)) {
-                name = 1;
-            }
+        case Title: 
             if (enemyfige) {
                 enemycount = 0;
                 enemyfige = false;
@@ -247,7 +242,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             }
 
             enemyscount = 0;
-
+            // シーン移動
+            if (input->Pushkey(DIK_RETURN)) {
+                name = 1;
+            }
             break;
         case Game:
             // シーン移動
