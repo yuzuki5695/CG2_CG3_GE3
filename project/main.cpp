@@ -19,6 +19,8 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Skydome.h"
+#include <cstdlib>  // std::rand(), std::srand()
+#include <ctime>    // std::time()
 
 // AABB同士の衝突判定
 static bool CheckCollisionAABB(const AABB& box1, const AABB& box2) {
@@ -75,11 +77,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ModelManager::GetInstance()->LoadTexture("axis.obj");
     ModelManager::GetInstance()->LoadTexture("cube.obj");
     ModelManager::GetInstance()->LoadTexture("skydome.obj");
+    ModelManager::GetInstance()->LoadTexture("Player.obj");
+    ModelManager::GetInstance()->LoadTexture("Enemy01.obj");
+    ModelManager::GetInstance()->LoadTexture("Enemy02.obj");
+    ModelManager::GetInstance()->LoadTexture("Enemy03.obj");
     std::string ModelPath01 = "plane.obj";
     std::string ModelPath02 = "axis.obj";
     std::string ModelPath03 = "cube.obj";
     std::string ModelPath04 = "skydome.obj";
-    
+    std::string ModelPath05 = "Player.obj";
+    std::string ModelPath06 = "Enemy01.obj";
+    std::string ModelPath07 = "Enemy02.obj";
+    std::string ModelPath08 = "Enemy03.obj";
+
     // 汎用機能の初期化 
 
     // 入力の初期化
@@ -123,17 +133,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // プレイヤーの初期化
     Player* player = new Player;
-    player->Initialize(object3dCommon, ModelPath03, input);
+    player->Initialize(object3dCommon, ModelPath05, input);
 
     // 敵の初期化
-    const uint32_t enemysize = 5;
+    const uint32_t enemysize = 10;
     std::vector<Enemy*> enemys;
-    float enemysPosition[enemysize] = { 5.0f ,10.0f ,15.0f,20.0f,25.0f };
-    uint32_t enemyindex[5] = { 0,1,0,2,1 };
+    float enemysPosition[enemysize] = {100.0f,100.0f ,100.0f ,100.0f ,100.0f ,100.0f ,100.0f,100.0f,100.0f,100.0f };
+    uint32_t enemyindex[enemysize] = { 0,1,0,2,1,2,0,1,2,0 };
+    // モデルのパスを定義
+    std::string ModelPaths[] = {
+        "Enemy01.obj",  // ModelPath06
+        "Enemy02.obj",  // ModelPath07
+        "Enemy03.obj"   // ModelPath08
+    };
 
     for (uint32_t i = 0; i < enemysize; ++i) {
+        // ランダムなモデルパスを選択
+        int randomIndex = std::rand() % 3;
+        std::string selectedModel = ModelPaths[randomIndex];
+
         Enemy* enemy = new Enemy;
-        enemy->Initialize(object3dCommon, ModelPath03);
+        enemy->Initialize(object3dCommon, ModelPaths[randomIndex]);
         // 現在の位置を取得
         Vector3 position = enemy->GetTranslate();
         position.x = enemysPosition[i];
@@ -162,6 +182,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector3 pos = skydome->GetScale();
 
     int name = 1;
+    bool enemyfige = false;
 
     enum Direction {
         Title = 0,
@@ -189,15 +210,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-       // ImGui::ShowDemoWindow();
-
-        ImGui::Begin("Camera");
-        ImGui::InputInt("Enemy kill", &enemycount);
-        ImGui::DragFloat3("skyPos", &pos.x, 0.1f);
-        skydome->SetScale(pos);;
-        ImGui::End();
-
         //ImGuiの描画コマンドを生成
         ImGui::Render();
 
@@ -213,27 +225,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
         /*------------------------------------------------------------------------------------------------------*/
 
+
+        size_t enemyscount = 0;
+
         switch (name) {
         case Title:
             // シーン移動
             if (input->Pushkey(DIK_RETURN)) {
                 name = 1;
             }
-
-            player->SetTranslate(Vector3{0.0f,0.0f,0.0f});
-            enemycount = 0;
+            if (enemyfige) {
+                enemycount = 0;
+                enemyfige = false;
+            }
+            player->SetTranslate(Vector3{0.0f,0.0f,0.0f});;
 
             for (Enemy* enemy : enemys) {
                 enemy->SetTranslate(Vector3(enemysPosition[enemycount]));
                 enemy->SetisDead(false);
-                enemycount++;
+                enemyscount++;
             }
-            enemycount = 0;
+
+            enemyscount = 0;
 
             break;
         case Game:
             // シーン移動
-            if (enemycount == 5) {
+            if (enemycount == enemysize) {
                 name = 2;
             }
 
@@ -261,6 +279,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // シーン移動
             if (input->Pushkey(DIK_R)) {
                 name = 0;
+                enemyfige = true;
+                enemycount = 0;
             }
 
             break;

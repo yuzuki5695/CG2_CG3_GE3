@@ -37,21 +37,82 @@ void Enemy::Update() {
 	// 移動方法を切り替え
 	switch (movePattern) {
 	case 0: // 縦移動
-		//transform.translate.y += moveSpeed;
+		if (moveUp) {
+			transform.translate.y += moveSpeed.y; // 上方向に移動
+			if (transform.translate.y > 30.0f) { // 上限に達した場合
+				// X座標をランダムに設定
+				transform.translate.x = -30.0f + static_cast<float>(std::rand() % 61);
+				// Y座標をリセット
+				transform.translate.y = -50.0f + static_cast<float>(std::rand() % 21 - 30); // -50 ~ -30 の範囲
+				// ランダムで移動速度を設定
+				moveSpeed.y = 0.05f + static_cast<float>(std::rand()) / RAND_MAX * 0.05f;
+				// 再移動時の方向を抽選 (true: 上移動, false: 下移動)
+				moveUp = (std::rand() % 2 == 0);
+			}
+		} else {
+			transform.translate.y -= moveSpeed.y; // 下方向に移動
+			if (transform.translate.y < -50.0f) { // 下限に達した場合
+				// X座標をランダムに設定
+				transform.translate.x = -30.0f + static_cast<float>(std::rand() % 61);
+				// Y座標をリセット
+				transform.translate.y = 30.0f; // 上限のスタート地点
+				// ランダムで移動速度を設定
+				moveSpeed.y = 0.05f + static_cast<float>(std::rand()) / RAND_MAX * 0.05f;
+				// 再移動時の方向を抽選 (true: 上移動, false: 下移動)
+				moveUp = (std::rand() % 2 == 0);
+			}
+		}
 		break;
 
 	case 1: // 横移動
-		//transform.translate.x += moveSpeed;
+		if (transform.translate.x > 35.0f) {
+			// Y座標をランダムに設定 (-25.0f ～ 25.0f)
+			transform.translate.y = -25.0f + static_cast<float>(std::rand() % 51);
+			// X座標をリセット (-80.0f ～ -20.0f)
+			transform.translate.x = -80.0f + static_cast<float>(std::rand()) / RAND_MAX * 60.0f;
+			// ランダムな移動速度 (0.05f ～ 0.1f)
+			moveSpeed.x = 0.05f + static_cast<float>(std::rand()) / RAND_MAX * 0.05f;
+		}
+
+		// X軸方向に移動
+		transform.translate.x += moveSpeed.x;
 		break;
 
 	case 2: // ジグザグ移動
-	//	transform.translate.x += moveSpeed;
-		//transform.translate.y += sin(position.x) * 0.1f; // ジグザグ（例としてsin波を利用）
+	{
+		static bool zigzagUp = true; // ジグザグ移動の方向フラグ
+
+		// Y方向の移動制御
+		if (transform.translate.y > 30.0f || transform.translate.y < -50.0f) {
+			zigzagUp = !zigzagUp; // 方向を反転
+			// ランダムな移動速度を設定 (0.05f ～ 0.1f)
+			moveSpeed.y = 0.05f + static_cast<float>(std::rand()) / RAND_MAX * 0.05f;
+		}
+
+		// X方向の移動制御
+		if (transform.translate.x > 35.0f || transform.translate.x < -80.0f) {
+			// Y座標をランダムに設定 (-25.0f ～ 25.0f)
+			transform.translate.y = -25.0f + static_cast<float>(std::rand() % 51);
+			// X座標をリセット (-80.0f ～ -20.0f)
+			transform.translate.x = -80.0f + static_cast<float>(std::rand()) / RAND_MAX * 60.0f;
+			// ランダムな移動速度を設定 (0.05f ～ 0.1f)
+			moveSpeed.x = 0.05f + static_cast<float>(std::rand()) / RAND_MAX * 0.05f;
+		}
+
+		// 方向に応じて移動を加算
+		transform.translate.x += moveSpeed.x;
+		transform.translate.y += (zigzagUp ? moveSpeed.y : -moveSpeed.y);
 		break;
+	}
+
 
 	default:
 		break;
 	}
+	
+	transform.rotate.x += moveSpeed.x;
+	transform.rotate.y += moveSpeed.y;
+	transform.rotate.z += moveSpeed.z;
 
 	// 位置を設定
 	object3d_->SetScale(transform.scale);

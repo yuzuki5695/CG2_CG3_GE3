@@ -25,9 +25,11 @@ private: // メンバ変数
 	// デスフラグ
 	bool isDead_ = false;
 	uint32_t movePattern = 0;
-	float moveSpeed = 0.05f;  // 移動スピード
+	Vector3 moveSpeed = { 0.05f,0.05f,0.05f };  // 移動スピード
 	// 現在の位置を取得
 	Vector3 position = GetTranslate();
+	// 移動方向を制御するフラグ
+	bool moveUp = true; // 初期値として上方向に移動する設定
 public:
 	// getter
 	const Vector3& GetScale() const { return transform.scale; }
