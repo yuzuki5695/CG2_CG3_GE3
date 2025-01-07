@@ -67,10 +67,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
     TextureManager::GetInstance()->LoadTexture("Resources/title.png");
     TextureManager::GetInstance()->LoadTexture("Resources/clear.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Rule01.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number10.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number09.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number08.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number07.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number06.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number05.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number04.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number03.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number02.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/Number01.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/operation.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/SPACE.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/RSPACE.png");
+
     std::string TexturePath01 = "Resources/uvChecker.png";
     std::string TexturePath02 = "Resources/monsterBall.png";
     std::string TexturePath03 = "Resources/title.png";
     std::string TexturePath04 = "Resources/clear.png";
+    std::string TexturePath05 = "Resources/Rule01.png";
+    std::string TexturePath06 = "Resources/operation.png";
+    std::string TexturePath07 = "Resources/SPACE.png";
+    std::string TexturePath08 = "Resources/RSPACE.png";
+    // テクスチャパスを配列で管理
+    std::string TexturePaths[] = {
+        "Resources/Number10.png",
+        "Resources/Number09.png",
+        "Resources/Number08.png",
+        "Resources/Number07.png",
+        "Resources/Number06.png",
+        "Resources/Number05.png",
+        "Resources/Number04.png",
+        "Resources/Number03.png",
+        "Resources/Number02.png",
+        "Resources/Number01.png"
+    };
+
 
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadTexture("plane.obj");
@@ -130,6 +163,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Clearsprite->SetSize(Vector2{ 259.0f,97.0f });
     Clearsprite->SetPosition(Vector2{ 475.0f,150.0f });
 
+    Sprite* Rule01 = new Sprite;
+    Rule01->Initialize(spriteCommon, TexturePath05);
+    Rule01->SetTextureSize(Vector2{ 270.0f,40.0f });
+    Rule01->SetSize(Vector2{ 270.0f,40.0f });
+    Rule01->SetPosition(Vector2{ 10.0f,10.0f });
+
+    Sprite* TextureNumber = new Sprite;
+    TextureNumber->Initialize(spriteCommon, TexturePaths[0]);
+    TextureNumber->SetTextureSize(Vector2{ 80.0f,40.0f });
+    TextureNumber->SetSize(Vector2{ 80.0f,40.0f });
+    TextureNumber->SetPosition(Vector2{ 10.0f,60.0f });
+
+    Sprite* operation = new Sprite;
+    operation->Initialize(spriteCommon, TexturePath06);
+    operation->SetTextureSize(Vector2{ 110.0f,80.0f });
+    operation->SetSize(Vector2{ 110.0f,80.0f });
+    operation->SetPosition(Vector2{ 10.0f,620.0f });
+
+    Sprite* SPACE = new Sprite;
+    SPACE->Initialize(spriteCommon, TexturePath07);
+    SPACE->SetTextureSize(Vector2{ 280.0f,40.0f });
+    SPACE->SetSize(Vector2{ 280.0f,40.0f });
+    SPACE->SetPosition(Vector2{ 470.0f,270.0f });
+    
+    Sprite* RSPACE = new Sprite;
+    RSPACE->Initialize(spriteCommon, TexturePath08);
+    RSPACE->SetTextureSize(Vector2{ 240.0f,40.0f });
+    RSPACE->SetSize(Vector2{ 240.0f,40.0f });
+    RSPACE->SetPosition(Vector2{ 480.0f,270.0f });
 
     // プレイヤーの初期化
     Player* player = new Player;
@@ -300,14 +362,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         case Title:
 
             Titlesprite->Update();
-          
+            SPACE->Update();
             break;
         case Game:
 
-         
+            Rule01->Update();
+            TextureNumber->Update();
+            operation->Update();
+
             break;
         case Clear:
             Clearsprite->Update(); 
+            RSPACE->Update();
             break;
         }
 
@@ -375,11 +441,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         case Title:
 
             Titlesprite->Draw();
-           
+            SPACE->Draw();
             break;
         case Game:
            
-
+            Rule01->Draw();
+            // enemycount の値で画像を切り替え
+            if (enemycount >= 0 && enemycount <= 9) {
+                TextureNumber->SetTexture(TexturePaths[enemycount]);
+                TextureNumber->Draw();
+            } 
+            operation->Draw();
 
             break;
         case Clear:
@@ -387,6 +459,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             if (enemycount == enemysize) {
                 Clearsprite->Draw();
             }
+            RSPACE->Draw();
             break;
         }
 
@@ -417,6 +490,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライトの解放
     delete  Titlesprite;
     delete Clearsprite;
+    delete Rule01;
+    delete TextureNumber;
+    delete  operation;
+    delete SPACE;
+    delete RSPACE;
+
     // 3Dモデルの解放
     // delete model;
     // 3Dオブジェクトの解放
