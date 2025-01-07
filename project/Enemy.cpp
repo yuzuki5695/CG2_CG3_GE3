@@ -34,20 +34,19 @@ void Enemy::Initialize(Object3dCommon* object3dCommon, const std::string& filena
 void Enemy::Update() {
 	object3d_->Update();
 
-
 	// 移動方法を切り替え
 	switch (movePattern) {
 	case 0: // 縦移動
-		transform.translate.y += moveSpeed;
+		//transform.translate.y += moveSpeed;
 		break;
 
 	case 1: // 横移動
-		transform.translate.x += moveSpeed;
+		//transform.translate.x += moveSpeed;
 		break;
 
 	case 2: // ジグザグ移動
-		transform.translate.x += moveSpeed;
-		transform.translate.y += sin(position.x) * 0.1f; // ジグザグ（例としてsin波を利用）
+	//	transform.translate.x += moveSpeed;
+		//transform.translate.y += sin(position.x) * 0.1f; // ジグザグ（例としてsin波を利用）
 		break;
 
 	default:

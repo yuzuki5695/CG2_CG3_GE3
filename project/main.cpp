@@ -64,10 +64,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
     TextureManager::GetInstance()->LoadTexture("Resources/title.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/clear.png");
     std::string TexturePath01 = "Resources/uvChecker.png";
     std::string TexturePath02 = "Resources/monsterBall.png";
     std::string TexturePath03 = "Resources/title.png";
-   
+    std::string TexturePath04 = "Resources/clear.png";
+
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadTexture("plane.obj");
     ModelManager::GetInstance()->LoadTexture("axis.obj");
@@ -110,6 +112,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Titlesprite->SetTextureSize(Vector2{ 446.0f,98.0f });
     Titlesprite->SetSize(Vector2{ 446.0f,98.0f });
     Titlesprite->SetPosition(Vector2{405.0f,150.0f});
+
+    // スプライトの初期化
+    Sprite* Clearsprite = new Sprite;
+    Clearsprite->Initialize(spriteCommon, TexturePath04);
+    Clearsprite->SetTextureSize(Vector2{ 259.0f,97.0f });
+    Clearsprite->SetSize(Vector2{ 259.0f,97.0f });
+    Clearsprite->SetPosition(Vector2{ 475.0f,150.0f });
+
 
     // プレイヤーの初期化
     Player* player = new Player;
@@ -156,7 +166,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     enum Direction {
         Title = 0,
         Game = 1,
-        Criea = 2
+        Clear = 2
     };
 
     // ウィンドウの×ボタンが押されるまでループ
@@ -247,7 +257,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
             break;
-        case Criea:
+        case Clear:
             // シーン移動
             if (input->Pushkey(DIK_R)) {
                 name = 0;
@@ -272,16 +282,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         case Title:
 
             Titlesprite->Update();
-
-
+          
             break;
         case Game:
 
          
             break;
-        case Criea:
-
-           
+        case Clear:
+            Clearsprite->Update(); 
             break;
         }
 
@@ -326,7 +334,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
             break;
-        case Criea:
+        case Clear:
 
 
             break;
@@ -349,19 +357,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         case Title:
 
             Titlesprite->Draw();
-
+           
             break;
         case Game:
            
 
 
             break;
-        case Criea:
+        case Clear:
 
-          //  if (enemycount == enemysize) {
-              //  Titlesprite->Draw();
-            //}//
-
+            if (enemycount == enemysize) {
+                Clearsprite->Draw();
+            }
             break;
         }
 
@@ -391,6 +398,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // スプライトの解放
     delete  Titlesprite;
+    delete Clearsprite;
     // 3Dモデルの解放
     // delete model;
     // 3Dオブジェクトの解放
