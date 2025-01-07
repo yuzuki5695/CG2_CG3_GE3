@@ -114,20 +114,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     const uint32_t enemysize = 5;
     std::vector<Enemy*> enemys;
     float enemysPosition[enemysize] = { 5.0f ,10.0f ,15.0f,20.0f,25.0f };
-\
+    uint32_t enemyindex[5] = { 0,1,0,2,1 };
 
     for (uint32_t i = 0; i < enemysize; ++i) {
-\
         Enemy* enemy = new Enemy;
         enemy->Initialize(object3dCommon, ModelPath03);
         // 現在の位置を取得
         Vector3 position = enemy->GetTranslate();
         position.x = enemysPosition[i];
+        // 移動パターンを設定（enemyindex を保存）
+        enemy->SetMovePattern(enemyindex[i]);
         // 変更した座標を設定
         enemy->SetTranslate(position);
         // ベクターに追加
         enemys.push_back(enemy);
-\
     }
 
     // 天球の初期化
@@ -162,6 +162,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             break;
         }
         // ゲームの処理
+
+        if (input->Pushkey(DIK_R)) {
+            name = 0;
+        }
 
         // 入力の更新
         input->Update();
@@ -209,9 +213,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             player->SetTranslate(Vector3{0.0f,0.0f,0.0f});
             enemycount = 0;
+
             for (Enemy* enemy : enemys) {
+                enemy->SetTranslate(Vector3(enemysPosition[enemycount]));
                 enemy->SetisDead(false);
+                enemycount++;
             }
+            enemycount = 0;
 
             break;
         case Game:
@@ -227,6 +235,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             // 敵の更新
             for (Enemy* enemy : enemys) {
+
                 // 敵のAABBを取得
                 AABB enemyBox = enemy->GetAABB();
                 // プレイヤーと敵が衝突した場合の処理
@@ -234,7 +243,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                     enemy->OnCollision();  // 敵が衝突した際の処理
                     enemycount++;
                 }
-                enemy->Update();          
+                enemy->Update();
             }
 
 

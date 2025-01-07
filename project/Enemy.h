@@ -24,6 +24,10 @@ private: // メンバ変数
 	Transform transform{};
 	// デスフラグ
 	bool isDead_ = false;
+	uint32_t movePattern = 0;
+	float moveSpeed = 0.05f;  // 移動スピード
+	// 現在の位置を取得
+	Vector3 position = GetTranslate();
 public:
 	// getter
 	const Vector3& GetScale() const { return transform.scale; }
@@ -36,4 +40,5 @@ public:
 	void SetRotate(const Vector3& rotate) { this->transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { this->transform.translate = translate; }
 	void SetisDead(const bool& isDead) { this->isDead_ = isDead; }
+	void SetMovePattern(uint32_t pattern) { movePattern = pattern; }
 };
