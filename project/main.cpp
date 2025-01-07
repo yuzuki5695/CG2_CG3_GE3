@@ -114,8 +114,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     const uint32_t enemysize = 5;
     std::vector<Enemy*> enemys;
     float enemysPosition[enemysize] = { 5.0f ,10.0f ,15.0f,20.0f,25.0f };
+\
 
     for (uint32_t i = 0; i < enemysize; ++i) {
+\
         Enemy* enemy = new Enemy;
         enemy->Initialize(object3dCommon, ModelPath03);
         // 現在の位置を取得
@@ -125,6 +127,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         enemy->SetTranslate(position);
         // ベクターに追加
         enemys.push_back(enemy);
+\
     }
 
     // 天球の初期化
@@ -143,6 +146,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Vector3 pos = skydome->GetScale();
 
+    int name = 1;
+
+    enum Direction {
+        Title = 0,
+        Game = 1,
+        Criea = 2
+    };
+
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -154,12 +165,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         // 入力の更新
         input->Update();
-
-        // 0を押している間true
-        if (enemycount == 5 &&input->Pushkey(DIK_R)) {
-            OutputDebugStringA("Hit 0 \n");
-        }
-
+       
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
@@ -194,30 +200,52 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
         /*------------------------------------------------------------------------------------------------------*/
 
-        // プレイヤーの更新処理
-        player->Update();
-
-        AABB playerBox = player->GetAABB();  // プレイヤーのAABB
-
-        // 敵の更新
-        size_t index = 0;
-        size_t maxIterations = enemysize;
-        for (Enemy* enemy : enemys) {
-            if (index >= maxIterations) {
-                break; // 指定回数を超えたらループを終了
+        switch (name) {
+        case Title:
+            // シーン移動
+            if (input->Pushkey(DIK_RETURN)) {
+                name = 1;
             }
 
-            // 敵のAABBを取得
-            AABB enemyBox = enemy->GetAABB();
-
-            // プレイヤーと敵が衝突した場合の処理
-            if (CheckCollisionAABB(playerBox, enemyBox) && !enemy->GetisDead()) {
-                enemy->OnCollision();  // 敵が衝突した際の処理
-                enemycount++;
+            player->SetTranslate(Vector3{0.0f,0.0f,0.0f});
+            enemycount = 0;
+            for (Enemy* enemy : enemys) {
+                enemy->SetisDead(false);
             }
-            enemy->Update();
-            // インクリメントして次へ
-            ++index;
+
+            break;
+        case Game:
+            // シーン移動
+            if (enemycount == 5) {
+                name = 2;
+            }
+
+            // プレイヤーの更新処理
+            player->Update();
+
+            AABB playerBox = player->GetAABB();  // プレイヤーのAABB
+
+            // 敵の更新
+            for (Enemy* enemy : enemys) {
+                // 敵のAABBを取得
+                AABB enemyBox = enemy->GetAABB();
+                // プレイヤーと敵が衝突した場合の処理
+                if (CheckCollisionAABB(playerBox, enemyBox) && !enemy->GetisDead()) {
+                    enemy->OnCollision();  // 敵が衝突した際の処理
+                    enemycount++;
+                }
+                enemy->Update();          
+            }
+
+
+            break;
+        case Criea:
+            // シーン移動
+            if (input->Pushkey(DIK_R)) {
+                name = 0;
+            }
+
+            break;
         }
 
         // 天球の更新
@@ -232,7 +260,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*--------------------------------------Spriteの更新処理の開始----------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------*/
 
-        sprite->Update();
+        switch (name) {
+        case Title:
+
+
+            break;
+        case Game:
+
+         
+            break;
+        case Criea:
+
+            sprite->Update();
+
+            break;
+        }
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理の終了----------------------------------------------*/
@@ -256,14 +298,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 天球の描画
         skydome->Draw();
 
-        // プレイヤーの描画処理
-        player->Draw();
 
-        // 敵の描画処理
-        for (Enemy* enemy : enemys) {
-            enemy->Draw();
+        switch (name) {
+        case Title:
+
+
+            break;
+        case Game:
+
+
+            // プレイヤーの描画処理
+            player->Draw();
+
+            // 敵の描画処理
+            for (Enemy* enemy : enemys) {
+                enemy->Draw();
+            }
+
+
+            break;
+        case Criea:
+
+
+            break;
         }
-
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
@@ -278,8 +336,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         spriteCommon->Commondrawing();
 #pragma region 全てのSprite個々の描画
 
-        if (enemycount == enemysize) {
-            sprite->Draw();
+        switch (name) {
+        case Title:
+
+
+            break;
+        case Game:
+           
+
+
+            break;
+        case Criea:
+
+            if (enemycount == enemysize) {
+                sprite->Draw();
+            }
+
+            break;
         }
 
 #pragma endregion 全てのSprite個々の描画

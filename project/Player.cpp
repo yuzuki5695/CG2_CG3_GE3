@@ -41,12 +41,15 @@ void Player::Update() {
 	object3d_->Update();
 	if (transform.translate.x < 34.0f) {
 		if (input_->Pushkey(DIK_D)) {
-			transform.translate.x += 0.1f;
+			transform.translate.x += moveSpeed;
+			lastDirection = { 1.0f, 0.0f, 0.0f }; // 右方向
+
 		}	
 	}
 	if (transform.translate.x > -34.0f) {
 		if (input_->Pushkey(DIK_A)) {
-			transform.translate.x -= 0.1f;
+			transform.translate.x -= moveSpeed;
+			lastDirection = { -1.0f, 0.0f, 0.0f }; // 左方向
 		}
 	}
 	if (transform.translate.x <= -34.0f) {
@@ -57,7 +60,8 @@ void Player::Update() {
 	}
 	if (transform.translate.y < 19.0f) {
 		if (input_->Pushkey(DIK_W)) {
-			transform.translate.y += 0.1f;
+			transform.translate.y += moveSpeed;
+			lastDirection = { 0.0f,1.0f, 0.0f }; // 前方向
 		}
 	}
 	if (transform.translate.y >= 19.0f) {
@@ -65,11 +69,19 @@ void Player::Update() {
 	}
 	if (transform.translate.y > -19.0f) {
 		if (input_->Pushkey(DIK_S)) {
-			transform.translate.y -= 0.1f;
+			transform.translate.y -= moveSpeed;
+			lastDirection = { 0.0f, -1.0f, 0.0f }; // 後ろ方向
 		}
 	}
 	if (transform.translate.y <= -19.0f) {
 		transform.translate.y = -19.0f + 0.1f;
+	}
+
+	// ダッシュ開始処理
+	if (input_->Pushkey(DIK_SPACE)) {
+		// ダッシュ方向に移動
+		transform.translate.x += lastDirection.x * dashSpeed;
+		transform.translate.y += lastDirection.y * dashSpeed;
 	}
 
 	// プレイヤーの位置を設定

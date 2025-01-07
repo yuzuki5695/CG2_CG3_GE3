@@ -28,6 +28,11 @@ private: // メンバ変数
 	Transform transform{};
 	// デスフラグ
 	bool isDead_ = false;
+	// プレイヤーの移動スピード
+	const float moveSpeed = 0.1f;
+	const float dashSpeed = 0.2f; // ダッシュスピード
+	Vector3 lastDirection = { 0.0f, 0.0f, 0.0f }; // 最後に押した方向を記録する変数
+
 public:
 	// getter
 	const Vector3& GetScale() const { return transform.scale; }

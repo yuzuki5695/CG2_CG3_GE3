@@ -35,4 +35,5 @@ public:
 	void SetScale(const Vector3& scale) { this->transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { this->transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { this->transform.translate = translate; }
+	void SetisDead(const bool& isDead) { this->isDead_ = isDead; }
 };
