@@ -63,8 +63,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/title.png");
     std::string TexturePath01 = "Resources/uvChecker.png";
     std::string TexturePath02 = "Resources/monsterBall.png";
+    std::string TexturePath03 = "Resources/title.png";
    
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadTexture("plane.obj");
@@ -103,8 +105,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
-    Sprite* sprite = new Sprite;
-    sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
+    Sprite* Titlesprite = new Sprite;
+    Titlesprite->Initialize(spriteCommon,TexturePath03);
+    Titlesprite->SetTextureSize(Vector2{ 446.0f,98.0f });
+    Titlesprite->SetSize(Vector2{ 446.0f,98.0f });
+    Titlesprite->SetPosition(Vector2{405.0f,150.0f});
 
     // プレイヤーの初期化
     Player* player = new Player;
@@ -180,13 +185,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::Begin("Camera");
         ImGui::InputInt("Enemy kill", &enemycount);
         ImGui::DragFloat3("skyPos", &pos.x, 0.1f);
-        skydome->SetScale(pos);
-        //// カメラの位置を編集
-        //ImGui::Text("Camera Transform");
-        //ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
-        //ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
-        //ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
-        //ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
+        skydome->SetScale(pos);;
         ImGui::End();
 
         //ImGuiの描画コマンドを生成
@@ -272,6 +271,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         switch (name) {
         case Title:
 
+            Titlesprite->Update();
+
 
             break;
         case Game:
@@ -280,8 +281,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             break;
         case Criea:
 
-            sprite->Update();
-
+           
             break;
         }
 
@@ -348,6 +348,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         switch (name) {
         case Title:
 
+            Titlesprite->Draw();
 
             break;
         case Game:
@@ -357,9 +358,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             break;
         case Criea:
 
-            if (enemycount == enemysize) {
-                sprite->Draw();
-            }
+          //  if (enemycount == enemysize) {
+              //  Titlesprite->Draw();
+            //}//
 
             break;
         }
@@ -389,7 +390,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 汎用機能の解放
 
     // スプライトの解放
-    delete  sprite;
+    delete  Titlesprite;
     // 3Dモデルの解放
     // delete model;
     // 3Dオブジェクトの解放
