@@ -109,6 +109,13 @@ struct CameraForGPU
     Vector3 worldPosition;
 };
 
+struct PointLight
+{
+    Vector4 color; //!< ライトの色
+    Vector3 position; //!< ライトの位置
+    float intensity; //!< 輝度
+};
+
 // Fieldの範囲内のパーティクルには加速度を適用する
 bool  IsCollision(const AABB& aabb1, const  Vector3& point) {
     // AABBの最小値と最大値
@@ -820,7 +827,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
     // RootParameter作成
-    D3D12_ROOT_PARAMETER rootParameters[5] = {};
+    D3D12_ROOT_PARAMETER rootParameters[6] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
@@ -847,6 +854,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[4].Descriptor.ShaderRegister = 2;// レジスタ番号2を使う
+
+    rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
+    rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+    rootParameters[5].Descriptor.ShaderRegister = 3;// レジスタ番号3を使う
 
     // RootSignature作成
     D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -1074,6 +1085,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 単位行列を書き込んでおく
     cameraForGPUData->worldPosition = { 0.0f, 0.0f, -500.0f };
 
+    /*---------------------------------------------------------------*/
+    /*------------------------点光源のResource------------------------*/
+    /*---------------------------------------------------------------*/
+
+    // 点光源用リソースを作る
+    Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource = CreateBufferResource(device, sizeof(PointLight));
+    // 書き込むためのアドレスを取得
+    PointLight* pointLightData = nullptr;
+    pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
+    // デフォルト値
+    pointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+    pointLightData->position = { 0.0f,2.0f,0.0f };
+    pointLightData->intensity = 1.0f;
 
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -1427,15 +1451,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
             ImGui::ShowDemoWindow();
 
-            ImGui::Begin("Sprite");
+            ImGui::Begin("Settings");
+            ImGui::Text("object3d");
             ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
             ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
             ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
             ImGui::ColorEdit4("color", reinterpret_cast<float*>(materialData));
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+            ImGui::Text("Light");
             ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
             ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
+            ImGui::Text("PointLight");
+            ImGui::DragFloat3("PointLightposition", &pointLightData->position.x, 0.01f);
+            ImGui::DragFloat("PointLightintensity", &pointLightData->intensity, 0.01f);
+            ImGui::Text("Sprite");
             ImGui::DragFloat3("SpriteTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
             ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
@@ -1445,6 +1475,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::SliderFloat("camera : rotateX", &cameratransform.rotate.x,0.000f, 0.01f);
             ImGui::SliderFloat("camera : rotateY", &cameratransform.rotate.y, 0.000f, 0.01f);
             ImGui::SliderFloat("camera : rotateZ", &cameratransform.rotate.z, 0.000f, 0.01f);
+            ImGui::Text("Particle");
             if (ImGui::Button("Add Particle")) {
                 particles.splice(particles.end(), Emit(emitter, randomEngine));
             }
@@ -1608,7 +1639,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
             // カメラの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
-
+            // 点光源を設定 
+            commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+           
             // 描画！(今回は球) 
             commandList->DrawInstanced(vertexCount, 1, 0, 0);
             
