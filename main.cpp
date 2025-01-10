@@ -53,6 +53,7 @@ struct Material {
     int32_t endbleLighting;
     float padding[3];
     Matrix4x4 uvTransform;
+    float shinimess;
 };
 
 struct DirectionalLight {
@@ -100,6 +101,11 @@ struct AABB {
 struct AccelerationField {
     Vector3 scceleration;   //!< 加速度
     AABB area; //!<範囲
+};
+
+struct CameraForGPU
+{
+    Vector3 worldPosition;
 };
 
 // Fieldの範囲内のパーティクルには加速度を適用する
@@ -813,7 +819,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
     // RootParameter作成
-    D3D12_ROOT_PARAMETER rootParameters[4] = {};
+    D3D12_ROOT_PARAMETER rootParameters[5] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
@@ -836,6 +842,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[3].Descriptor.ShaderRegister = 1;// レジスタ番号1を使う
+
+    rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
+    rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+    rootParameters[4].Descriptor.ShaderRegister = 2;// レジスタ番号2を使う
 
     // RootSignature作成
     D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -889,6 +899,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     materialData->endbleLighting = true;
     // 単位行列を書き込んでおく
     materialData->uvTransform = MakeIdentity4x4();
+    //光沢度を書き込む
+    materialData->shinimess = 70;
 
     /*------------------------------------------------------------------*/
     /*----------------TransformationMatrix用のResource-------------------*/
@@ -1048,6 +1060,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 単位行列を書き込んでおく
     transformationMatrixDateSprite->World = MakeIdentity4x4();
     transformationMatrixDateSprite->WVP = MakeIdentity4x4();
+
+    /*---------------------------------------------------------------*/
+    /*-----------------------カメラ用のResource------------------------*/
+    /*---------------------------------------------------------------*/
+
+    // カメラ用リソースを作る
+    Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource = CreateBufferResource(device, sizeof(CameraForGPU));
+    // 書き込むためのアドレスを取得
+    CameraForGPU* cameraForGPUData = nullptr;
+    cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData));
+    // 単位行列を書き込んでおく
+    cameraForGPUData->worldPosition = { 0.0f, 0.0f, -500.0f };
+
 
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -1284,17 +1309,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     /*----------------------------------------------------------------------------------*/
 
      //======== ShaderをCompile ===========// 
-    //// Object3DをCompile
-    //Microsoft::WRL::ComPtr <IDxcBlob> vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-    //assert(vertexShaderBlob != nullptr);
-    //Microsoft::WRL::ComPtr <IDxcBlob> pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-    //assert(pixelShaderBlob != nullptr);
-
-    // ParticleをCompile
-    Microsoft::WRL::ComPtr <IDxcBlob> vertexShaderBlob = CompileShader(L"Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+    // Object3DをCompile
+    Microsoft::WRL::ComPtr <IDxcBlob> vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
     assert(vertexShaderBlob != nullptr);
-    Microsoft::WRL::ComPtr <IDxcBlob> pixelShaderBlob = CompileShader(L"Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+    Microsoft::WRL::ComPtr <IDxcBlob> pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
     assert(pixelShaderBlob != nullptr);
+
+    //// ParticleをCompile
+    //Microsoft::WRL::ComPtr <IDxcBlob> vertexShaderBlob = CompileShader(L"Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+    //assert(vertexShaderBlob != nullptr);
+    //Microsoft::WRL::ComPtr <IDxcBlob> pixelShaderBlob = CompileShader(L"Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+    //assert(pixelShaderBlob != nullptr);
 
     //========== PSO生成 =============//
     D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
@@ -1572,14 +1597,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // マテリアルCBufferの場所を設定
             commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
             // wvp用のCBufferの場所を設定
-            //commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
             //  instancing用のDateを読むためにStructuredBufferのSRVを設定する
-            commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
+            //commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
             //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
             //SRVを切り替えて画像を変えるS
             commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
             // 平行光源用のCBufferの場所を設定 
             commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+            // カメラの場所を設定 
+            commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
             commandList->DrawInstanced(vertexCount, 1, 0, 0);
