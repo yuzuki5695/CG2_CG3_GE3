@@ -25,6 +25,8 @@ struct PointLight
     float4 color; //!< ライトの色
     float3 position; //!< ライトの位置
     float intensity; //!< 輝度
+    float radius; //!< ライトの届く最大距離
+    float decay; //!< 減衰率
 };
 
 
@@ -91,16 +93,19 @@ PixeShaderOutput main(VertexShaderOutput input)
         gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);    
         
         float3 pointLightDirection = normalize(input.worldPosition - gPointLight.position);
+        float distance = length(gPointLight.position - input.worldPosition); // ポイントライトへの距離
+        float factor = pow(saturate(-distance / gPointLight.radius + 1.0), gPointLight.decay);  // 指数によるコントロール
+        
         // 鏡面反射（ポイントライト）
         float3 pointLightHalfVector = normalize(-pointLightDirection + toEve);
         float pointLightNDotH = dot(normalize(input.normal), pointLightHalfVector);
         float pointLightSpecularPow = pow(saturate(pointLightNDotH), gMaterial.shininess);
         // 拡散反射（ポイントライト）
         float3 pointLightDiffuse =
-        gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity;
+        gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
         // 鏡面反射（ポイントライト）
         float3 pointLightSpecular =
-        gPointLight.color.rgb * gPointLight.intensity * pointLightSpecularPow * float3(1.0f, 1.0f, 1.0f);
+        gPointLight.color.rgb * gPointLight.intensity * pointLightSpecularPow * float3(1.0f, 1.0f, 1.0f) * factor;
          
         //（ディレクショナルライト）*（ポイントライト）
         output.color.rgb = diffuse + specular + pointLightDiffuse + pointLightSpecular;

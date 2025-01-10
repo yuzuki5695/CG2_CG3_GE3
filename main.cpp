@@ -114,6 +114,9 @@ struct PointLight
     Vector4 color; //!< ライトの色
     Vector3 position; //!< ライトの位置
     float intensity; //!< 輝度
+    float radius; //!< ライトの届く最大距離
+    float decay; //!< 減衰率
+    float padding[2];
 };
 
 // Fieldの範囲内のパーティクルには加速度を適用する
@@ -1098,6 +1101,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     pointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
     pointLightData->position = { 0.0f,2.0f,0.0f };
     pointLightData->intensity = 1.0f;
+    pointLightData->radius = 10.0f;
+    pointLightData->decay = 1.0f;
 
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
