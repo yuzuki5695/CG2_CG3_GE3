@@ -29,16 +29,26 @@ struct PointLight
     float decay; //!< 減衰率
 };
 
+struct SpotLight
+{
+    float4 color; //!< ライトの色
+    float3 position; //!< ライトの位置
+    float intensity; //!< 輝度
+    float3 direction; //!< スポットライトの向き
+    float radius; //!< ライトの届く最大距離
+    float decay; //!< 減衰率
+    float cosAngle; //!< スポットライトの余弦
+};
 
 ConstantBuffer<Material> gMaterial : register(b0);
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
 ConstantBuffer<Camera> gCamera : register(b2);
 ConstantBuffer<PointLight> gPointLight : register(b3);
+ConstantBuffer<SpotLight> gSpotLight : register(b4);
 
 struct PixeShaderOutput
 {
-    float4 color : SV_TARGET0;
-    
+    float4 color : SV_TARGET0;   
 };
 
 Texture2D<float4> gTexture : register(t0);
