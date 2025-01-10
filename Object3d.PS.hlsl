@@ -66,10 +66,14 @@ PixeShaderOutput main(VertexShaderOutput input)
         float cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
         float3 toEve = normalize(gCamera.worldPosition - input.worldPosition);
         
-        float3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
-        float RdotE = dot(reflectLight, toEve);
-        float specularPow = pow(saturate(RdotE), gMaterial.shininess); // 反射強度
+        //float3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
+        //float RdotE = dot(reflectLight, toEve);
+        //float specularPow = pow(saturate(RdotE), gMaterial.shininess); // 反射強度
         
+        float3 halfVector = normalize(-gDirectionalLight.direction + toEve);
+        float NDotH = dot(normalize(input.normal), halfVector);
+        float specularPow = pow(saturate(NDotH), gMaterial.shininess); // 反射強度
+         
         // 拡散反射
         float3 diffuse =
         gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
