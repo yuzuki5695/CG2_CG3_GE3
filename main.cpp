@@ -125,7 +125,7 @@ struct SpotLight
     Vector3 position; //!< ライトの位置
     float intensity; //!< 輝度
     Vector3 direction; //!< スポットライトの向き
-    float radius; //!< ライトの届く最大距離
+    float distance; //!< ライトの届く最大距離
     float decay; //!< 減衰率
     float cosAngle;  //!< スポットライトの余弦
     float padding[2];
@@ -842,7 +842,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
     // RootParameter作成
-    D3D12_ROOT_PARAMETER rootParameters[6] = {};
+    D3D12_ROOT_PARAMETER rootParameters[7] = {};
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
@@ -873,6 +873,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
     rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[5].Descriptor.ShaderRegister = 3;// レジスタ番号3を使う
+
+    rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
+    rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+    rootParameters[6].Descriptor.ShaderRegister = 4;// レジスタ番号4を使う
 
     // RootSignature作成
     D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -1115,6 +1119,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     pointLightData->intensity = 1.0f;
     pointLightData->radius = 10.0f;
     pointLightData->decay = 1.0f;
+
+
+    /*---------------------------------------------------------------*/
+    /*------------------スポットライトのResource-----------------------*/
+    /*--------------------------------------------------------------*/
+
+    // スポットライトリソースを作る
+    Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource = CreateBufferResource(device, sizeof(SpotLight));
+    // 書き込むためのアドレスを取得
+    SpotLight* spotLightData = nullptr;
+    spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+    // デフォルト値
+    spotLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+    spotLightData->position = { 2.0f,1.25f,0.0f };
+    spotLightData->distance = 7.0f;
+    spotLightData->direction =
+        Normalize({ -1.0f,-1.0f,0.0f });
+    spotLightData->intensity = 4.0f;
+    spotLightData->decay = 2.0f;
+    spotLightData->cosAngle =
+        std::cos(std::numbers::pi_v<float> / 3.0f);
 
     /*-----------------------------------------------------------------------------------*/
     /*--------------------------------Resourceの作成終了-----------------------------------*/
@@ -1658,7 +1683,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
             // 点光源を設定 
             commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
-           
+            // スポットライトを設定 
+            //commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
+
             // 描画！(今回は球) 
             commandList->DrawInstanced(vertexCount, 1, 0, 0);
             

@@ -86,40 +86,55 @@ PixeShaderOutput main(VertexShaderOutput input)
         float Ndont = dot(normalize(input.normal), -gDirectionalLight.direction);
         float cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
         float3 toEve = normalize(gCamera.worldPosition - input.worldPosition);
-        
-        //float3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
-        //float RdotE = dot(reflectLight, toEve);
-        //float specularPow = pow(saturate(RdotE), gMaterial.shininess); // 反射強度
-        
-        // 鏡面反射（ハーフベクトル法）
-        float3 halfVector = normalize(-gDirectionalLight.direction + toEve);
-        float NDotH = dot(normalize(input.normal), halfVector);
-        float specularPow = pow(saturate(NDotH), gMaterial.shininess); // 反射強度 
+                
         // 拡散反射（ディレクショナルライト）
         float3 diffuse =
         gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         // 鏡面反射（ディレクショナルライト）
+        float3 halfVector = normalize(-gDirectionalLight.direction + toEve);
+        float NDotH = dot(normalize(input.normal), halfVector);
+        float specularPow = pow(saturate(NDotH), gMaterial.shininess); // 反射強度
         float3 specular =
-        gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);    
+        gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
         
         float3 pointLightDirection = normalize(input.worldPosition - gPointLight.position);
+
+        // 拡散反射（ポイントライト）
         float distance = length(gPointLight.position - input.worldPosition); // ポイントライトへの距離
-        float factor = pow(saturate(-distance / gPointLight.radius + 1.0), gPointLight.decay);  // 指数によるコントロール
-        
+        float factor = pow(saturate(-distance / gPointLight.radius + 1.0), gPointLight.decay); // 指数によるコントロール
+        float3 pointLightDiffuse =
+        gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
         // 鏡面反射（ポイントライト）
         float3 pointLightHalfVector = normalize(-pointLightDirection + toEve);
         float pointLightNDotH = dot(normalize(input.normal), pointLightHalfVector);
         float pointLightSpecularPow = pow(saturate(pointLightNDotH), gMaterial.shininess);
-        // 拡散反射（ポイントライト）
-        float3 pointLightDiffuse =
-        gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
-        // 鏡面反射（ポイントライト）
         float3 pointLightSpecular =
         gPointLight.color.rgb * gPointLight.intensity * pointLightSpecularPow * float3(1.0f, 1.0f, 1.0f) * factor;
          
-        //（ディレクショナルライト）*（ポイントライト）
+        //// スポットライト
+        //float3 spotLightDirectionOnSurface = normalize(input.worldPosition - gSpotLight.position);
+        //float cosAngle = dot(spotLightDirectionOnSurface, gSpotLight.direction);
+        //float falloffFactor = saturate((cos - gSpotLight.cosAngle) / (1.0f - gSpotLight.cosAngle));
+        
+        
+        //float diffuseIntensity = max(dot(normalize(input.normal), -spotLightDirectionOnSurface), 0.0f);
+        
+        //float3 spotLighthalfVector = normalize(-spotLightDirectionOnSurface + toEye);
+        //float spotLightNDotH = dot(normalize(input.normal), spotLighthalfVector);
+        //float spotLightspecularIntensity = pow(saturate(spotLightNDotH), gMaterial.shininess);
+        
+        //// 拡散反射（スポットライト）
+        //float3 spotLightDiffuse =
+        //gSpotLight.color.rgb * gSpotLight.intensity * diffuseIntensity * falloffFactor;
+        
+        //// 鏡面反射（スポットライト）
+        //float3 spotLightspecular =
+        //gSpotLight.color.rgb * gSpotLight.intensity * spotLightspecularIntensity * falloffFactor;
+       
+        
+        
+        // ライト
         output.color.rgb = diffuse + specular + pointLightDiffuse + pointLightSpecular;
-        //output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         output.color.a = gMaterial.color.a * textureColor.a;
     }
     else
