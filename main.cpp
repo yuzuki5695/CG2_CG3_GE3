@@ -128,6 +128,7 @@ struct SpotLight
     float distance; //!< ライトの届く最大距離
     float decay; //!< 減衰率
     float cosAngle;  //!< スポットライトの余弦
+    float cosFalloffStart;
     float padding[2];
 };
 
@@ -1138,6 +1139,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         Normalize({ -1.0f,-1.0f,0.0f });
     spotLightData->intensity = 4.0f;
     spotLightData->decay = 2.0f;
+    spotLightData->cosFalloffStart = 1.0f;
     spotLightData->cosAngle =
         std::cos(std::numbers::pi_v<float> / 3.0f);
 
@@ -1445,7 +1447,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
+    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,4.7f,0.0f},{0.0f,0.0f,0.0f} };
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-800.0f} };
     // Transform  cameratransform{ {1.0f,1.0f,1.0f},{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},{0.0f,0.0f,-500.0f} };
@@ -1502,11 +1504,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
             ImGui::Checkbox("useMonsterBall", &useMonsterBall);
             ImGui::Text("Light");
-            ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
-            ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
+            ImGui::DragFloat3("Light : Direction", &directionalLightDate->direction.x, 0.01f);
+            ImGui::DragFloat("Light : Intensity", &directionalLightDate->intensity, 0.01f);
             ImGui::Text("PointLight");
-            ImGui::DragFloat3("PointLightposition", &pointLightData->position.x, 0.01f);
-            ImGui::DragFloat("PointLightintensity", &pointLightData->intensity, 0.01f);
+            ImGui::DragFloat3("PointLight : Position", &pointLightData->position.x, 0.01f);
+            ImGui::DragFloat("PointLight : Intensity", &pointLightData->intensity, 0.01f);
+            ImGui::DragFloat("PointLight : Radius", &pointLightData->radius, 0.01f);
+            ImGui::DragFloat("PointLight : Decay", &pointLightData->decay, 0.01f);
+            ImGui::Text("SpotLight");
+            ImGui::DragFloat3("Sposition : Position", &spotLightData->position.x, 0.01f);
+            ImGui::DragFloat("SpotLight : Intensity", &spotLightData->intensity, 0.01f);
+            ImGui::DragFloat3("SpotLight : Direction", &spotLightData->direction.x, 0.01f);
+            ImGui::DragFloat("SpotLight : Decay", &spotLightData->decay, 0.01f);
+            ImGui::DragFloat("SpotLight : CosAngle", &spotLightData->cosAngle, 0.01f);
+            ImGui::DragFloat("SpotLight : CosFalloffStart", &spotLightData->cosFalloffStart, 0.01f);
             ImGui::Text("Sprite");
             ImGui::DragFloat3("SpriteTranslate", (&transformSprite.translate.x));
             ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
@@ -1684,7 +1695,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             // 点光源を設定 
             commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
             // スポットライトを設定 
-            //commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
+            commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
             commandList->DrawInstanced(vertexCount, 1, 0, 0);
