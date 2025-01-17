@@ -133,7 +133,7 @@ PixeShaderOutput main(VertexShaderOutput input)
         float3 spotLightDiffuse =
         gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * attenuationFactor * gSpotLight.intensity * spotLightfactor;
         
-        // 鏡面反射（ポイントライト）
+        // 鏡面反射（スポットライト）
         float3 spotLightHalfVector = normalize(-spotLightDiffuse + toEve);
         float spotLightNDotH = dot(normalize(input.normal), spotLightHalfVector);
         float spotLightSpecularPow = pow(saturate(spotLightNDotH), gMaterial.shininess);
