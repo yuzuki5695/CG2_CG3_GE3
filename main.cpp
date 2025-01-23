@@ -978,7 +978,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // デフォルト値はとりあえず以下のようにして置く
     directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
-    directionalLightDate->intensity = 1.0f;
+    directionalLightDate->intensity = 0.0f;
 
     /*---------------------------------------------------------------*/
     /*--------------------Instancing用のResource----------------------*/
@@ -1117,7 +1117,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // デフォルト値
     pointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
     pointLightData->position = { 0.0f,2.0f,0.0f };
-    pointLightData->intensity = 1.0f;
+    pointLightData->intensity = 0.0f;
     pointLightData->radius = 10.0f;
     pointLightData->decay = 1.0f;
 

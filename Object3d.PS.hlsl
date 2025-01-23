@@ -84,7 +84,7 @@ PixeShaderOutput main(VertexShaderOutput input)
     if (gMaterial.endbleLighting != 0)
     { // Linhthingする場合
         // half lambert
-        float Ndont = dot(normalize(input.normal), -gDirectionalLight.direction);
+        float Ndont = dot(normalize(input.normal), normalize(-gDirectionalLight.direction));
         float cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
         float3 toEve = normalize(gCamera.worldPosition - input.worldPosition);
         
@@ -101,10 +101,15 @@ PixeShaderOutput main(VertexShaderOutput input)
         float3 specular =
         gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
 
+        
         ///-----------------------------------------------------------------------------------///
         ///----------------------------------ポイントライト-------------------------------------///
         ///-----------------------------------------------------------------------------------///
-        float3 pointLightDirection = normalize(input.worldPosition - gPointLight.position);
+        
+        float3 pointLightDirection = normalize(input.worldPosition - gPointLight.position); 
+        // 再計算
+        Ndont = dot(normalize(input.normal), -pointLightDirection);
+        cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
         
         // 拡散反射（ポイントライト）
         float distance = length(gPointLight.position - input.worldPosition); // ポイントライトへの距離
@@ -122,6 +127,11 @@ PixeShaderOutput main(VertexShaderOutput input)
         ///-----------------------------------------------------------------------------------///
         ///----------------------------------スポットライト-------------------------------------///
         ///-----------------------------------------------------------------------------------///
+        
+        // 再計算
+        Ndont = dot(normalize(input.normal), -gSpotLight.direction);
+        cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
+        
         float3 spotLightDirectionOnSurface = normalize(input.worldPosition - gSpotLight.position);
         float cosAngle = dot(spotLightDirectionOnSurface, gSpotLight.direction);
         float falloffFactor = saturate((cosAngle - gSpotLight.cosAngle) / (gSpotLight.cosFalloffStart - gSpotLight.cosAngle));
