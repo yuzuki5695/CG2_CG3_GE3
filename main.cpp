@@ -21,6 +21,9 @@
 #include"ResourceObject.h"
 #include<random>
 #include<numbers>
+#include<assimp/Importer.hpp>
+#include<assimp/scene.h>
+#include<assimp/postprocess.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -241,6 +244,51 @@ ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filen
         }
     }
     // 4. ModelDateを返す
+    return modelDate;
+}
+
+ModelDate LoadObjFile2(const std::string& directoryPath, const std::string& filename) {
+    ModelDate modelDate; // 構築するModelDate
+    Assimp::Importer importer;
+    std::string filePath = directoryPath + "/" + filename;
+    const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+    assert(scene->HasMeshes()); // メッシュがないのは対応しない
+    // meshを解析する
+    for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++ meshIndex){
+        aiMesh* mesh = scene->mMeshes[meshIndex];
+        assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
+        assert(mesh->HasTextureCoords(0)); // TexcoordがないMeshは今回は非対応
+        // ここからMeshの中身(Face)の解析を行っていく
+        for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
+            aiFace face = mesh->mFaces[faceIndex];
+            //  ここからFaceの中身(Vertex)の解析を行っていく
+
+            for (uint32_t element = 0; element < face.mNumIndices; ++ element) {
+                uint32_t vertexIndex = face.mIndices[element];
+                aiVector3D& position = mesh->mVertices[vertexIndex];
+                aiVector3D& normal = mesh->mNormals[vertexIndex];
+                aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+                VertexData vertex;
+                vertex.position = { position.x,position.y,position.z,1.0f };
+                vertex.normal = { normal.x,normal.y,normal.z };
+                vertex.texcoord = { texcoord.x,texcoord.y };
+                // aiProcess_MakeLeftHandedはz*=-1で、右手->左手に変化するので手動で対処
+                vertex.position.x *= -1.0f;
+                vertex.normal.x *= -1.0f;
+                modelDate.vertices.push_back(vertex);
+            }
+        }
+    }
+
+    for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
+        aiMaterial* material = scene->mMaterials[materialIndex];
+        if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
+            aiString textureFilePath;
+            material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+            modelDate.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
+        }
+    }
+
     return modelDate;
 }
 
@@ -1006,7 +1054,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み(axis or plane or fence)
-    ModelDate modelDate = LoadObjFile("Resources", "plane.obj");
+    ModelDate modelDate = LoadObjFile2("Resources", "plane.obj");
 
     // 関数化したResouceで作成
     //Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
