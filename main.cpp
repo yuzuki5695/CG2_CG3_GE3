@@ -135,6 +135,36 @@ struct SpotLight
     float padding[2];
 };
 
+
+struct Node {
+    Matrix4x4 localMatrix;
+    std::string name;
+    std::vector<Node> children;
+};
+
+struct glTFModelData {
+    std::vector<VertexData> vertices;
+    MaterialDate material;
+    Node rootNode;
+};
+
+Node ReadNode(aiNode* node) {
+    Node result;
+    aiMatrix4x4 aiLocalMatrix = node->mTransformation; // nodeのlocalMatrixを取得
+    aiLocalMatrix.Transpose(); // 列ベクトル形式を行ベクトル形式に転置
+    result.localMatrix.m[0][0] = aiLocalMatrix[0][0];
+    //
+    result.name = node->mName.C_Str(); // Node名を格納
+    result.children.resize(node->mNumChildren); // 子供の数だけ確保
+    for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex) {
+        // 再帰的に読んで階層構造を作っていく
+        result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
+    }
+    return result;
+}
+
+
+
 // Fieldの範囲内のパーティクルには加速度を適用する
 bool  IsCollision(const AABB& aabb1, const  Vector3& point) {
     // AABBの最小値と最大値
@@ -247,14 +277,15 @@ ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filen
     return modelDate;
 }
 
-ModelDate LoadObjFile2(const std::string& directoryPath, const std::string& filename) {
-    ModelDate modelDate; // 構築するModelDate
+glTFModelData LoadModelFile(const std::string& directoryPath, const std::string& filename) {
+    glTFModelData modelData; // 構築するModelDate
     Assimp::Importer importer;
     std::string filePath = directoryPath + "/" + filename;
     const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
     assert(scene->HasMeshes()); // メッシュがないのは対応しない
+    modelData.rootNode = ReadNode(scene->mRootNode);
     // meshを解析する
-    for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++ meshIndex){
+    for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
         aiMesh* mesh = scene->mMeshes[meshIndex];
         assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
         assert(mesh->HasTextureCoords(0)); // TexcoordがないMeshは今回は非対応
@@ -263,7 +294,7 @@ ModelDate LoadObjFile2(const std::string& directoryPath, const std::string& file
             aiFace face = mesh->mFaces[faceIndex];
             //  ここからFaceの中身(Vertex)の解析を行っていく
 
-            for (uint32_t element = 0; element < face.mNumIndices; ++ element) {
+            for (uint32_t element = 0; element < face.mNumIndices; ++element) {
                 uint32_t vertexIndex = face.mIndices[element];
                 aiVector3D& position = mesh->mVertices[vertexIndex];
                 aiVector3D& normal = mesh->mNormals[vertexIndex];
@@ -275,7 +306,7 @@ ModelDate LoadObjFile2(const std::string& directoryPath, const std::string& file
                 // aiProcess_MakeLeftHandedはz*=-1で、右手->左手に変化するので手動で対処
                 vertex.position.x *= -1.0f;
                 vertex.normal.x *= -1.0f;
-                modelDate.vertices.push_back(vertex);
+                modelData.vertices.push_back(vertex);
             }
         }
     }
@@ -285,13 +316,11 @@ ModelDate LoadObjFile2(const std::string& directoryPath, const std::string& file
         if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
             aiString textureFilePath;
             material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-            modelDate.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
+            modelData.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
         }
     }
-
-    return modelDate;
+    return modelData;
 }
-
 
 //ウィンドウプロージャー
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -1054,21 +1083,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み(axis or plane or fence)
-    ModelDate modelDate = LoadObjFile2("Resources", "plane.obj");
+    //ModelDate modelData = LoadObjFile("Resources", "plane.obj");
+
+    // モデル読み込み(axis or plane or fence)
+    glTFModelData modelData = LoadModelFile("Resources", "axis.obj");
 
     // 関数化したResouceで作成
-    //Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
+    Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 
     // 関数化したResouceで作成
-     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
+    // Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
 
     //頂点バッファビューを作成する
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
     // リソースの先頭のアドレスから使う
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
     // 使用するリソースのサイズはの頂点のサイズ
-    //vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelDate.vertices.size());
-    vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
+    vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+    //vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
 
     // 1頂点当たりのサイズ
     vertexBufferView.StrideInBytes = sizeof(VertexData);
@@ -1078,10 +1110,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //書き込むためのアドレスを取得
     vertexResoruce->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
     // 頂点データをリソースにコピー
-    //std::memcpy(vertexData, modelDate.vertices.data(), sizeof(VertexData) * modelDate.vertices.size());
+    std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
     // 球の頂点にデータを入力
-    DrawSphere(kSubdivision, vertexData);
+    //DrawSphere(kSubdivision, vertexData);
 
     /*-------------------------------------------------------*/
     /*----------------------spriteのデータ---------------------*/
@@ -1278,10 +1310,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UploadTextureData(textureResource, mipImages);
 
     //2枚目のTextureを読んで転送する
-    DirectX::ScratchImage mipImages2 = LoadTexture("Resources/monsterBall.png");
+    //DirectX::ScratchImage mipImages2 = LoadTexture("Resources/monsterBall.png");
     
     //modelDate.material.textureFilePath = "Resources/circle.png";
-    //DirectX::ScratchImage mipImages2 = LoadTexture(modelDate.material.textureFilePath);
+    DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
     const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
     Microsoft::WRL::ComPtr <ID3D12Resource> textureResource2 = CreateTextureResource(device, metadata2);
     UploadTextureData(textureResource2, mipImages2);
@@ -1495,7 +1527,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,4.7f,0.0f},{0.0f,0.0f,0.0f} };
+    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.2f,0.0f},{0.0f,0.0f,0.0f} };
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-800.0f} };
     // Transform  cameratransform{ {1.0f,1.0f,1.0f},{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},{0.0f,0.0f,-500.0f} };
@@ -1596,9 +1628,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             Matrix4x4 cameraMatrix = MakeAftineMatrix(cameratransform.scale, cameratransform.rotate, cameratransform.translate);
             Matrix4x4 viewMatrix = Inverse(cameraMatrix);
             Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
-            Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
-            transformationMatrixData->World = worludMatrix;
-            transformationMatrixData->WVP = worldViewProjectionMatrix;
+            Matrix4x4 viewprojectionMatrix = Multiply(viewMatrix, projectionMatrix);
+            Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, viewprojectionMatrix);
+          /*  transformationMatrixData->World = worludMatrix;
+            transformationMatrixData->WVP = worldViewProjectionMatrix;*/
+
+             transformationMatrixData->World = Multiply(modelData.rootNode.localMatrix, worludMatrix); // ローカル座標 -> グローバル座標
+             transformationMatrixData->WVP = Multiply(modelData.rootNode.localMatrix, worldViewProjectionMatrix); // 正しい WVP 行列
+
+
 
             /*--------------------------------------------------*/
             /*----------InstanceのTransforms用の行列を作る--------*/
@@ -1746,10 +1784,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
-            commandList->DrawInstanced(vertexCount, 1, 0, 0);
+            //commandList->DrawInstanced(vertexCount, 1, 0, 0);
             
             // 描画！6頂点の板ポリゴンを、kNumInstance(今回は10)だけInstance描画を行う
             //commandList->DrawInstanced(UINT(modelDate.vertices.size()), numInstance, 0, 0);
+
+            // 描画！(今回は球) 
+            commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
