@@ -1089,7 +1089,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //ModelDate modelData = LoadObjFile("Resources", "plane.obj");
 
     // モデル読み込み(axis or plane or fence)
-    glTFModelData modelData = LoadModelFile("Resources", "plane.obj");
+    glTFModelData modelData = LoadModelFile("Resources", "plane.gltf");
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
