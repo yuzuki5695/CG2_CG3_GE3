@@ -442,8 +442,6 @@ Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(
     return shaderBlob;
 }
 
-
-
 Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> CreateDescriptorHeap(
     Microsoft::WRL::ComPtr <ID3D12Device> device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
 {
@@ -763,7 +761,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //ウィンドウの生成
     HWND hwnd = CreateWindow(
         wc.lpszClassName,        //利用するクラス名
-        L"CG2",                  //タイトルバーの文字
+        L"LE2C_09_オノデラユヅキ", //タイトルバーの文字
         WS_OVERLAPPEDWINDOW,     //よく見るウィンドウスタイル
         CW_USEDEFAULT,           //表示X座標(Windowsに任せる)
         CW_USEDEFAULT,           //表示Y座標(WindowsOSに任せる)
