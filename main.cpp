@@ -1054,7 +1054,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     uint32_t vertexCount = kSubdivision * kSubdivision * 6; //球の頂点数
 
     // モデル読み込み(axis or plane or fence)
-    ModelDate modelDate = LoadObjFile2("Resources", "plane.obj");
+    ModelDate modelDate = LoadObjFile2("Resources", "plane.obj"); 
 
     // 関数化したResouceで作成
     //Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelDate.vertices.size());
