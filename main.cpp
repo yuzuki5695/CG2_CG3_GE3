@@ -1090,18 +1090,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     glTFModelData modelData = LoadModelFile("Resources", "plane.obj");
 
     // 関数化したResouceで作成
-    Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
+    //Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 
     // 関数化したResouceで作成
-    // Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
+     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * vertexCount);
 
     //頂点バッファビューを作成する
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
     // リソースの先頭のアドレスから使う
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
     // 使用するリソースのサイズはの頂点のサイズ
-    vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
-    //vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
+    //vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+    vertexBufferView.SizeInBytes = sizeof(VertexData) * vertexCount;
 
     // 1頂点当たりのサイズ
     vertexBufferView.StrideInBytes = sizeof(VertexData);
@@ -1111,10 +1111,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //書き込むためのアドレスを取得
     vertexResoruce->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
     // 頂点データをリソースにコピー
-    std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+    //std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
     // 球の頂点にデータを入力
-    //DrawSphere(kSubdivision, vertexData);
+    DrawSphere(kSubdivision, vertexData);
 
     /*-------------------------------------------------------*/
     /*----------------------spriteのデータ---------------------*/
@@ -1311,10 +1311,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UploadTextureData(textureResource, mipImages);
 
     //2枚目のTextureを読んで転送する
-    //DirectX::ScratchImage mipImages2 = LoadTexture("Resources/monsterBall.png");
+    DirectX::ScratchImage mipImages2 = LoadTexture("Resources/monsterBall.png");
     
     //modelDate.material.textureFilePath = "Resources/circle.png";
-    DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
+    //DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
     const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
     Microsoft::WRL::ComPtr <ID3D12Resource> textureResource2 = CreateTextureResource(device, metadata2);
     UploadTextureData(textureResource2, mipImages2);
@@ -1528,7 +1528,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.2f,0.0f},{0.0f,0.0f,0.0f} };
+    Transform transform{ {1.0f,1.0f,1.0f},{0.0f,4.7f,0.0f},{0.0f,0.0f,0.0f} };
     Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-800.0f} };
     // Transform  cameratransform{ {1.0f,1.0f,1.0f},{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},{0.0f,0.0f,-500.0f} };
@@ -1784,13 +1784,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
             // 描画！(今回は球) 
-            //commandList->DrawInstanced(vertexCount, 1, 0, 0);
+            commandList->DrawInstanced(vertexCount, 1, 0, 0);
             
             // 描画！6頂点の板ポリゴンを、kNumInstance(今回は10)だけInstance描画を行う
             //commandList->DrawInstanced(UINT(modelDate.vertices.size()), numInstance, 0, 0);
 
             // 描画！(今回は球) 
-            commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+            //commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
             /*---------------------------------------------------*/
             /*-------------------2dの描画コマンド開始---------------*/
