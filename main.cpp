@@ -152,8 +152,10 @@ Node ReadNode(aiNode* node) {
     Node result;
     aiMatrix4x4 aiLocalMatrix = node->mTransformation; // nodeのlocalMatrixを取得
     aiLocalMatrix.Transpose(); // 列ベクトル形式を行ベクトル形式に転置
-    result.localMatrix.m[0][0] = aiLocalMatrix[0][0];
-    //
+    result.localMatrix.m[0][0] = aiLocalMatrix[0][0]; result.localMatrix.m[0][1] = aiLocalMatrix[0][1]; result.localMatrix.m[0][2] = aiLocalMatrix[0][2]; result.localMatrix.m[0][3] = aiLocalMatrix[0][3];
+    result.localMatrix.m[1][0] = aiLocalMatrix[1][0]; result.localMatrix.m[1][1] = aiLocalMatrix[1][1]; result.localMatrix.m[1][2] = aiLocalMatrix[1][2]; result.localMatrix.m[1][3] = aiLocalMatrix[1][3];
+    result.localMatrix.m[2][0] = aiLocalMatrix[2][0]; result.localMatrix.m[2][1] = aiLocalMatrix[2][1]; result.localMatrix.m[2][2] = aiLocalMatrix[2][2]; result.localMatrix.m[2][3] = aiLocalMatrix[2][3];
+    result.localMatrix.m[3][0] = aiLocalMatrix[3][0]; result.localMatrix.m[3][1] = aiLocalMatrix[3][1]; result.localMatrix.m[3][2] = aiLocalMatrix[3][2]; result.localMatrix.m[3][3] = aiLocalMatrix[3][3];
     result.name = node->mName.C_Str(); // Node名を格納
     result.children.resize(node->mNumChildren); // 子供の数だけ確保
     for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex) {
@@ -283,7 +285,6 @@ glTFModelData LoadModelFile(const std::string& directoryPath, const std::string&
     std::string filePath = directoryPath + "/" + filename;
     const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
     assert(scene->HasMeshes()); // メッシュがないのは対応しない
-    modelData.rootNode = ReadNode(scene->mRootNode);
     // meshを解析する
     for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
         aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -319,6 +320,8 @@ glTFModelData LoadModelFile(const std::string& directoryPath, const std::string&
             modelData.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
         }
     }
+
+    modelData.rootNode = ReadNode(scene->mRootNode);
     return modelData;
 }
 
@@ -1055,7 +1058,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // デフォルト値はとりあえず以下のようにして置く
     directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
-    directionalLightDate->intensity = 0.0f;
+    directionalLightDate->intensity = 1.0f;
 
     /*---------------------------------------------------------------*/
     /*--------------------Instancing用のResource----------------------*/
@@ -1086,7 +1089,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     //ModelDate modelData = LoadObjFile("Resources", "plane.obj");
 
     // モデル読み込み(axis or plane or fence)
-    glTFModelData modelData = LoadModelFile("Resources", "axis.obj");
+    glTFModelData modelData = LoadModelFile("Resources", "plane.obj");
 
     // 関数化したResouceで作成
     Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
@@ -1197,7 +1200,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // デフォルト値
     pointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
     pointLightData->position = { 0.0f,2.0f,0.0f };
-    pointLightData->intensity = 0.0f;
+    pointLightData->intensity = 1.0f;
     pointLightData->radius = 10.0f;
     pointLightData->decay = 1.0f;
 
@@ -1633,9 +1636,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
           /*  transformationMatrixData->World = worludMatrix;
             transformationMatrixData->WVP = worldViewProjectionMatrix;*/
 
-             transformationMatrixData->World = Multiply(modelData.rootNode.localMatrix, worludMatrix); // ローカル座標 -> グローバル座標
              transformationMatrixData->WVP = Multiply(modelData.rootNode.localMatrix, worldViewProjectionMatrix); // 正しい WVP 行列
-
+             transformationMatrixData->World = Multiply(modelData.rootNode.localMatrix, worludMatrix); // ローカル座標 -> グローバル座標
 
 
             /*--------------------------------------------------*/
