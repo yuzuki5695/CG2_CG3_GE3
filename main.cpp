@@ -773,6 +773,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         dxCommon->PostDrow();
     }
 
+
+    // ComPtrを扱っていないものの解放処理
+    mipImages.Release();
+    mipImages2.Release();
+
+
     // シーンの解放
 
 
@@ -790,11 +796,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     winApp->Finalize();
     // WindowsAPIの解放
     delete winApp;
-
-    // ComPtrを扱っていないものの解放処理
-    mipImages.Release();
-    mipImages2.Release();
-   // CloseHandle(fenceEvent);
 
     // ImGuiの終了処理。
     ImGui_ImplDX12_Shutdown();
