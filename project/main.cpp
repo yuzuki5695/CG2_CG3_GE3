@@ -6,7 +6,7 @@
 #include"Transform.h"
 #include "TextureManager.h"
 #include "SpriteCommon.h"
-#include "Sprite.h"
+#include "Sprite.h" 
 #include "Object3dCommon.h"
 #include "Object3d.h"
 #include "ModelCommon.h"
