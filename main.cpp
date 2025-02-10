@@ -14,6 +14,8 @@
 #include "Input.h"
 #include "DirectXCommon.h"
 #include"D3DResourceLeakChecker.h"
+#include "Sprite.h"
+#include "SpriteCommon.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -258,15 +260,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 汎用機能の初期化 
 
-
-
     // 入力の初期化
     input = new Input();
     input->Initialize(winApp);
 
+#pragma region 基盤システムの初期化
+
+    SpriteCommon* spriteCommon = nullptr;
+
+    // スプライト共通部の初期化
+    spriteCommon = new SpriteCommon;
+    spriteCommon->Initialize();
+
+#pragma endregion 基盤システムの初期化
 
 
     // シーンの初期化
+
+#pragma region 最初のシーンの初期化
+
+    Sprite* sprite = new Sprite;;
+    sprite->Initialize();
+
+#pragma endregion 最初のシーンの初期化
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
@@ -753,16 +769,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         dxCommon->PostDrow();
     }
 
-
     // ComPtrを扱っていないものの解放処理
     mipImages.Release();
     mipImages2.Release();
 
     // シーンの解放
-
+    delete  spriteCommon;
 
     // 汎用機能の解放
-
+    delete  sprite;
 
     // 入力解放
     delete input;
