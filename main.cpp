@@ -256,7 +256,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     dxCommon->Initialize(winApp);
 
 
-
     // 汎用機能の初期化 
 
 
@@ -269,10 +268,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // シーンの初期化
 
-
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
 
     //DescriptorRange作成
     D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
@@ -581,7 +578,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     textureSrvHandleGPU.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     //SRVの生成
     dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
- 
+
     /*----------------------------------------------------------------------------------*/
     /*----------------------------各Descriptorの設定終了----------------------------------*/
     /*----------------------------------------------------------------------------------*/
