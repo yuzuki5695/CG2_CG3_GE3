@@ -317,10 +317,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 各処理の解放
 
-    // ImGuiの終了処理。
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
 
     // シーンの解放
     delete  spriteCommon;

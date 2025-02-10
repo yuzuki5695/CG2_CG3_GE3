@@ -15,7 +15,8 @@
 class DirectXCommon
 {
 public: // メンバ関数
-	
+	// デストラクタ
+	~DirectXCommon();
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
 
