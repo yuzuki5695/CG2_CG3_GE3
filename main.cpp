@@ -574,23 +574,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
 
     //SRVを作成するDescriptorHeapの場所を決める
-    D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = dxCommon->GetSRVCPUDescriptorHandle(0);
-    D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = dxCommon->GetSRVGPUDescriptorHandle(0);
+    D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = dxCommon->GetSRVCPUDescriptorHandle(1);
+    D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = dxCommon->GetSRVGPUDescriptorHandle(1);
     //先頭はImGuiが使っているのでその次を使う
     textureSrvHandleCPU.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     textureSrvHandleGPU.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     //SRVの生成
     dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
-
-    //SRVを作成するDescriptorHeapの場所を決める
-    D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = dxCommon->GetSRVCPUDescriptorHandle(1);
-    D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = dxCommon->GetSRVGPUDescriptorHandle(1);
-    //先頭はImGuiが使っているのでその次を使う
-    textureSrvHandleCPU2.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    textureSrvHandleGPU2.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    //SRVの生成
-    dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
-
  
     /*----------------------------------------------------------------------------------*/
     /*----------------------------各Descriptorの設定終了----------------------------------*/
@@ -637,8 +627,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
-    bool useMonsterBall = true;
-
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -668,7 +656,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
         ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
         ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
-        ImGui::Checkbox("useMonsterBall", &useMonsterBall);
         ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
         ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
         ImGui::DragFloat3("SpriteTranslate", (&transformSprite.translate.x));
@@ -734,7 +721,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
         //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
         //SRVを切り替えて画像を変えるS
-        dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
+        dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
         // 平行光源用のCBufferの場所を設定 
         dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
@@ -788,6 +775,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 入力解放
     delete input;
 
+    // Win32APIオブジェクト解放
+    CloseHandle(dxCommon->GetfenceEvent());
     // DirectXの解放
     delete dxCommon;
 
@@ -796,7 +785,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     winApp->Finalize();
     // WindowsAPIの解放
     delete winApp;
-
+    
     // ImGuiの終了処理。
     ImGui_ImplDX12_Shutdown();
     ImGui_ImplWin32_Shutdown();
