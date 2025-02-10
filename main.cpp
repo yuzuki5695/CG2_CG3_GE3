@@ -20,6 +20,8 @@
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
 
+using namespace MatrixVector;
+
 struct Transform {
     Vector3 scale;
     Vector3 rotate;
@@ -352,7 +354,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // Lightingするのでtrueを設定する
     materialData->endbleLighting = true;
     // 単位行列を書き込んでおく
-    materialData->uvTransform = MakeIdentity4x4();
+    materialData->uvTransform =  MakeIdentity4x4();
 
     /*------------------------------------------------------------------*/
     /*----------------TransformationMatrix用のResource-------------------*/

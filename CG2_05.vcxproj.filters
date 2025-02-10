@@ -114,6 +114,9 @@
     <ClCompile Include="WinApp.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
+    <ClCompile Include="MatrixVector.cpp">
+      <Filter>ソース ファイル\engine\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
