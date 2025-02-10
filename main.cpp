@@ -247,6 +247,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Input* input = nullptr;
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
+    SpriteCommon* spriteCommon = nullptr;
 
     // ウィンドウ作成
     
@@ -268,20 +269,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 基盤システムの初期化
 
-    SpriteCommon* spriteCommon = nullptr;
-
     // スプライト共通部の初期化
     spriteCommon = new SpriteCommon;
-    spriteCommon->Initialize();
+    spriteCommon->Initialize(dxCommon);
 
 #pragma endregion 基盤システムの初期化
 
-
-    // シーンの初期化
-
 #pragma region 最初のシーンの初期化
 
-    Sprite* sprite = new Sprite;;
+    Sprite* sprite = new Sprite;
     sprite->Initialize();
 
 #pragma endregion 最初のシーンの初期化
@@ -716,31 +712,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ID3D12DescriptorHeap* descriptorHeap[] = { dxCommon->GetsrvDescriptorHeap().Get()};
         dxCommon->GetCommandList()->SetDescriptorHeaps(1, descriptorHeap);
 
-
-        // 描画前処理
+        //  DirectXの描画準備。全ての描画に共通のグラフィックスコマンドを積む
         dxCommon->PreDraw();
 
-        // RootSignatureを設定。PSOに設定しているけど別途設定が必要
-        dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-        dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-        dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-        // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
-        dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        // マテリアルCBufferの場所を設定
-        dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-        // wvp用のCBufferの場所を設定
-        dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-        //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
-        //SRVを切り替えて画像を変えるS
-        dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-        // 平行光源用のCBufferの場所を設定 
-        dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+        // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
+        spriteCommon->Commondrawing();
 
-        // 描画！(今回は球) 
-        //  dxCommon->GetCommandList()->DrawInstanced(vertexCount, 1, 0, 0);
+        //// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+        //dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+        //dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+        //dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+        //// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
+        //dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        //// マテリアルCBufferの場所を設定
+        //dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        //// wvp用のCBufferの場所を設定
+        //dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+        ////SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
+        ////SRVを切り替えて画像を変えるS
+        //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+        //// 平行光源用のCBufferの場所を設定 
+        //dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
-        // 描画！(今回は球) 
-        dxCommon->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
+        //// 描画！(今回は球) 
+        ////  dxCommon->GetCommandList()->DrawInstanced(vertexCount, 1, 0, 0);
+
+        //// 描画！(今回は球) 
+        //dxCommon->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 
 
         /*---------------------------------------------------*/
