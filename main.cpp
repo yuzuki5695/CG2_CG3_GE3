@@ -778,11 +778,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     winApp->Finalize();
     // WindowsAPIの解放
     delete winApp;
-    
-    // ImGuiの終了処理。
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
 
     return 0;
 }
