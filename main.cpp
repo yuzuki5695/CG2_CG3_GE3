@@ -765,7 +765,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     mipImages.Release();
     mipImages2.Release();
 
-
     // シーンの解放
 
 
@@ -775,8 +774,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 入力解放
     delete input;
 
-    // Win32APIオブジェクト解放
-    CloseHandle(dxCommon->GetfenceEvent());
     // DirectXの解放
     delete dxCommon;
 

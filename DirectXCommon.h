@@ -15,7 +15,8 @@
 class DirectXCommon
 {
 public: // メンバ関数
-
+	// デストラクタ
+	~DirectXCommon();
 	// 初期化
 	void Initialize(WinApp* winApp);
 	// 描画前処理

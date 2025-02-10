@@ -10,6 +10,10 @@
 
 using namespace Microsoft::WRL;
 
+DirectXCommon::~DirectXCommon() {
+    CloseHandle(fenceEvent);
+}
+
 void DirectXCommon::Initialize(WinApp* winApp){
     // FPS固定初期化
     InitializeFizFPS();
