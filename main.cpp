@@ -527,8 +527,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
     Transform transform{ {1.0f,1.0f,1.0f},{0.0f,3.0f,0.0f},{0.0f,0.0f,0.0f} };
-
     Transform  cameratransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} };
+
+    std::vector<Sprite*> sprites;
+    float Position[5]{};
+    for (uint32_t i = 0; i < 5; ++i) {
+        Position[i] = 180.0f * i;
+        Sprite* sprite = new Sprite();
+        sprite->Initialize(spriteCommon);
+        sprites.push_back(sprite);
+    }
+
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -584,11 +593,68 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         transformationMatrixData->WVP = worldViewProjectionMatrix;
 
 
+        /*----------------------------------------------------------------------------------------------------*/
+        /*---------------------------------------Spriteの更新処理----------------------------------------------*/
+        /*---------------------------------------------------------------------------------------------------*/
+
+        //// 更新処理
+        //sprite->Update();
+
+        ///*--------Spriteの移動--------*/
+        //// 現在の座標を変数で受ける
+        //Vector2 position = sprite->GetPosition();
+        //// 座標を変更する
+        //position.x += 0.1f;
+        //position.y += 0.1f;
+        //// 変更を反映する
+        //sprite->SetPosition(position);
 
 
-        sprite->Update();
+        ///*--------Spriteの回転--------*/
+        //// 角度を変化させるテスト
+        //float rotation = sprite->GetRotation();
+        //rotation += 0.01f;
+        //sprite->SetRotation(rotation);
+
+        ///*--------Spriteの色--------*/
+        //// 色を変化させるテスト
+        //Vector4 color = sprite->GetColor();
+        //color.x += 0.01f;
+        //if (color.w > 1.0f) {
+        //    color.x -= 1.0f;
+        //}
+        //sprite->SetColor(color);
+
+        ///*--------Spriteのサイズ--------*/
+        //// サイズを変化させるテスト
+        //Vector2 size = sprite->GetSize();
+        //size.x += 0.1f;
+        //size.y += 0.1f;
+        //sprite->SetSize(size);
 
 
+        /*----------------------------複数Sprite----------------------------*/
+
+        // 更新処理
+        for (Sprite* sprite : sprites) {
+            sprite->Update();
+        }
+
+        /*--------複数Spriteの座標--------*/
+        // 現在の座標を変数で受ける
+        for (uint32_t i = 0; i < sprites.size(); ++i) {
+            Sprite* sprite = sprites[i];
+            // 現在の位置を取得
+            Vector2 position = sprite->GetPosition();
+            // 位置を変更する
+            position.x = Position[i];
+            // 変更した座標を設定
+            sprite->SetPosition(position);
+        }
+
+        /*----------------------------------------------------------------------------------------------------*/
+        /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
+        /*---------------------------------------------------------------------------------------------------*/
 
         // 描画用のDescriptorHeapの設定
         ID3D12DescriptorHeap* descriptorHeap[] = { dxCommon->GetsrvDescriptorHeap().Get()};
@@ -630,7 +696,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
          // Spriteの描画は常にuvCheckerにする
         dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-        sprite->Draw();
+        //sprite->Draw();
+
+          /*--------複数Spriteの描画--------*/
+        for (Sprite* sprite : sprites) {
+            sprite->Draw();
+        }
+
 
         /*---------------------------------------------------*/
         /*-------------------2dの描画コマンド終了---------------*/
@@ -653,6 +725,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 汎用機能の解放
     delete  sprite;
 
+    //sprites.clear();
+
+    for (Sprite* sprite : sprites) {
+        delete sprite;
+    }
     // 入力解放
     delete input;
 
