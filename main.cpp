@@ -258,7 +258,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 最初のシーンの初期化
 
     Sprite* sprite = new Sprite;
-    sprite->Initialize(spriteCommon, TexturePath01);
+    sprite->Initialize(spriteCommon);
+
+    sprite->Crrate(TexturePath01);
 
 #pragma endregion 最初のシーンの初期化
 
@@ -410,7 +412,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (uint32_t i = 0; i < spritesize; ++i) {
         Position[i] = 180.0f * i;
         Sprite* sprite = new Sprite();
-        sprite->Initialize(spriteCommon, TexturePath01);
+        sprite->Initialize(spriteCommon);
+        sprite->Crrate(TexturePath01);
         if (i % 2 == 1) {
             sprite->SetTexture(TexturePath02);
         }

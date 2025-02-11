@@ -38,11 +38,15 @@ public: // メンバ関数
 
 public: // メンバ関数
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath);
+	void Initialize(SpriteCommon* spriteCommon);
 	// 更新処理
 	void Update();
 	// 描画処理
 	void Draw();
+
+
+	void Crrate(std::string textureFilePath);
+
 private:
 	// 頂点データ作成	
 	void VertexDatacreation();

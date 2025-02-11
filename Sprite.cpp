@@ -6,7 +6,7 @@
 
 using namespace MatrixVector;
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath) {
+void Sprite::Initialize(SpriteCommon* spriteCommon) {
 	// NULL検出
 	assert(spriteCommon);
 	// 引数で受け取ってメンバ変数に記録する
@@ -17,10 +17,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	MaterialGenerate();
 	// WVP,World用のリソースの生成、初期化
 	TransformationMatrixGenerate();
-	// 単位行列を書き込んでおく
-	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
-
 }
+
 void Sprite::VertexDatacreation() {
 	// 頂点リソースを作る
 	vertexResoruce = spriteCommon_->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * 4);
@@ -157,4 +155,15 @@ void Sprite::SetTexture(const std::string& textureFilePath) {
 	uint32_t newTextureIndex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
 	// テクスチャインデックスを更新
 	this->textureindex = newTextureIndex;
+}
+
+
+void Sprite::Crrate(std::string textureFilePath) {
+	// 単位行列を書き込んでおく
+	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
+
+
+	//transform.translate = { position.x,position.y,0.0f };
+	//transform.rotate = { 0.0f,0.0f,rotation };
+	//transform.scale = { size.x,size.y,1.0f };
 }
