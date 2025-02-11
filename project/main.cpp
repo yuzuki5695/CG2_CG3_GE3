@@ -195,7 +195,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::NewFrame();
 
         // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-        ImGui::ShowDemoWindow();
+        //ImGui::ShowDemoWindow();
 
         ImGui::Begin("Sprite");
         ImGui::DragInt("Dise",&dice);
