@@ -188,6 +188,9 @@
     <ClInclude Include="Matrix3x3.h">
       <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>ヘッダー ファイル\engine\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
