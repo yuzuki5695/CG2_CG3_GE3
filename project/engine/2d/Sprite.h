@@ -75,7 +75,7 @@ private: // メンバ変数
 
 	Vector2 position = { 0.0f,0.0f };
 	float rotation = 0.0f;
-	Vector2 size = { 360.0f,360.0f };
+	Vector2 size = { 90.0f,90.0f };
 	// テクスチャ番号
 	uint32_t textureindex = 0;
 	// アンカーポイント
@@ -87,7 +87,7 @@ private: // メンバ変数
 	// テクスチャ左上座標
 	Vector2 textureLeftTop = { 0.0f,0.0f };
 	// テクスチャ切り出しサイズ
-	Vector2 textureSize = { 640.0f,640.0f };
+	Vector2 textureSize = { 360.0f,720.0f };
 public: 
 	// getter
 	const Vector2& GetPosition() const { return position; }

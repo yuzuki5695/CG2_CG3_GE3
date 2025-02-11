@@ -16,6 +16,21 @@
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
 
+
+// 再帰関数でスプライトを順に描画
+void DrawSpritesRecursively(std::vector<Sprite*>& sprites, size_t index) {
+    // ベースケース: 全てのスプライトを描画し終えたら終了
+    if (index >= sprites.size()) {
+        return;
+    }
+
+    // 現在のスプライトを描画
+    sprites[index]->Draw();
+
+    // 次のスプライトを描画
+    DrawSpritesRecursively(sprites, index + 1);
+}
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
@@ -209,18 +224,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
         /*--------------------------------------------------------------------------------------------------------*/
-        /*---------------------------------------priteの更新処理の開始----------------------------------------------*/
+        /*---------------------------------------Spriteの更新処理の開始----------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------*/
 
         // 更新処理
         sprite->Update();
 
-        /*----------------------------複数Sprite----------------------------*/
 
-        //// 更新処理
-        //for (Sprite* sprite : sprites) {
-        //    sprite->Update();
-        //}
+        // 更新処理
+        for (Sprite* sprite : sprites) {
+            sprite->Update();
+        }
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理の終了----------------------------------------------*/
@@ -244,7 +258,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
        // object3d->Draw();
 
         for (Object3d* object3d : objects) {
-            object3d->Draw();
+            //object3d->Draw();
         }
 
 #pragma endregion 全てのObject3d個々の描画
@@ -261,12 +275,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 全てのSprite個々の描画
 
 
-        sprite->Draw();
+        //sprite->Draw();
 
-        ///*--------複数Spriteの描画--------*/
-        //for (Sprite* sprite : sprites) {
-        //    sprite->Draw();
-        //}
+        // スプライトの描画（再帰関数を利用）
+        DrawSpritesRecursively(sprites, 0);
+
 #pragma endregion 全てのSprite個々の描画
         /*----------------------------------------------------------------------------------------------------*/
         /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
