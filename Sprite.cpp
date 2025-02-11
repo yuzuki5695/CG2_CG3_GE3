@@ -15,6 +15,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon) {
 	VertexDatacreation();
 	// マテリアルの生成、初期化
 	MaterialGenerate();
+	// テクスチャサイズをイメージに合わせる
+	AdjustTextureSize();
 	// WVP,World用のリソースの生成、初期化
 	TransformationMatrixGenerate();
 }
@@ -157,6 +159,14 @@ void Sprite::SetTexture(const std::string& textureFilePath) {
 	this->textureindex = newTextureIndex;
 }
 
+void Sprite::AdjustTextureSize() {
+	// テクスチャメタデータを取得
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
+	textureSize.x = static_cast<float>(metadata.width);
+	textureSize.y = static_cast<float>(metadata.height);
+	// 画像サイズをテクスチャサイズに合わせる
+	size_ = textureSize;
+}
 
 void Sprite::Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size){
 	// 単位行列を書き込んでおく

@@ -259,7 +259,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
-    sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 90.0f ,90.0f });
+    sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
 
 #pragma endregion 最初のシーンの初期化
 

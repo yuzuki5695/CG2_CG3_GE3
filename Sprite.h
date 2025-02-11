@@ -44,9 +44,8 @@ public: // メンバ関数
 	// 描画処理
 	void Draw();
 
-
+	// スプライト作成関数
 	void Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
-
 private:
 	// 頂点データ作成	
 	void VertexDatacreation();
@@ -55,6 +54,8 @@ private:
 	void MaterialGenerate();
 	// トランスフォームマトリックス
 	void TransformationMatrixGenerate();
+	// テクスチャサイズをイメージに合わせる
+	void AdjustTextureSize();
 private: // メンバ変数
 	// ポインタ
 	SpriteCommon* spriteCommon_ = nullptr;
