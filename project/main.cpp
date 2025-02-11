@@ -30,8 +30,6 @@ void DrawSpritesRecursively(std::vector<Sprite*>& sprites, size_t index) {
 
 // コールバック関数
 void DispResult(int* s, std::vector<Object3d*>& objects) {
-    printf("サイコロの出目は %d\n", *s);
-
     // 出目が奇数なら1つ目のオブジェクト、偶数なら2つ目のオブジェクトを表示
     size_t index = (*s % 2 == 1) ? 0 : 1;
     objects[index]->Draw();
