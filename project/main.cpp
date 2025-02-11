@@ -123,10 +123,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion 最初のシーンの終了
 
-
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
 
     std::vector<Sprite*> sprites;
     const uint32_t spritesize = 6;
@@ -200,17 +198,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::ShowDemoWindow();
 
         ImGui::Begin("Sprite");
-       /* ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
-        ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
-        ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-        ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
-        ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-        ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
-        ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
-        ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
         ImGui::DragInt("Dise",&dice);
         ImGui::End();
-
 
           //ImGuiの描画コマンドを生成
         ImGui::Render();
@@ -218,9 +207,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
         /*------------------------------------------------------------------------------------------------------*/
-
-        // 更新処理
-       // object3d->Update();
 
         size_t index = 0;
         size_t maxIterations = 2;
@@ -249,9 +235,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*---------------------------------------Spriteの更新処理の開始----------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------*/
 
-        // 更新処理
-        sprite->Update();
-
 
         // 更新処理
         for (Sprite* sprite : sprites) {
@@ -277,12 +260,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         object3dCommon->Commondrawing();
 #pragma region 全てのObject3d個々の描画
 
-       // object3d->Draw();
-
-        for (Object3d* object3d : objects) {
-            //object3d->Draw();
-        }
-
         // コールバック関数を設定
         PFunc p = DispResult;
         setTimeout(p, dice, time_, objects);
@@ -299,9 +276,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
         spriteCommon->Commondrawing();
 #pragma region 全てのSprite個々の描画
-
-
-        //sprite->Draw();
 
         // スプライトの描画（再帰関数を利用）
         DrawSpritesRecursively(sprites, 0);
