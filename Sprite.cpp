@@ -131,9 +131,9 @@ void Sprite::Update() {
 	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransformSprite.translate));
 	//materialSpriteDate->uvTransform = uvTransformMatrix;
 
-	transform.translate = { position.x,position.y,0.0f };
-	transform.rotate = { 0.0f,0.0f,rotation };
-	transform.scale = { size.x,size.y,1.0f };
+	transform.translate = { position_.x,position_.y,0.0f };
+	transform.rotate = { 0.0f,0.0f,rotation_ };
+	transform.scale = { size_.x,size_.y,1.0f };
 }
 
 void Sprite::Draw() {
@@ -158,12 +158,15 @@ void Sprite::SetTexture(const std::string& textureFilePath) {
 }
 
 
-void Sprite::Crrate(std::string textureFilePath) {
+void Sprite::Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size){
 	// 単位行列を書き込んでおく
 	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
+	 position_ = position;
+	 rotation_ = rotation;
+	 size_ = size;
 
-
-	//transform.translate = { position.x,position.y,0.0f };
-	//transform.rotate = { 0.0f,0.0f,rotation };
-	//transform.scale = { size.x,size.y,1.0f };
+	// トランスフォームの初期化
+	transform.translate = { position_.x,position_.y,0.0f };
+	transform.rotate = { 0.0f,0.0f,rotation_ };
+	transform.scale = { size_.x,size_.y,1.0f };
 }

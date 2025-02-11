@@ -45,7 +45,7 @@ public: // メンバ関数
 	void Draw();
 
 
-	void Crrate(std::string textureFilePath);
+	void Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
 
 private:
 	// 頂点データ作成	
@@ -76,9 +76,9 @@ private: // メンバ変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	// Transform  uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} }
 
-	Vector2 position = { 0.0f,0.0f };
-	float rotation = 0.0f;
-	Vector2 size = { 90.0f,90.0f };
+	Vector2 position_{};
+	float rotation_;
+	Vector2 size_{};
 
 	// テクスチャ番号
 	uint32_t textureindex = 0;
@@ -94,20 +94,20 @@ private: // メンバ変数
 	Vector2 textureSize = { 64.0f,64.0f };
 public:
 	// getter
-	const Vector2& GetPosition() const { return position; }
-	float GetRotation() const { return rotation; }
+	const Vector2& GetPosition() const { return position_; }
+	float GetRotation() const { return rotation_; }
 	const Vector4& GetColor() const { return materialData->color; }
-	const Vector2& GetSize()const { return size; }
+	const Vector2& GetSize()const { return size_; }
 	const Vector2& GetAnchorPoint()const { return anchorPoint; }
 	const bool& GetisFlipX()const { return isFlipX_; }
 	const bool& GetisFlipY()const { return isFlipY_; }
 	const Vector2& GetTextureLeftTop()const { return textureLeftTop; }
 	const Vector2& GetTextureSize()const { return textureSize; }
 	// setter
-	void SetPosition(const Vector2& position) { this->position = position; }
-	void SetRotation(float rotation) { this->rotation = rotation; }
+	void SetPosition(const Vector2& position) { this->position_ = position; }
+	void SetRotation(float rotation) { this->rotation_ = rotation; }
 	void SetColor(const Vector4& color) { materialData->color = color; }
-	void SetSize(const Vector2& size) { this->size = size; }
+	void SetSize(const Vector2& size) { this->size_ = size; }
 	void SetTexture(const std::string& textureFilePath);
 	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 	void SetisFlipX(const bool& isFlipX) { this->isFlipX_ = isFlipX; }
