@@ -16,20 +16,36 @@
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
 
-
 // 再帰関数でスプライトを順に描画
 void DrawSpritesRecursively(std::vector<Sprite*>& sprites, size_t index) {
     // ベースケース: 全てのスプライトを描画し終えたら終了
     if (index >= sprites.size()) {
         return;
     }
-
     // 現在のスプライトを描画
     sprites[index]->Draw();
-
     // 次のスプライトを描画
     DrawSpritesRecursively(sprites, index + 1);
 }
+
+// コールバック関数
+void DispResult(int* s, std::vector<Object3d*>& objects) {
+    printf("サイコロの出目は %d\n", *s);
+
+    // 出目が奇数なら1つ目のオブジェクト、偶数なら2つ目のオブジェクトを表示
+    size_t index = (*s % 2 == 1) ? 0 : 1;
+    objects[index]->Draw();
+}
+
+// コールバック関数型定義
+typedef void (*PFunc)(int*, std::vector<Object3d*>&);
+
+// コールバック関数を呼び出す
+void setTimeout(PFunc p, int number, int second, std::vector<Object3d*>& objects) {
+    Sleep(second * 1000);
+    p(&number, objects);
+}
+
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -135,9 +151,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     std::vector<Object3d*> objects;
     const uint32_t objectize = 2;
-    float objectsPosition[spritesize]{};
-    objectsPosition[0] = 2.0f;
-    objectsPosition[1] = -2.0f;
+    float objectsPosition[objectize] = { 2.0f, -2.0f };
+    // 乱数のシードを設定
+    srand(static_cast<unsigned int>(time(nullptr)));
+    // サイコロを振る
+    int dice = rand() % 6 + 1;
+
     for (uint32_t i = 0; i < objectize; ++i) {
         Object3d* object3d = new Object3d();
         object3d->Initialize(object3dCommon);
@@ -146,14 +165,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         } else {
             object3d->SetModel(ModelPath01);
         }
-        // 現在の位置を取得
+
+        // 位置を設定
         Vector3 position = object3d->GetTranslate();
         position.x = objectsPosition[i];
-        // 変更した座標を設定
         object3d->SetTranslate(position);
-        // 情報を転送
+
         objects.push_back(object3d);
     }
+    int time_ = 0;
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -179,7 +199,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
         ImGui::ShowDemoWindow();
 
-        //ImGui::Begin("Sprite");
+        ImGui::Begin("Sprite");
        /* ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
         ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
         ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
@@ -188,7 +208,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
         ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
         ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
-        //  ImGui::End();
+        ImGui::DragInt("Dise",&dice);
+        ImGui::End();
+
 
           //ImGuiの描画コマンドを生成
         ImGui::Render();
@@ -260,6 +282,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         for (Object3d* object3d : objects) {
             //object3d->Draw();
         }
+
+        // コールバック関数を設定
+        PFunc p = DispResult;
+        setTimeout(p, dice, time_, objects);
 
 #pragma endregion 全てのObject3d個々の描画
         /*------------------------------------------------------------------------------------------------------*/
