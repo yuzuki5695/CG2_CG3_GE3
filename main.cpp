@@ -425,7 +425,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         sprites.push_back(sprite);
     }
 
-
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -483,9 +482,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*----------------------------------------------------------------------------------------------------*/
         /*---------------------------------------Spriteの更新処理----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
-
-        //// 更新処理
-        //sprite->Update();
+       
+        
+        // 更新処理
+        sprite->Update();
 
         ///*--------Spriteの移動--------*/
         //// 現在の座標を変数で受ける
@@ -522,22 +522,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         /*----------------------------複数Sprite----------------------------*/
 
-        // 更新処理
-        for (Sprite* sprite : sprites) {
-            sprite->Update();
-        }
+        //// 更新処理
+        //for (Sprite* sprite : sprites) {
+        //    sprite->Update();
+        //}
 
-        /*--------複数Spriteの座標--------*/
-        // 現在の座標を変数で受ける
-        for (uint32_t i = 0; i < sprites.size(); ++i) {
-            Sprite* sprite = sprites[i];
-            // 現在の位置を取得
-            Vector2 position = sprite->GetPosition();
-            // 位置を変更する
-            position.x = Position[i];
-            // 変更した座標を設定
-            sprite->SetPosition(position);
-        }
+        ///*--------複数Spriteの座標--------*/
+        //// 現在の座標を変数で受ける
+        //for (uint32_t i = 0; i < sprites.size(); ++i) {
+        //    Sprite* sprite = sprites[i];
+        //    // 現在の位置を取得
+        //    Vector2 position = sprite->GetPosition();
+        //    // 位置を変更する
+        //    position.x = Position[i];
+        //    // 変更した座標を設定
+        //    sprite->SetPosition(position);
+        //}
 
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -583,12 +583,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //// Spriteの描画は常にuvCheckerにする
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-        //sprite->Draw();
+        sprite->Draw();
 
-          /*--------複数Spriteの描画--------*/
-        for (Sprite* sprite : sprites) {
-            sprite->Draw();
-        }
+        //  /*--------複数Spriteの描画--------*/
+        //for (Sprite* sprite : sprites) {
+        //    sprite->Draw();
+        //}
 
 
         /*---------------------------------------------------*/
