@@ -215,39 +215,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 更新処理
         sprite->Update();
 
-        ///*--------Spriteの移動--------*/
-        //// 現在の座標を変数で受ける
-        //Vector2 position = sprite->GetPosition();
-        //// 座標を変更する
-        //position.x += 0.1f;
-        //position.y += 0.1f;
-        //// 変更を反映する
-        //sprite->SetPosition(position);
-
-
-        /////*--------Spriteの回転--------*/
-        //// 角度を変化させるテスト
-        //float rotation = sprite->GetRotation();
-        //rotation += 0.01f;
-        //sprite->SetRotation(rotation);
-
-        ///*--------Spriteの色--------*/
-        //// 色を変化させるテスト
-        //Vector4 color = sprite->GetColor();
-        //color.x += 0.01f;
-        //if (color.w > 1.0f) {
-        //    color.x -= 1.0f;
-        //}
-        //sprite->SetColor(color);
-
-        ///*--------Spriteのサイズ--------*/
-        //// サイズを変化させるテスト
-        //Vector2 size = sprite->GetSize();
-        //size.x += 0.1f;
-        //size.y += 0.1f;
-        //sprite->SetSize(size);
-
-
         /*----------------------------複数Sprite----------------------------*/
 
         //// 更新処理
@@ -293,9 +260,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         spriteCommon->Commondrawing();
 #pragma region 全てのSprite個々の描画
 
-
-        //// Spriteの描画は常にuvCheckerにする
-        //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
         sprite->Draw();
 
