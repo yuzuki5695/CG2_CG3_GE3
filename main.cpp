@@ -17,6 +17,8 @@
 #include "Sprite.h"
 #include "SpriteCommon.h"
 #include "TextureManager.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -43,7 +45,6 @@ struct ModelDate {
 /*----------------------------------------------------------------------*/
 /*-------------------------Objファイルを読む関数---------------------------*/
 /*----------------------------------------------------------------------*/
-
 
 MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
@@ -217,11 +218,13 @@ void DrawSphere(const uint32_t ksubdivision, Sprite::VertexData* vertexdata) {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
     
-    // ポインタ
+#pragma region ポインタ
     Input* input = nullptr;
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
     SpriteCommon* spriteCommon = nullptr;
+    Object3dCommon* object3dCommon = nullptr;
+#pragma endregion ポインタ
 
     // ウィンドウ作成
     
@@ -253,6 +256,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
 
+    // 3Dオブジェクト共通部の初期化
+    object3dCommon = new Object3dCommon;
+    object3dCommon->Initialize();
+
 #pragma endregion 基盤システムの初期化
 
 #pragma region 最初のシーンの初期化
@@ -260,6 +267,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
     sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
+
+    // 3Dオブジェクトの初期化
+    Object3d* object3d = new Object3d;
+    object3d->Initialize();
 
 #pragma endregion 最初のシーンの初期化
 
@@ -606,6 +617,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // シーンの解放
     delete  spriteCommon;
+    delete  object3dCommon;
 
     // 汎用機能の解放
     delete  sprite;
@@ -615,6 +627,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Sprite* sprite : sprites) {
         delete sprite;
     }
+
+    // 3Dオブジェクトの解放
+    delete  object3d;
+
     // 入力解放
     delete input;
 
