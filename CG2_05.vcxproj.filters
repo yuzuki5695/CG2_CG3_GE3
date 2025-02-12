@@ -64,6 +64,12 @@
     <Filter Include="ヘッダー ファイル\engine\math">
       <UniqueIdentifier>{28340a47-7d72-4339-9ddf-7feeea023b28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\application">
+      <UniqueIdentifier>{e2eeeae6-7bff-48ec-904c-1bb0da6123a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application">
+      <UniqueIdentifier>{8879c179-8943-4fc5-a19e-f0b38a474781}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
