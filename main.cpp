@@ -258,7 +258,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
-    object3dCommon->Initialize();
+    object3dCommon->Initialize(dxCommon);
 
 #pragma endregion 基盤システムの初期化
 
@@ -276,51 +276,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
-    ////DescriptorRange作成
-    //D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-    //descriptorRange[0].BaseShaderRegister = 0;
-    //descriptorRange[0].NumDescriptors = 1;
-    //descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-    //descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-    ////RootParameter作成
-    //D3D12_ROOT_PARAMETER rootParameters[4] = {};
-    //rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-    //rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
-    //rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
-
-    //rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-    //rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShaderでを使う
-    //rootParameters[1].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
-
-    //rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTableを使う
-    //rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで使う
-    //rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;//Tableの中身の配列を指定
-    //rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);//利用する数
-
-    //rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-    //rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
-    //rootParameters[3].Descriptor.ShaderRegister = 1;// レジスタ番号1を使う
-
-    ////RootSignature作成
-    //D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-    //descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-    //descriptionRootSignature.pParameters = rootParameters;// ルートパラメータ配列へのポインタ
-    //descriptionRootSignature.NumParameters = _countof(rootParameters);// 配列の長さ
-
-    ////Samplerの設定
-    //D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-    //staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;//バイリニアフィルタ	
-    //staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;//0～1の範囲外をリピート		
-    //staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    //staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    //staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;//比較しない		
-    //staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;//ありったけのMipmapを使う	
-    //staticSamplers[0].ShaderRegister = 0;//レジスタ番号０を使う
-    //staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで使う
-    //descriptionRootSignature.pStaticSamplers = staticSamplers;
-    //descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
 
     /*------------------------------------------------------------------------------------*/
@@ -500,57 +455,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 更新処理
         sprite->Update();
 
-        ///*--------Spriteの移動--------*/
-        //// 現在の座標を変数で受ける
-        //Vector2 position = sprite->GetPosition();
-        //// 座標を変更する
-        //position.x += 0.1f;
-        //position.y += 0.1f;
-        //// 変更を反映する
-        //sprite->SetPosition(position);
-
-
-        ///*--------Spriteの回転--------*/
-        //// 角度を変化させるテスト
-        //float rotation = sprite->GetRotation();
-        //rotation += 0.01f;
-        //sprite->SetRotation(rotation);
-
-        ///*--------Spriteの色--------*/
-        //// 色を変化させるテスト
-        //Vector4 color = sprite->GetColor();
-        //color.x += 0.01f;
-        //if (color.w > 1.0f) {
-        //    color.x -= 1.0f;
-        //}
-        //sprite->SetColor(color);
-
-        ///*--------Spriteのサイズ--------*/
-        //// サイズを変化させるテスト
-        //Vector2 size = sprite->GetSize();
-        //size.x += 0.1f;
-        //size.y += 0.1f;
-        //sprite->SetSize(size);
-
-
-        /*----------------------------複数Sprite----------------------------*/
-
-        //// 更新処理
-        //for (Sprite* sprite : sprites) {
-        //    sprite->Update();
-        //}
-
-        ///*--------複数Spriteの座標--------*/
-        //// 現在の座標を変数で受ける
-        //for (uint32_t i = 0; i < sprites.size(); ++i) {
-        //    Sprite* sprite = sprites[i];
-        //    // 現在の位置を取得
-        //    Vector2 position = sprite->GetPosition();
-        //    // 位置を変更する
-        //    position.x = Position[i];
-        //    // 変更した座標を設定
-        //    sprite->SetPosition(position);
-        //}
 
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -562,16 +466,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         //  DirectXの描画準備。全ての描画に共通のグラフィックスコマンドを積む
         dxCommon->PreDraw();
+        
+        // 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
+        object3dCommon->Commondrawing();
 
         // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
         spriteCommon->Commondrawing();
 
-        //// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-        //dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-        //dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+        /*------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------3Dオブジェクトの描画処理開始--------------------------------------------*/
+        /*-----------------------------------------------------------------------------------------------------*/
+
+#pragma region 全てのObject3d個々の描画
         //dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-        //// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
-        //dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         //// マテリアルCBufferの場所を設定
         //dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         //// wvp用のCBufferの場所を設定
@@ -588,25 +495,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //// 描画！(今回は球) 
         //dxCommon->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 
+#pragma endregion 全てのObject3d個々の描画
 
-        /*---------------------------------------------------*/
-        /*-------------------2dの描画コマンド開始---------------*/
-        /*---------------------------------------------------*/
+        /*------------------------------------------------------------------------------------------------------*/
+        /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/
+        /*-----------------------------------------------------------------------------------------------------*/
+
+
+        /*----------------------------------------------------------------------------------------------------*/
+        /*------------------------------------Spriteの描画処理開始----------------------------------------------*/
+        /*---------------------------------------------------------------------------------------------------*/
+
+#pragma region 全てのSprite個々の描画
 
         //// Spriteの描画は常にuvCheckerにする
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
         sprite->Draw();
+     
+#pragma endregion 全てのSprite個々の描画
 
-        //  /*--------複数Spriteの描画--------*/
-        //for (Sprite* sprite : sprites) {
-        //    sprite->Draw();
-        //}
-
-
-        /*---------------------------------------------------*/
-        /*-------------------2dの描画コマンド終了---------------*/
-        /*---------------------------------------------------*/
+        /*----------------------------------------------------------------------------------------------------*/
+        /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
+        /*---------------------------------------------------------------------------------------------------*/
 
        //実際のcommandListのImGuiの描画コマンドを積む
        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
