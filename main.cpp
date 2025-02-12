@@ -19,6 +19,8 @@
 #include "TextureManager.h"
 #include "Object3dCommon.h"
 #include "Object3d.h"
+#include "ModelCommon.h"
+#include "Model.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -35,6 +37,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     DirectXCommon* dxCommon = nullptr;
     SpriteCommon* spriteCommon = nullptr;
     Object3dCommon* object3dCommon = nullptr;
+    ModelCommon* modelCommon = nullptr;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -67,6 +70,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
 
+    // 3Dモデル共通部の初期化
+    modelCommon = new ModelCommon;
+    modelCommon->Initialize(dxCommon);
+
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
     object3dCommon->Initialize(dxCommon);
@@ -75,13 +82,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 最初のシーンの初期化
 
+    // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
     sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
 
+    // 3Dモデルの初期化
+    Model* model = new Model;;
+    model->Initialize(modelCommon);
+
     // 3Dオブジェクトの初期化
     Object3d* object3d = new Object3d;
     object3d->Initialize(object3dCommon);
+    // モデルを結びつける
+    object3d->SetModel(model);
 
 #pragma endregion 最初のシーンの初期化
 
@@ -230,6 +244,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // シーンの解放
     delete  spriteCommon;
     delete  object3dCommon;
+    delete modelCommon;
 
     // 汎用機能の解放
     delete  sprite;
@@ -239,7 +254,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Sprite* sprite : sprites) {
         delete sprite;
     }
-
+    // 3Dモデルの解放
+    delete model;
     // 3Dオブジェクトの解放
     delete  object3d;
 
