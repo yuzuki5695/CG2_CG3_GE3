@@ -124,6 +124,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         sprites.push_back(sprite);
     }
 
+    std::vector<Object3d*> objects;
+    const uint32_t objectize = 2;
+    float objectsPosition[spritesize]{};
+    objectsPosition[0] = 2.0f;
+    objectsPosition[1] = -2.0f;
+    for (uint32_t i = 0; i < objectize; ++i) {
+        Object3d* object3d = new Object3d();
+        object3d->Initialize(object3dCommon);
+        object3d->SetModel(model);
+        // 現在の位置を取得
+        Vector3 position = object3d->GetTranslate();
+        position.x = objectsPosition[i];
+        // 変更した座標を設定
+        object3d->SetTranslate(position);
+        // 情報を転送
+        objects.push_back(object3d);
+    }
+
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -167,9 +185,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
         /*------------------------------------------------------------------------------------------------------*/
 
-        // 更新処理
-        object3d->Update();
 
+        // 更新処理
+       // object3d->Update();
+
+        size_t index = 0;
+        size_t maxIterations = 2;
+        for (Object3d* object3d : objects) {
+            if (index >= maxIterations) {
+                break; // 指定回数を超えたらループを終了
+            }
+            object3d->Update();
+            Vector3 rotation = object3d->GetRotate();
+            if (index == 0) {
+                rotation.z += 0.01f;
+            } else if (index == 1) {
+                rotation.y += 0.01f;
+            }
+            object3d->SetRotate(rotation);
+            // インクリメントして次へ
+            ++index;
+        }
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -208,7 +244,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 全てのObject3d個々の描画
       
-        object3d->Draw();
+       // object3d->Draw();
+
+        for (Object3d* object3d : objects) {
+            object3d->Draw();
+        }
 
 #pragma endregion 全てのObject3d個々の描画
 
@@ -254,10 +294,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Sprite* sprite : sprites) {
         delete sprite;
     }
+    
     // 3Dモデルの解放
     delete model;
+    
     // 3Dオブジェクトの解放
     delete  object3d;
+    for (Object3d* object3d : objects) {
+        delete object3d;
+    }
 
     // 入力解放
     delete input;
