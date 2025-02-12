@@ -53,7 +53,7 @@ public:
 	const Vector3& GetTranslate() const { return transform.translate; }
 
 	// setter
-	void SetModel(Model* model) { this->model = model; }
+	void SetModel(const std::string& filePath);
 	void SetScale(const Vector3& scale) { this->transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { this->transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { this->transform.translate = translate; }

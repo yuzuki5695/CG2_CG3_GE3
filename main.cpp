@@ -21,6 +21,7 @@
 #include "Object3d.h"
 #include "ModelCommon.h"
 #include "Model.h"
+#include"ModelManager.h"
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
@@ -52,11 +53,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // テクスチャマネージャーの初期化
     TextureManager::GetInstance()->Initialize(dxCommon);
+    // 3Dモデルマネージャの初期化
+    ModelManager::GetInstance()->Initialize(dxCommon);
 
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
     std::string TexturePath01 = "Resources/uvChecker.png";
     std::string TexturePath02 = "Resources/monsterBall.png";
+
+    // .objファイルからモデルを読み込む
+    ModelManager::GetInstance()->LoadTexture("plane.obj");
+    ModelManager::GetInstance()->LoadTexture("axis.obj");
+    std::string ModelPath01 = "plane.obj";
+    std::string ModelPath02 = "axis.obj";
+
 
     // 汎用機能の初期化 
 
@@ -69,10 +79,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライト共通部の初期化
     spriteCommon = new SpriteCommon;
     spriteCommon->Initialize(dxCommon);
-
-    // 3Dモデル共通部の初期化
-    modelCommon = new ModelCommon;
-    modelCommon->Initialize(dxCommon);
 
     // 3Dオブジェクト共通部の初期化
     object3dCommon = new Object3dCommon;
@@ -89,13 +95,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // 3Dモデルの初期化
     Model* model = new Model;;
-    model->Initialize(modelCommon);
+    model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
     // 3Dオブジェクトの初期化
     Object3d* object3d = new Object3d;
     object3d->Initialize(object3dCommon);
     // モデルを結びつける
-    object3d->SetModel(model);
+    object3d->SetModel(ModelPath01);
+
 
 #pragma endregion 最初のシーンの初期化
 
@@ -132,7 +139,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (uint32_t i = 0; i < objectize; ++i) {
         Object3d* object3d = new Object3d();
         object3d->Initialize(object3dCommon);
-        object3d->SetModel(model);
+        if (i % 2 == 0) {
+            object3d->SetModel(ModelPath02);
+        } else {
+            object3d->SetModel(ModelPath01);
+        }
         // 現在の位置を取得
         Vector3 position = object3d->GetTranslate();
         position.x = objectsPosition[i];
@@ -309,10 +320,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
-
+    // 3Dモデルマネージャの終了
+    ModelManager::GetInstance()->Finalize();
     // DirectXの解放
     delete dxCommon;
-
     // ウィンドウ解放 
     // WindowsAPIの終了処理
     winApp->Finalize();

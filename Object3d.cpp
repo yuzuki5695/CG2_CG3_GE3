@@ -4,6 +4,7 @@
 #include<sstream>
 #include <cassert>
 #include "MatrixVector.h"
+#include "ModelManager.h"
 
 using namespace MatrixVector;
 
@@ -63,4 +64,9 @@ void Object3d::DirectionalLightGenerate() {
     directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
     directionalLightDate->intensity = 1.0f;
+}
+
+void Object3d::SetModel(const std::string& filePath) {
+    // モデルを検索してセットする
+    model = ModelManager::GetInstance()->FindModel(filePath);
 }
