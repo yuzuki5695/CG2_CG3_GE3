@@ -31,7 +31,7 @@ using namespace MatrixVector;
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     OutputDebugStringA("Hello,Directx!\n");
-    
+
 #pragma region ポインタ
     Input* input = nullptr;
     WinApp* winApp = nullptr;
@@ -42,7 +42,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion ポインタ
 
     // ウィンドウ作成
-    
+
     // WindowsAPIの初期化
     winApp = new WinApp();
     winApp->Initialize();
@@ -100,9 +100,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // 3Dオブジェクトの初期化
     Object3d* object3d = new Object3d;
     object3d->Initialize(object3dCommon);
-    // モデルを結びつける
-    object3d->SetModel(ModelPath01);
-
+    // オブジェクト作成
+    object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
 #pragma endregion 最初のシーンの初期化
 
@@ -140,9 +139,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         Object3d* object3d = new Object3d();
         object3d->Initialize(object3dCommon);
         if (i % 2 == 0) {
-            object3d->SetModel(ModelPath02);
+            object3d->Crrate(ModelPath02, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
         } else {
-            object3d->SetModel(ModelPath01);
+            object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
         }
         // 現在の位置を取得
         Vector3 position = object3d->GetTranslate();

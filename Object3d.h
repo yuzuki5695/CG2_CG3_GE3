@@ -27,6 +27,9 @@ public: // メンバ関数
 	// 描画処理
 	void Draw();
 
+	// 3Dobject作成関数
+	void Crrate(std::string filePath, Transform transform);
+
 private:
 	// リソース
 	// トランスフォームマトリックス
@@ -44,17 +47,18 @@ private:
 	TransformationMatrix* transformationMatrixData = nullptr;
 	DirectionalLight* directionalLightDate = nullptr;
 
-	Transform transform;
+	Transform transform_;
 	Transform  cameraTransform;
 public:
 	// getter
-	const Vector3& GetScale() const { return transform.scale; }
-	const Vector3& GetRotate() const { return transform.rotate; }
-	const Vector3& GetTranslate() const { return transform.translate; }
+	const Transform& GetTransform() const { return transform_; }
+	const Vector3& GetScale() const { return transform_.scale; }
+	const Vector3& GetRotate() const { return transform_.rotate; }
+	const Vector3& GetTranslate() const { return transform_.translate; }
 
 	// setter
 	void SetModel(const std::string& filePath);
-	void SetScale(const Vector3& scale) { this->transform.scale = scale; }
-	void SetRotate(const Vector3& rotate) { this->transform.rotate = rotate; }
-	void SetTranslate(const Vector3& translate) { this->transform.translate = translate; }
+	void SetScale(const Vector3& scale) { this->transform_.scale = scale; }
+	void SetRotate(const Vector3& rotate) { this->transform_.rotate = rotate; }
+	void SetTranslate(const Vector3& translate) { this->transform_.translate = translate; }
 };
