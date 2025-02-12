@@ -645,6 +645,5 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     winApp->Finalize();
     // WindowsAPIの解放
     delete winApp;
-
     return 0;
 }
