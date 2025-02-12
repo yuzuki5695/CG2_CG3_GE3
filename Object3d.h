@@ -62,7 +62,6 @@ public: // メンバ関数
 	static Object3d::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	// .objファイルの読み取り
 	static Object3d::ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
-
 private:
 	// 頂点データ作成
 	void VertexDatacreation();
@@ -93,5 +92,4 @@ private:
 
 	Transform transform;
 	Transform  cameraTransform;
-
 };

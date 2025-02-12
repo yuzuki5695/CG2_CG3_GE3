@@ -6,6 +6,8 @@
 #include "MatrixVector.h"
 #include "TextureManager.h"
 
+using namespace MatrixVector;
+
 void Object3d::Initialize(Object3dCommon* object3dCommon) {
     // NULL検出
     assert(object3dCommon);
@@ -36,11 +38,11 @@ void Object3d::Update() {
 
     transform.rotate.y += 0.01f;
 
-    Matrix4x4 worludMatrix = MatrixVector::MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
-    Matrix4x4 cameraMatrix = MatrixVector::MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-    Matrix4x4 viewMatrix = MatrixVector::Inverse(cameraMatrix);
-    Matrix4x4 projectionMatrix = MatrixVector::MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-    Matrix4x4 worldViewProjectionMatrix = MatrixVector::Multiply(worludMatrix, MatrixVector::Multiply(viewMatrix, projectionMatrix));
+    Matrix4x4 worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+    Matrix4x4 cameraMatrix = MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+    Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+    Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
+    Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
     transformationMatrixData->World = worludMatrix;
     transformationMatrixData->WVP = worldViewProjectionMatrix;
 }
@@ -90,7 +92,7 @@ void Object3d::MaterialGenerate() {
     // マテリアルデータの初期値を書き込む
     materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     materialData->endbleLighting = true;
-    materialData->uvTransform = MatrixVector::MakeIdentity4x4();
+    materialData->uvTransform = MakeIdentity4x4();
 }
 
 void Object3d::TransformationMatrixGenerate() {
@@ -99,8 +101,8 @@ void Object3d::TransformationMatrixGenerate() {
     // データを書き込むためのアドレスを取得
     transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
     // 単位行列を書き込んでおく
-    transformationMatrixData->WVP = MatrixVector::MakeIdentity4x4();
-    transformationMatrixData->World = MatrixVector::MakeIdentity4x4();
+    transformationMatrixData->WVP = MakeIdentity4x4();
+    transformationMatrixData->World = MakeIdentity4x4();
 }
 
 void Object3d::DirectionalLightGenerate() {
