@@ -17,16 +17,17 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
     TransformationMatrixGenerate();
     // 平行光源の生成,初期化
     DirectionalLightGenerate();
-
-    cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-700.0f} };
 }
 
 void Object3d::Update() {
     Matrix4x4 worludMatrix = MakeAftineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-    Matrix4x4 cameraMatrix = MakeAftineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-    Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-    Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-    Matrix4x4 worldViewProjectionMatrix = Multiply(worludMatrix, Multiply(viewMatrix, projectionMatrix));
+    Matrix4x4 worldViewProjectionMatrix;
+    if (camera) {
+        const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
+        worldViewProjectionMatrix = Multiply(worludMatrix, viewProjectionMatrix);
+    } else {
+        worldViewProjectionMatrix = worludMatrix;
+    }
     transformationMatrixData->World = worludMatrix;
     transformationMatrixData->WVP = worldViewProjectionMatrix;
 }
@@ -73,4 +74,5 @@ void Object3d::Crrate(std::string filePath, Transform transform) {
     // モデルを検索してセットする
     model = ModelManager::GetInstance()->FindModel(filePath);
     transform_ = transform;
+    this->camera = object3dCommon->GetDefaultCamera();
 }
