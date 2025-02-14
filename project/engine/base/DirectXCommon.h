@@ -158,6 +158,5 @@ public:
 	Microsoft::WRL::ComPtr <ID3D12Device> GetDevice() const { return device.Get(); }
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
 	D3D12_DEPTH_STENCIL_DESC GetdepthStencilDesc() { return depthStencilDesc; }
-	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> GetsrvDescriptorHeap() { return srvDescriptorHeap.Get(); }
 	HANDLE GetfenceEvent() const { return fenceEvent; }
 };

@@ -56,7 +56,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     srvManager->Initialize(dxCommon);
 
     // テクスチャマネージャーの初期化
-    TextureManager::GetInstance()->Initialize(dxCommon);
+    TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
     // 3Dモデルマネージャの初期化
     ModelManager::GetInstance()->Initialize(dxCommon);
 
@@ -101,7 +101,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
-    sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
+    sprite->Crrate(TexturePath01,{ 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dモデルの初期化
     Model* model = new Model;;

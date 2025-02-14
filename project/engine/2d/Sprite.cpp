@@ -3,6 +3,7 @@
 #include <cassert>
 #include "MatrixVector.h"
 #include "TextureManager.h"
+#include "SrvManager.h"
 
 using namespace MatrixVector;
 
@@ -11,14 +12,6 @@ void Sprite::Initialize(SpriteCommon* spriteCommon) {
 	assert(spriteCommon);
 	// 引数で受け取ってメンバ変数に記録する
 	this->spriteCommon_ = spriteCommon;
-	// 頂点データの作成
-	VertexDatacreation();
-	// マテリアルの生成、初期化
-	MaterialGenerate();
-	// テクスチャサイズをイメージに合わせる
-	AdjustTextureSize();
-	// WVP,World用のリソースの生成、初期化
-	TransformationMatrixGenerate();
 }
 
 void Sprite::VertexDatacreation() {
@@ -94,7 +87,7 @@ void Sprite::Update() {
 	vertexData[3].position = { right,top,0.0f,1.0f };    // 左上
 
 	// テクスチャ範囲指定
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureFilePath_);
 	// UV座標系に変換する
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
@@ -147,34 +140,43 @@ void Sprite::Draw() {
 	// TransformationMatrixBufferの場所を設定
 	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 	// SRVのDescriptortableの先頭を設定
-	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureindex));
+	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureFilePath_));
 	// 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い
 	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Sprite::SetTexture(const std::string& textureFilePath) {
 	// テクスチャインデックスを取得
-	uint32_t newTextureIndex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
+	uint32_t newTextureIndex = TextureManager::GetInstance()->GetSrvIndex(textureFilePath);
 	// テクスチャインデックスを更新
 	this->textureindex = newTextureIndex;
 }
 
 void Sprite::AdjustTextureSize() {
 	// テクスチャメタデータを取得
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureindex);
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureFilePath_);
 	textureSize.x = static_cast<float>(metadata.width);
 	textureSize.y = static_cast<float>(metadata.height);
 	// 画像サイズをテクスチャサイズに合わせる
 	size_ = textureSize;
 }
 
-void Sprite::Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size){
+void Sprite::Crrate(std::string textureFilePath,Vector2 position, float rotation, Vector2 size){
+	// 引数で受け取ってメンバ変数に記録する
+	textureFilePath_ = textureFilePath;
 	// 単位行列を書き込んでおく
-	textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(textureFilePath);
+	textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilePath_);
 	 position_ = position;
 	 rotation_ = rotation;
 	 size_ = size;
-
+	 // 頂点データの作成
+	 VertexDatacreation();
+	 // マテリアルの生成、初期化
+	 MaterialGenerate();
+	 // テクスチャサイズをイメージに合わせる
+	 AdjustTextureSize();
+	 // WVP,World用のリソースの生成、初期化
+	 TransformationMatrixGenerate();
 	// トランスフォームの初期化
 	transform.translate = { position_.x,position_.y,0.0f };
 	transform.rotate = { 0.0f,0.0f,rotation_ };

@@ -59,6 +59,8 @@ private:
 private: // メンバ変数
 	// ポインタ
 	SpriteCommon* spriteCommon_ = nullptr;
+	// 使用するファイル
+	std::string textureFilePath_;
 	// バッファリソース
 	Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce;
 	Microsoft::WRL::ComPtr <ID3D12Resource> indexResource;

@@ -22,7 +22,7 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
     // .objの参照しているテクスチャ読み込み
     TextureManager::GetInstance()->LoadTexture(modelDate.material.textureFilePath);
     // 読み込んだテクスチャの番号を取得
-    modelDate.material.textureindex = TextureManager::GetInstance()->GetTextureindexByFilePath(modelDate.material.textureFilePath);
+    modelDate.material.textureindex = TextureManager::GetInstance()->GetSrvIndex(modelDate.material.textureFilePath);
 }
 
 void Model::Draw() {
@@ -32,7 +32,7 @@ void Model::Draw() {
     modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
     //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
     //SRVを切り替えて画像を変えるS
-    modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelDate.material.textureindex));
+    modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelDate.material.textureFilePath));
 
     // 描画！(今回は球)
     modelCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);

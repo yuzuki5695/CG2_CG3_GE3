@@ -5,10 +5,8 @@ using namespace Microsoft::WRL;
 const uint32_t 	SrvManager::kMaxSRVCount = 512;
 
 void SrvManager::Initialize(DirectXCommon* directXCommon) {
-
 	// 引数で受け取ってメンバ変数に記録する
 	this->directXCommon = directXCommon;
-
 
 	// SRV用のヒープでディスクリプタの数は128.RTVはshader内で触るものなので、ShaderVisibleはtrue
 	descriptorHeap = directXCommon->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
@@ -76,5 +74,6 @@ bool SrvManager::TextureDataCheck() {
 	if (useIndex < kMaxSRVCount) {
 		return true;
 	}
+	// 確保しているテクスチャより大きい場合はエラー
 	return false;
 }
