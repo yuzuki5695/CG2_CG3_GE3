@@ -144,6 +144,9 @@
     <ClCompile Include="engine\base\Camera.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
+    <ClCompile Include="SrvManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="engine\base\Camera.h">
       <Filter>ソース ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="SrvManager.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

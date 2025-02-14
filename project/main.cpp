@@ -23,9 +23,7 @@
 #include "Model.h"
 #include"ModelManager.h"
 #include "Camera.h"
-#include"externals/imgui/imgui.h"
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
+#include"SrvManager.h"
 
 using namespace MatrixVector;
 
@@ -40,6 +38,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     SpriteCommon* spriteCommon = nullptr;
     Object3dCommon* object3dCommon = nullptr;
     ModelCommon* modelCommon = nullptr;
+    SrvManager* srvManager = nullptr;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -51,6 +50,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // DirectXの初期化
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
+    
+    // SRVマネージャーの初期化
+    srvManager = new SrvManager();
+    srvManager->Initialize(dxCommon);
 
     // テクスチャマネージャーの初期化
     TextureManager::GetInstance()->Initialize(dxCommon);
@@ -180,12 +183,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             OutputDebugStringA("Hit 0 \n");
         }
 
-        ImGui_ImplDX12_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
+        //ImGui_ImplDX12_NewFrame();
+        //ImGui_ImplWin32_NewFrame();
+        //ImGui::NewFrame();
 
-        // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-        ImGui::ShowDemoWindow();
+        //// 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
+        //ImGui::ShowDemoWindow();
 
         //ImGui::Begin("Sprite");
        /* ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
@@ -198,18 +201,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
         //  ImGui::End();
 
-        ImGui::Begin("Camera");
-        // カメラの位置を編集
-        ImGui::Text("Camera Transform");
-        ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
-        ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
-        ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
-        ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
-        ImGui::End();
+        //ImGui::Begin("Camera");
+        //// カメラの位置を編集
+        //ImGui::Text("Camera Transform");
+        //ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
+        //ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
+        //ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
+        //ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
+        //ImGui::End();
 
 
-        //ImGuiの描画コマンドを生成
-        ImGui::Render();
+        ////ImGuiの描画コマンドを生成
+        //ImGui::Render();
 
         /*-------------------------------------------*/
         /*--------------カメラの更新処理---------------*/
@@ -262,10 +265,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
-
-        // 描画用のDescriptorHeapの設定
-        ID3D12DescriptorHeap* descriptorHeap[] = { dxCommon->GetsrvDescriptorHeap().Get()};
-        dxCommon->GetCommandList()->SetDescriptorHeaps(1, descriptorHeap);
+        
+        //  描画用のDescriptorHeapの設定
+        srvManager->PreDraw();
 
         //  DirectXの描画準備。全ての描画に共通のグラフィックスコマンドを積む
         dxCommon->PreDraw();
@@ -312,8 +314,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
 
-       //実際のcommandListのImGuiの描画コマンドを積む
-       ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
+       ////実際のcommandListのImGuiの描画コマンドを積む
+       //ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
 
         // 描画後処理
         dxCommon->PostDrow();
@@ -343,11 +345,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     }
     // 入力解放
     delete input;
-
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
     ModelManager::GetInstance()->Finalize();
+    // SRVマネージャの開放
+    delete srvManager;
     // DirectXの解放
     delete dxCommon;
     // ウィンドウ解放 

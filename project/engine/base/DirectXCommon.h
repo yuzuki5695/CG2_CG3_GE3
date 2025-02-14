@@ -16,9 +16,6 @@ class DirectXCommon
 {
 public: // メンバ関数
 
-	// 最大SRV数(最大テクスチャ枚数)
-	static const uint32_t kMaxSRVCount;
-
 	// デストラクタ
 	~DirectXCommon();
 	// 初期化
@@ -32,16 +29,6 @@ public: // メンバ関数
 	/// デスクリプタヒープを生成する
 	/// </summary>
 	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
-
-	/// <summary>
-	/// SRV指定番号のCPUディスクリプタハンドルを取得する
-	/// </summary>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
-
-	/// <summary>
-	/// SRV指定番号のGPUディスクリプタハンドルの取得をする
-	/// </summary>
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
 
 	// リソース
 	Microsoft::WRL::ComPtr <ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr <ID3D12Device>& device, int32_t width, int32_t heigth);
@@ -128,12 +115,9 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthbufferresource;
 	// RTV用のヒープでディスクリプタ
 	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> rtvDescriptorHeap;
-	// SRV用のヒープでディスクリプタ
-	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> srvDescriptorHeap;
 	// DSV用のヒープでディスクリプタ
 	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> dsvDescriptorHeap;
 	// 各DescriptorSizeを取得する
-	uint32_t descriptorsizeSRV;
 	uint32_t descriptorsizeRTV;
 	uint32_t descriptorsizeDSV;
 	// スワップチェーンリソース

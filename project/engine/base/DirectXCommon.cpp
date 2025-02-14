@@ -2,23 +2,21 @@
 #include<cassert>
 #include<format>
 #include <thread> 
-#include"externals/imgui/imgui.h"
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
+//#include"externals/imgui/imgui.h"
+//#include"externals/imgui/imgui_impl_dx12.h"
+//#include"externals/imgui/imgui_impl_win32.h"
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
 using namespace Microsoft::WRL;
 
-const uint32_t 	DirectXCommon::kMaxSRVCount = 512;
-
 DirectXCommon::~DirectXCommon() {
     // Win32APIの開放
     CloseHandle(fenceEvent);
-    // ImGuiの終了処理。
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+    //// ImGuiの終了処理。
+    //ImGui_ImplDX12_Shutdown();
+    //ImGui_ImplWin32_Shutdown();
+    //ImGui::DestroyContext();
 }
 
 void DirectXCommon::Initialize(WinApp* winApp){
@@ -254,13 +252,10 @@ void DirectXCommon::DescriptorHeapGenerate() {
 
     // RTV用のヒープでディスクリプタの数は2。RTVはshader内で触るものではないので、ShaderVisibleはfalse
     rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-    // SRV用のヒープでディスクリプタの数は128.RTVはshader内で触るものなので、ShaderVisibleはtrue
-    srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
     // DSV用のヒープでディスクリプタの数は1。DSVはshader内で触るものではないので、ShaderVisibleはfalse
     dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
     // DescriptorSizeを取得する
-    descriptorsizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     descriptorsizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     descriptorsizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
@@ -368,20 +363,20 @@ void DirectXCommon::DxCompilerGenerate() {
 }
 
 void DirectXCommon::ImguiInitialize() {
-    // バージョンチェック
-    IMGUI_CHECKVERSION();
-    // コンテキストの生成
-    ImGui::CreateContext();
-    // スタイルの設定
-    ImGui::StyleColorsDark();
-    // 初期化
-    ImGui_ImplWin32_Init(winApp_->Gethwnd());
-    ImGui_ImplDX12_Init(device.Get(),
-        swapChainDesc.BufferCount,
-        rtvDesc.Format,
-        srvDescriptorHeap.Get(),
-        srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-        srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()); 
+    //// バージョンチェック
+    //IMGUI_CHECKVERSION();
+    //// コンテキストの生成
+    //ImGui::CreateContext();
+    //// スタイルの設定
+    //ImGui::StyleColorsDark();
+    //// 初期化
+    //ImGui_ImplWin32_Init(winApp_->Gethwnd());
+    //ImGui_ImplDX12_Init(device.Get(),
+    //    swapChainDesc.BufferCount,
+    //    rtvDesc.Format,
+    //    srvDescriptorHeap.Get(),
+    //    srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+    //    srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()); 
 }
 
 void DirectXCommon::PreDraw() {
@@ -481,16 +476,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetGPUDescriptorHandle(Microsoft::WRL
     D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     handleGPU.ptr += (descriptorsize * index);
     return handleGPU;
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVCPUDescriptorHandle(uint32_t index) {
-
-    return GetCPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, index);
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVGPUDescriptorHandle(uint32_t index) {
-
-    return GetGPUDescriptorHandle(srvDescriptorHeap, descriptorsizeSRV, index);
 }
 
 ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(ComPtr <ID3D12Device>& device, int32_t width, int32_t heigth) {
