@@ -12,6 +12,8 @@ class DirectXCommon;
 class ImGuiManager
 {
 public: // メンバ関数
+	// デストラクタ
+	~ImGuiManager() { Finalize(); }
 	///<summary>
 	/// 初期化
 	///</summary>
