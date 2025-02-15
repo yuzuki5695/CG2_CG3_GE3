@@ -44,4 +44,7 @@ private: // メンバ変数
 	uint32_t descriptorSize;
 	// 次に使用するSRVインデックス
 	uint32_t useIndex = 0;
+public:
+	// getter
+	Microsoft::WRL::ComPtr <ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
 };

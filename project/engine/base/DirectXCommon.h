@@ -159,4 +159,6 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
 	D3D12_DEPTH_STENCIL_DESC GetdepthStencilDesc() { return depthStencilDesc; }
 	HANDLE GetfenceEvent() const { return fenceEvent; }
+	// スワップチェーンリソースの数を取得
+	size_t  GetSwapChainResourcesNum() const { return  swapChainResources.size(); }
 };
