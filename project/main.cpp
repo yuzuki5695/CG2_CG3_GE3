@@ -14,7 +14,6 @@
 #include<ModelManager.h>
 #include<Camera.h>
 #include<SrvManager.h>
-#include<ImGuiManager.h>
 
 using namespace MatrixVector;
 
@@ -30,7 +29,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Object3dCommon* object3dCommon = nullptr;
     ModelCommon* modelCommon = nullptr;
     SrvManager* srvManager = nullptr;
-    ImGuiManager* imGuiManager = nullptr;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -46,10 +44,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // SRVマネージャーの初期化
     srvManager = new SrvManager();
     srvManager->Initialize(dxCommon);
-    
-    // ImGuiマネージャの初期化
-    imGuiManager = new ImGuiManager();
-    imGuiManager->Initialize(winApp, dxCommon, srvManager);
 
     // テクスチャマネージャーの初期化
     TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
@@ -178,13 +172,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         if (input->Pushkey(DIK_0)) {
             OutputDebugStringA("Hit 0 \n");
         }
-#pragma region  ImGuiの更新処理開始
-        // ImGuiの受付開始
-        imGuiManager->Begin();
-        // デモウィンドウの表示
-        ImGui::ShowDemoWindow(); 
 
-#pragma endregion ImGuiの更新処理終了
 
         /*-------------------------------------------*/
         /*--------------カメラの更新処理---------------*/
@@ -237,10 +225,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
-        
-
-        // ImGuiの描画前準備
-        imGuiManager->End();
 
         //  描画用のDescriptorHeapの設定
         srvManager->PreDraw();
@@ -290,8 +274,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
         
-        // ImGuiの描画開始
-        imGuiManager->Draw();
         // 描画後処理
         dxCommon->PostDrow();
     }
@@ -324,9 +306,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
     ModelManager::GetInstance()->Finalize();
-    // ImGuiマネージャの解放
-    imGuiManager->Finalize();
-    delete imGuiManager;
     // SRVマネージャの開放
     delete srvManager;
     // DirectXの解放
