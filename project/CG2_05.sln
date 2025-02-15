@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj", "{371B9FA9-4C90-4AC6-A123-ACED756D6C77}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "externals", "externals", "{4A63E22E-7540-41F2-9CCE-A12C1045B36F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -37,6 +39,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4A4DC1F5-7C46-444E-98E4-C58C3FB34D6B} = {2D81CB0D-CFB9-4F7C-B8D2-23D695132381}
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77} = {00000000-0000-0000-0000-000000000000}
+		{4A63E22E-7540-41F2-9CCE-A12C1045B36F} = {2D81CB0D-CFB9-4F7C-B8D2-23D695132381}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8C5D745E-2C27-4496-86DB-7F78854F6A8A}
