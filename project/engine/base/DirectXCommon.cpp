@@ -43,8 +43,6 @@ void DirectXCommon::Initialize(WinApp* winApp){
 	scissorRectInitialize();
 	// DXCコンパイラの生成
 	DxCompilerGenerate();
-	// imguiの初期化
-	ImguiInitialize();
 }
 
 void DirectXCommon::DebugInitialize() {
