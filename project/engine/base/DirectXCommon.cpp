@@ -2,9 +2,6 @@
 #include<cassert>
 #include<format>
 #include <thread> 
-//#include"externals/imgui/imgui.h"
-//#include"externals/imgui/imgui_impl_dx12.h"
-//#include"externals/imgui/imgui_impl_win32.h"
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
@@ -13,10 +10,6 @@ using namespace Microsoft::WRL;
 DirectXCommon::~DirectXCommon() {
     // Win32APIの開放
     CloseHandle(fenceEvent);
-    //// ImGuiの終了処理。
-    //ImGui_ImplDX12_Shutdown();
-    //ImGui_ImplWin32_Shutdown();
-    //ImGui::DestroyContext();
 }
 
 void DirectXCommon::Initialize(WinApp* winApp){
@@ -360,23 +353,6 @@ void DirectXCommon::DxCompilerGenerate() {
     //現時点でincludeはしないが、includeに対応するための設定を行っていく
     hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
     assert(SUCCEEDED(hr));
-}
-
-void DirectXCommon::ImguiInitialize() {
-    //// バージョンチェック
-    //IMGUI_CHECKVERSION();
-    //// コンテキストの生成
-    //ImGui::CreateContext();
-    //// スタイルの設定
-    //ImGui::StyleColorsDark();
-    //// 初期化
-    //ImGui_ImplWin32_Init(winApp_->Gethwnd());
-    //ImGui_ImplDX12_Init(device.Get(),
-    //    swapChainDesc.BufferCount,
-    //    rtvDesc.Format,
-    //    srvDescriptorHeap.Get(),
-    //    srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-    //    srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()); 
 }
 
 void DirectXCommon::PreDraw() {

@@ -76,8 +76,6 @@ private: // プライベートメンバ関数
 	void scissorRectInitialize();
 	// DXCコンパイラの生成
 	void DxCompilerGenerate();
-	// imguiの初期化
-	void ImguiInitialize();
 	
 	/// <summary>
 	/// 指定番号のCPUディスクリプタハンドルを取得する
