@@ -1,3 +1,4 @@
+
 #include "Object3d.h"
 #include "Object3dCommon.h"
 #include<fstream>
@@ -70,7 +71,7 @@ void Object3d::SetModel(const std::string& filePath) {
     model = ModelManager::GetInstance()->FindModel(filePath);
 }
 
-void Object3d::Crrate(std::string filePath, Transform transform) {
+void Object3d::Create(std::string filePath, Transform transform) {
     // モデルを検索してセットする
     model = ModelManager::GetInstance()->FindModel(filePath);
     transform_ = transform;

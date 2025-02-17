@@ -162,7 +162,7 @@ void Sprite::AdjustTextureSize() {
 	size_ = textureSize;
 }
 
-void Sprite::Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size) {
+void Sprite::Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size) {
 	// 引数で受け取ってメンバ変数に記録する
 	textureFilePath_ = textureFilePath;
 	// 単位行列を書き込んでおく

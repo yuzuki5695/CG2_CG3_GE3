@@ -25,7 +25,7 @@ public:// メンバ関数
 	/// <summary>
 	/// モデルファイルの読み込み
 	/// </summary>	/// <param name="filePath"モデルファイルのパス></param>
-	void LoadTexture(const std::string& filePath);
+	void LoadModel(const std::string& filePath);
 
 	/// <summary>
 	/// モデルファイルの検索

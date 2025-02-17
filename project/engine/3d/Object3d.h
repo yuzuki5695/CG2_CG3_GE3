@@ -29,7 +29,7 @@ public: // メンバ関数
 	void Draw();
 
 	// 3Dobject作成関数
-	void Crrate(std::string filePath, Transform transform);
+	void Create(std::string filePath, Transform transform);
 
 private:
 	// リソース

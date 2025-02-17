@@ -23,7 +23,7 @@ void ModelManager::Initialize(DirectXCommon* dxCommon) {
 	modelCommon->Initialize(dxCommon);
 }
 
-void ModelManager::LoadTexture(const std::string& filePath) {
+void ModelManager::LoadModel(const std::string& filePath) {
 	//  読み込み済みモデルを検索
 	if (models.contains(filePath)) {
 		// 読み込み済みなら早期return
