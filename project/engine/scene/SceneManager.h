@@ -2,19 +2,19 @@
 #include<BaseScene.h>
 
 // シーン管理
-class SceneManeger
+class SceneManager
 {
 private:
 
-	static SceneManeger* instance;
+	static SceneManager* instance;
 
-	SceneManeger() = default;
-	~SceneManeger() = default;
-	SceneManeger(SceneManeger&) = delete;
-	SceneManeger& operator=(SceneManeger&) = delete;
+	SceneManager() = default;
+	~SceneManager() = default;
+	SceneManager(SceneManager&) = delete;
+	SceneManager& operator=(SceneManager&) = delete;
 public: // メンバ関数
 	// シングルトンインスタンスの取得
-	static SceneManeger* GetInstance();
+	static SceneManager* GetInstance();
 	// 終了
 	void Finalize();
 	// 毎フレーム更新

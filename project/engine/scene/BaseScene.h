@@ -1,7 +1,7 @@
 #pragma once
 
 // 前方宣言 
-class SceneManeger;
+class SceneManager;
 
 // シーン基底クラス
 class BaseScene
@@ -20,8 +20,8 @@ public:// メンバ関数
 	virtual void Draw() = 0;
 private:
 	// シーンマネージャ（借りてくる）
-	SceneManeger* sceneManeger_ = nullptr;
+	SceneManager* sceneManeger_ = nullptr;
 public:// メンバ関数
-	virtual void SetSceneManeger(SceneManeger* sceneManeger) { sceneManeger_ = sceneManeger; }
-	SceneManeger* GetSceneManeger() { return sceneManeger_; }
+	virtual void SetSceneManeger(SceneManager* sceneManeger) { sceneManeger_ = sceneManeger; }
+	SceneManager* GetSceneManeger() { return sceneManeger_; }
 };

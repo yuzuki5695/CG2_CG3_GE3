@@ -5,7 +5,7 @@
 #include<Object3dCommon.h>
 #include <Input.h>
 #include <ImGuiManager.h>
-#include"SceneManeger.h"
+#include"SceneManager.h"
 
 void TitleScene::Finalize() {
     // 汎用機能の解放

@@ -21,7 +21,7 @@ void Framework::Run() {
 
 void Framework::Finalize() {
     // シーンマネージャの解放
-    SceneManeger::GetInstance()->Finalize();
+    SceneManager::GetInstance()->Finalize();
     // 基盤システムの解放
     SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
@@ -114,7 +114,7 @@ void Framework::Update() {
     camera->SetRotate(Camerarotation);
 
     // シーンマネージャの更新処理
-    sceneManeger_->Update();
+    SceneManager::GetInstance()->Update();
 }
 
 void Framework::Draw() {

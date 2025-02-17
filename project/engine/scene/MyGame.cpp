@@ -11,7 +11,7 @@ void MyGame::Initialize() {
     // ゲームプレイシーンの生成
     BaseScene* scene_ = new TitleScene();
     // シーンマネージャに最初のシーンをセット
-    Framework::GetSceneManeger()->SetNextScene(scene_);
+    SceneManager::GetInstance()->SetNextScene(scene_);
 }
 
 void MyGame::Update() {
@@ -23,7 +23,7 @@ void MyGame::Draw() {
     // 描画処理
     Framework::Draw();
     // シーンマネージャの描画処理
-    Framework::GetSceneManeger()->Draw();
+    SceneManager::GetInstance()->Draw();
     // デバックテキスト描画
     ImGuiManager::GetInstance()->Draw();
     // 描画後処理
