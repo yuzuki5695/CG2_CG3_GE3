@@ -10,7 +10,8 @@ public: // メンバ関数
 	Camera();
 	// 更新処理
 	void Update();
-
+	// ImGuiの更新
+	void DebugUpdata();
 private: // メンバ変数
 	Transform  transform;
 	Matrix4x4 worludMatrix;

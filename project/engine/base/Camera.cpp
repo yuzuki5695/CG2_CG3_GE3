@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "MatrixVector.h"
 #include "WinApp.h"
+#include<ImGuiManager.h>
 
 using namespace MatrixVector;
 
@@ -14,11 +15,24 @@ Camera::Camera()
 	, viewMatrix(Inverse(worludMatrix))
 	, projectionMatrix(MakePerspectiveFovMatrix(fovY, aspectRatio, nearClip, farclip))
 	, ViewProjectionMatrix(Multiply(viewMatrix, projectionMatrix))
-{}
+{
+}
 
 void Camera::Update() {
 	worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
 	viewMatrix = Inverse(worludMatrix);
 	projectionMatrix = MakePerspectiveFovMatrix(fovY, aspectRatio, nearClip, farclip);
 	ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
+}
+
+void Camera::DebugUpdata() {
+#ifdef USE_IMGUI
+	// 開発用UIの処理
+	ImGui::Begin("SetCamera");
+	ImGui::DragFloat3("CameraTranslate", &transform.translate.x, 0.01f, -10.0f, 10.0f);
+	ImGui::SliderAngle("CameraRotateX", &transform.rotate.x);
+	ImGui::SliderAngle("CameraRotateY", &transform.rotate.y);
+	ImGui::SliderAngle("CameraRotateZ", &transform.rotate.z);
+	ImGui::End();
+#endif // USE_IMGUI
 }

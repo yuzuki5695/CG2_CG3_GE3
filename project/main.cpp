@@ -42,17 +42,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // DirectXの初期化
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
-    
+
     // SRVマネージャーの初期化
     srvManager = new SrvManager();
     srvManager->Initialize(dxCommon);
-    
+
     // ImGuiマネージャの初期化
     imGuiManager = new ImGuiManager();
     imGuiManager->Initialize(winApp, dxCommon, srvManager);
 
     // テクスチャマネージャーの初期化
-    TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
+    TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
     // 3Dモデルマネージャの初期化
     ModelManager::GetInstance()->Initialize(dxCommon);
 
@@ -97,7 +97,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
-    sprite->Crrate(TexturePath01,{ 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
+    sprite->Crrate(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dモデルの初期化
     Model* model = new Model;;
@@ -121,7 +121,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         Position[i] = 180.0f * i;
         Sprite* sprite = new Sprite();
         sprite->Initialize(spriteCommon);
-        sprite->Crrate(TexturePath01,{ 0.0f,0.0f }, 0.0f, { 90.0f ,90.0f });
+        sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 90.0f ,90.0f });
         if (i % 2 == 1) {
             sprite->SetTexture(TexturePath02);
         }
@@ -184,6 +184,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // デモウィンドウの表示
         //ImGui::ShowDemoWindow(); 
 
+        // スプライト
+        sprite->DebugUpdata();
+
 #pragma endregion ImGuiの更新処理終了
 
         /*-------------------------------------------------------------------------------------------------------------------------------*/
@@ -232,8 +235,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*----------------------------------------------------------------------------------------------------*/
         /*---------------------------------------Spriteの更新処理----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
-       
-        
+
+
         // 更新処理
         sprite->Update();
 
@@ -241,10 +244,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
         /*---------------------------------------------------------------------------------------------------*/
-        
+
         // ImGuiの描画前準備
         imGuiManager->End();
-        
+
         /*-------------------------------------------------------------------------------------------------------------------------------*/
         /*--------------------------------------------------------更新処理の終了-----------------------------------------------------------*/
         /*-------------------------------------------------------------------------------------------------------------------------------*/
@@ -252,7 +255,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //  描画用のDescriptorHeapの設定
         srvManager->PreDraw();
         //  DirectXの描画準備。全ての描画に共通のグラフィックスコマンドを積む
-        dxCommon->PreDraw(); 
+        dxCommon->PreDraw();
         // 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
         object3dCommon->Commondrawing();
         // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
@@ -267,7 +270,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-----------------------------------------------------------------------------------------------------*/
 
 #pragma region 全てのObject3d個々の描画
-      
+
        // object3d->Draw();
 
         for (Object3d* object3d : objects) {
@@ -291,7 +294,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
         sprite->Draw();
-     
+
 #pragma endregion 全てのSprite個々の描画
 
         /*----------------------------------------------------------------------------------------------------*/
@@ -321,10 +324,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Sprite* sprite : sprites) {
         delete sprite;
     }
-    
+
     // 3Dモデルの解放
     delete model;
-    
+
     // 3Dオブジェクトの解放
     delete  object3d;
     for (Object3d* object3d : objects) {

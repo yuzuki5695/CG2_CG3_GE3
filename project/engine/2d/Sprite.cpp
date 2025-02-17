@@ -4,6 +4,7 @@
 #include "MatrixVector.h"
 #include "TextureManager.h"
 #include "SrvManager.h"
+#include<ImGuiManager.h>
 
 using namespace MatrixVector;
 
@@ -161,24 +162,34 @@ void Sprite::AdjustTextureSize() {
 	size_ = textureSize;
 }
 
-void Sprite::Crrate(std::string textureFilePath,Vector2 position, float rotation, Vector2 size){
+void Sprite::Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size) {
 	// 引数で受け取ってメンバ変数に記録する
 	textureFilePath_ = textureFilePath;
 	// 単位行列を書き込んでおく
 	textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilePath_);
-	 position_ = position;
-	 rotation_ = rotation;
-	 size_ = size;
-	 // 頂点データの作成
-	 VertexDatacreation();
-	 // マテリアルの生成、初期化
-	 MaterialGenerate();
-	 // テクスチャサイズをイメージに合わせる
-	 AdjustTextureSize();
-	 // WVP,World用のリソースの生成、初期化
-	 TransformationMatrixGenerate();
+	position_ = position;
+	rotation_ = rotation;
+	size_ = size;
+	// 頂点データの作成
+	VertexDatacreation();
+	// マテリアルの生成、初期化
+	MaterialGenerate();
+	// テクスチャサイズをイメージに合わせる
+	//AdjustTextureSize();
+	// WVP,World用のリソースの生成、初期化
+	TransformationMatrixGenerate();
 	// トランスフォームの初期化
 	transform.translate = { position_.x,position_.y,0.0f };
 	transform.rotate = { 0.0f,0.0f,rotation_ };
 	transform.scale = { size_.x,size_.y,1.0f };
+}
+
+void Sprite::DebugUpdata() {
+#ifdef USE_IMGUI
+	// ウィンドウサイズを指定
+	ImGui::SetNextWindowSize(ImVec2(500, 100));
+	ImGui::Begin("Sprite");
+	ImGui::SliderFloat2("position", &position_.x, 0.0f, 1000.0f, "%.01f");
+	ImGui::End();
+#endif // USE_IMGUI
 }

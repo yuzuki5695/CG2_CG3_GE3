@@ -46,6 +46,10 @@ public: // メンバ関数
 
 	// スプライト作成関数
 	void Crrate(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
+
+	// ImGuiの更新
+	void DebugUpdata();
+
 private:
 	// 頂点データ作成	
 	void VertexDatacreation();
@@ -72,7 +76,7 @@ private: // メンバ変数
 	Material* materialData = nullptr;
 	TransformationMatrix* transformationMatrixData = nullptr;
 	// バッファリソースの使い道を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;	
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
 	// トランスフォーム
@@ -94,7 +98,7 @@ private: // メンバ変数
 	// テクスチャ左上座標
 	Vector2 textureLeftTop = { 0.0f,0.0f };
 	// テクスチャ切り出しサイズ
-	Vector2 textureSize = { 64.0f,64.0f };
+	Vector2 textureSize = { 640.0f,640.0f };
 public:
 	// getter
 	const Vector2& GetPosition() const { return position_; }
