@@ -14,6 +14,7 @@
 #include<SoundPlayer.h>
 #include<TitleScene.h>
 #include<GamePlayScene.h>
+#include<SceneManeger.h>
 
 // ゲーム全体
 class Framework
@@ -36,7 +37,7 @@ public:// メンバ関数
 
 private: // メンバ変数
 	// シーン
-	BaseScene* scene_ = nullptr;
+	SceneManeger* sceneManeger_ = nullptr;
 	// ポインタ
 	WinApp* winApp = nullptr;
 	DirectXCommon* dxCommon = nullptr;
@@ -56,6 +57,7 @@ public:
 	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
 	Camera* GetCamera() const { return camera; }
 	SrvManager* GetSrvManager() const { return srvManager; }
+	SceneManeger* GetSceneManeger() const { return sceneManeger_; }
 	// 終了フラグのチェック
 	virtual bool IsEndRequst() { return  endRequst_; }
 };

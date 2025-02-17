@@ -20,10 +20,8 @@ void Framework::Run() {
 }
 
 void Framework::Finalize() {
-    // シーンの終了処理
-    scene_->Finalize();
-    // シーンの解放
-    delete scene_;
+    // シーンマネージャの解放
+    delete sceneManeger_;
     // 基盤システムの解放
     SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
@@ -98,10 +96,10 @@ void Framework::Initialize() {
 #pragma endregion 基盤システムの初期化
 
 #pragma region 最初のシーンの初期化
-    // ゲームプレイシーンの生成
-    scene_ = new TitleScene();
-    // ゲームプレイシーンの初期化
-    scene_->Initialize();
+
+    // シーンマネージャの生成
+    sceneManeger_ = new SceneManeger();
+
 #pragma endregion 最初のシーンの初期化
 }
 
@@ -122,8 +120,8 @@ void Framework::Update() {
     camera->SetTranslate(Cameraposition);
     camera->SetRotate(Camerarotation);
 
-    // シーンの更新処理
-    scene_->Update();
+    // シーンマネージャの更新処理
+    sceneManeger_->Update();
 }
 
 void Framework::Draw() {
@@ -135,10 +133,4 @@ void Framework::Draw() {
     Object3dCommon::GetInstance()->Commondrawing();
     // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
     SpriteCommon::GetInstance()->Commondrawing();
-    // シーンの描画処理
-    scene_->Draw();
-    // ImGuiの描画開始
-    ImGuiManager::GetInstance()->Draw();
-    // 描画後処理
-    dxCommon->PostDrow();
 }

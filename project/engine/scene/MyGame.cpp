@@ -8,6 +8,10 @@ void MyGame::Finalize() {
 void MyGame::Initialize() {
     // 基底クラスの初期化処理
     Framework::Initialize();
+    // ゲームプレイシーンの生成
+    BaseScene* scene_ = new TitleScene();
+    // シーンマネージャに最初のシーンをセット
+    Framework::GetSceneManeger()->SetNextScene(scene_);
 }
 
 void MyGame::Update() {
@@ -18,4 +22,10 @@ void MyGame::Update() {
 void MyGame::Draw() {
     // 描画処理
     Framework::Draw();
+    // シーンマネージャの描画処理
+    Framework::GetSceneManeger()->Draw();
+    // デバックテキスト描画
+    ImGuiManager::GetInstance()->Draw();
+    // 描画後処理
+    Framework::GetDirectXCommon()->PostDrow();
 }
