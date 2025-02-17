@@ -1,10 +1,11 @@
 #include "GamePlayScene.h"
-#include <TextureManager.h>
-#include <ModelManager.h>
+#include<TextureManager.h>
+#include<ModelManager.h>
 #include<SpriteCommon.h>
 #include<Object3dCommon.h>
-#include <Input.h>
-#include <ImGuiManager.h>
+#include<Input.h>
+#include<ImGuiManager.h>
+#include<SceneManager.h>
 
 void GamePlayScene::Finalize() {
     // 汎用機能の解放

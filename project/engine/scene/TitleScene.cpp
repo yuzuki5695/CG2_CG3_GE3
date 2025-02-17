@@ -1,11 +1,12 @@
 #include "TitleScene.h"
-#include <TextureManager.h>
-#include <ModelManager.h>
+#include<TextureManager.h>
+#include<ModelManager.h>
 #include<SpriteCommon.h>
 #include<Object3dCommon.h>
-#include <Input.h>
-#include <ImGuiManager.h>
-#include"SceneManager.h"
+#include<Input.h>
+#include<ImGuiManager.h>
+#include<GamePlayScene.h>
+#include<SceneManager.h>
 
 void TitleScene::Finalize() {
     // 汎用機能の解放
@@ -53,7 +54,7 @@ void TitleScene::Update() {
     }
 
 
-    if (Input::GetInstance()->Pushkey(DIK_SPACE) && soundfige == 0) {
+    if (Input::GetInstance()->Triggrkey(DIK_SPACE) && soundfige == 0) {
         soundfige = 1;
     }
 
