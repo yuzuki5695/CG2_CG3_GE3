@@ -6,7 +6,7 @@
 #include<BaseScene.h>
 
 // ゲームプレイシーン
-class GamePlayScene : public BaseScene
+class TitleScene : public BaseScene
 {
 public: // メンバ関数
     // 初期化
@@ -21,16 +21,10 @@ private: // メンバ変数
     // オブジェクトデータ
     // Sprite
     Sprite* sprite = nullptr;
-    // Object3d
-    Model* model = nullptr;
-    Object3d* object3d = nullptr;
     /*-----ファイルデータ----*/
     // Texture
     std::string TexturePath01;
     std::string TexturePath02;
-    // Model
-    std::string ModelPath01;
-    std::string ModelPath02;
     // 音声
     SoundData soundData;
     /*-----ファイルデータ----*/
