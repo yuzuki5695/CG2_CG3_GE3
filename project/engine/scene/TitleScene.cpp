@@ -64,8 +64,6 @@ void TitleScene::Update() {
     }
 
 #pragma region  ImGuiの更新処理開始
-    // デモウィンドウの表示
-    //ImGui::ShowDemoWindow();
     // スプライト
     sprite->DebugUpdata();
 #pragma endregion ImGuiの更新処理終了
