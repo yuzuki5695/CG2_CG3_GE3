@@ -5,7 +5,6 @@
 #include<Object3dCommon.h>
 #include<Input.h>
 #include<ImGuiManager.h>
-#include<GamePlayScene.h>
 #include<SceneManager.h>
 
 void TitleScene::Finalize() {
@@ -42,10 +41,8 @@ void TitleScene::Initialize() {
 void TitleScene::Update() {
     // ENTERキーを押したら
     if (Input::GetInstance()->Triggrkey(DIK_RETURN)) {
-        // ゲームプレイシーン（次シーン）生成
-        BaseScene* scene = new GamePlayScene();
-        // シーン切り替え依頼
-       BaseScene::GetSceneManeger()->SetNextScene(scene);
+        // シーン切り替え
+        SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
     }
 
     // 0を押している間true

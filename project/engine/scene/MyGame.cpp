@@ -1,4 +1,5 @@
 #include "MyGame.h"
+#include "SceneFactory.h"
 
 void MyGame::Finalize() {
     // 基底クラスの終了処理
@@ -8,10 +9,11 @@ void MyGame::Finalize() {
 void MyGame::Initialize() {
     // 基底クラスの初期化処理
     Framework::Initialize();
-    // ゲームプレイシーンの生成
-    BaseScene* scene_ = new TitleScene();
-    // シーンマネージャに最初のシーンをセット
-    SceneManager::GetInstance()->SetNextScene(scene_);
+    // シーンファクトリを生成し、マネージャにセット
+    sceneFactory_ = new SceneFactory();
+    SceneManager::GetInstance()->SetSceneFactory(sceneFactory_);
+    // シーンマネージャに最初のシーンをセットした
+    SceneManager::GetInstance()->ChangeScene("TITLE");
 }
 
 void MyGame::Update() {

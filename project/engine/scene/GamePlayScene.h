@@ -31,10 +31,5 @@ private: // メンバ変数
     // Model
     std::string ModelPath01;
     std::string ModelPath02;
-    // 音声
-    SoundData soundData;
     /*-----ファイルデータ----*/
-
-    // 音声プレイフラグ
-    uint32_t soundfige;
 };

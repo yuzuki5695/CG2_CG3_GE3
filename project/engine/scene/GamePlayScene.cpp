@@ -14,8 +14,6 @@ void GamePlayScene::Finalize() {
     delete model;
     // 3Dオブジェクトの解放
     delete  object3d;
-    // 音声データ解放
-    SoundPlayer::GetInstance()->SoundUnload(&soundData);
 }
 
 void GamePlayScene::Initialize() {
@@ -32,9 +30,6 @@ void GamePlayScene::Initialize() {
     // 変数に代入
     ModelPath01 = "plane.obj";
     ModelPath02 = "axis.obj";
-
-    // 音声ファイルを追加
-    soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
 
 #pragma region 最初のシーンの初期化
 
@@ -54,27 +49,9 @@ void GamePlayScene::Initialize() {
     object3d->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
 #pragma endregion 最初のシーンの初期化
-    // 音声プレイフラグ
-    soundfige = 0;
 }
 
 void GamePlayScene::Update() {
-    // 0を押している間true
-    if (Input::GetInstance()->Pushkey(DIK_0)) {
-        OutputDebugStringA("Hit 0 \n");
-    }
-
-
-    if (Input::GetInstance()->Pushkey(DIK_SPACE) && soundfige == 0) {
-        soundfige = 1;
-    }
-
-    if (soundfige == 1) {
-        // 音声再生
-        SoundPlayer::GetInstance()->SoundPlayWave(soundData, false);
-        soundfige = 2;
-    }
-
 #pragma region  ImGuiの更新処理開始
     // デモウィンドウの表示
     //ImGui::ShowDemoWindow();

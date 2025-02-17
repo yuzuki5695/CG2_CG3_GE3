@@ -2,7 +2,7 @@
 #include<TitleScene.h>
 #include<GamePlayScene.h>
 
-BaseScene* CreateScene(const std::string& sceneName) {
+BaseScene* SceneFactory::CreateScene(const std::string& sceneName) {
 	// 次のシーンの生成
 	BaseScene* newScene = nullptr;
 

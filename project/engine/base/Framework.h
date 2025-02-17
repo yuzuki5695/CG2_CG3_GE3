@@ -12,9 +12,8 @@
 #include<SrvManager.h>
 #include<ImGuiManager.h>
 #include<SoundPlayer.h>
-#include<TitleScene.h>
-#include<GamePlayScene.h>
 #include<SceneManager.h>
+#include "SceneFactory.h"
 
 // ゲーム全体
 class Framework
@@ -35,6 +34,9 @@ public:// メンバ関数
 	// 実行
 	void Run();
 
+protected:
+	// シーンファクトリー
+	AbstractSceneFactory* sceneFactory_ = nullptr;
 private: // メンバ変数
 	// ポインタ
 	WinApp* winApp = nullptr;
