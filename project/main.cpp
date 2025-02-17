@@ -15,6 +15,7 @@
 #include<Camera.h>
 #include<SrvManager.h>
 #include<ImGuiManager.h>
+#include<SoundPlayer.h>
 
 using namespace MatrixVector;
 
@@ -31,6 +32,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ModelCommon* modelCommon = nullptr;
     SrvManager* srvManager = nullptr;
     ImGuiManager* imGuiManager = nullptr;
+    SoundLoader* soundLoader = nullptr;
+    SoundPlayer* soundPlayer = nullptr;
 #pragma endregion ポインタ
 
     // ウィンドウ作成
@@ -42,6 +45,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // DirectXの初期化
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
+
+    // 音声読み込み
+    soundLoader = new SoundLoader();
+    soundLoader->Initialize();
+    // 音声再生
+    soundPlayer = new SoundPlayer();
+    soundPlayer->Initialize(soundLoader);
+
+    // 音声ファイル
+    SoundData soundData = soundLoader->SoundLoadWave("Resources/Alarm01.wav");
 
     // SRVマネージャーの初期化
     srvManager = new SrvManager();
@@ -162,6 +175,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector3 Cameraposition = camera->GetTranslate();
     Vector3 Camerarotation = camera->GetRotate();
 
+    // 音声プレイフラグ
+    uint32_t soundfige = 0;
+
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -178,6 +194,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         if (input->Pushkey(DIK_0)) {
             OutputDebugStringA("Hit 0 \n");
         }
+
+
+        if (input->Pushkey(DIK_SPACE) && soundfige == 0) {
+            soundfige = 1;
+        }
+
+        if (soundfige == 1) {
+            // 音声再生
+            soundPlayer->SoundPlayWave(soundData, false);
+            soundfige = 2;
+        }
+
 #pragma region  ImGuiの更新処理開始
         // ImGuiの受付開始
         imGuiManager->Begin();
@@ -343,11 +371,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     delete imGuiManager;
     // SRVマネージャの開放
     delete srvManager;
+    // 音声データ解放
+    delete soundLoader;
+    // 音声再生
+    soundPlayer->SoundUnload(&soundData);
+    delete soundPlayer;
     // DirectXの解放
     delete dxCommon;
-    // ウィンドウ解放 
-    // WindowsAPIの終了処理
-    winApp->Finalize();
     // WindowsAPIの解放
     delete winApp;
     return 0;
