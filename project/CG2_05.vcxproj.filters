@@ -132,6 +132,9 @@
     <ClCompile Include="engine\audio\SoundPlayer.cpp">
       <Filter>ソース ファイル\engine\audio</Filter>
     </ClCompile>
+    <ClCompile Include="MyGame.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\2d\Sprite.h">
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="engine\audio\SoundPlayer.h">
       <Filter>ヘッダー ファイル\engine\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="MyGame.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
