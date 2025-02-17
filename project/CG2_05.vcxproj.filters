@@ -67,6 +67,18 @@
     <Filter Include="ヘッダー ファイル\application">
       <UniqueIdentifier>{8879c179-8943-4fc5-a19e-f0b38a474781}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\application\base">
+      <UniqueIdentifier>{79697765-9025-43f1-9d93-6d25fbc412f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\application\scene">
+      <UniqueIdentifier>{0c9a8f97-8f5f-4515-8184-74193096ccbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\base">
+      <UniqueIdentifier>{a3d0208e-6d5c-4b49-92e2-f8ba9fee3759}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\scene">
+      <UniqueIdentifier>{0f0d4ec5-2226-4393-8f68-c1e8013bbee6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -132,26 +144,26 @@
     <ClCompile Include="engine\audio\SoundPlayer.cpp">
       <Filter>ソース ファイル\engine\audio</Filter>
     </ClCompile>
-    <ClCompile Include="engine\scene\MyGame.cpp">
-      <Filter>ソース ファイル\engine\scene</Filter>
-    </ClCompile>
     <ClCompile Include="engine\base\Framework.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="engine\scene\GamePlayScene.cpp">
-      <Filter>ソース ファイル\engine\scene</Filter>
+    <ClCompile Include="engine\base\SceneManager.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="engine\scene\BaseScene.cpp">
-      <Filter>ソース ファイル\engine\scene</Filter>
+    <ClCompile Include="application\MyGame.cpp">
+      <Filter>ソース ファイル\application</Filter>
     </ClCompile>
-    <ClCompile Include="engine\scene\TitleScene.cpp">
-      <Filter>ソース ファイル\engine\scene</Filter>
+    <ClCompile Include="application\scene\TitleScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
     </ClCompile>
-    <ClCompile Include="engine\scene\SceneManager.cpp">
-      <Filter>ソース ファイル\engine\scene</Filter>
+    <ClCompile Include="application\scene\GamePlayScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
     </ClCompile>
-    <ClCompile Include="SceneFactory.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="application\scene\BaseScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="application\base\SceneFactory.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -236,29 +248,29 @@
     <ClInclude Include="engine\audio\SoundPlayer.h">
       <Filter>ヘッダー ファイル\engine\audio</Filter>
     </ClInclude>
-    <ClInclude Include="engine\scene\MyGame.h">
-      <Filter>ヘッダー ファイル\engine\scene</Filter>
-    </ClInclude>
     <ClInclude Include="engine\base\Framework.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="engine\scene\GamePlayScene.h">
-      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    <ClInclude Include="application\base\SceneFactory.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="engine\scene\BaseScene.h">
-      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    <ClInclude Include="engine\base\AbstractSceneFactory.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="engine\scene\TitleScene.h">
-      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    <ClInclude Include="engine\base\SceneManager.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="engine\scene\SceneManager.h">
-      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    <ClInclude Include="application\scene\BaseScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
     </ClInclude>
-    <ClInclude Include="AbstractSceneFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="application\scene\GamePlayScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
     </ClInclude>
-    <ClInclude Include="SceneFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="application\scene\TitleScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="application\MyGame.h">
+      <Filter>ヘッダー ファイル\application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

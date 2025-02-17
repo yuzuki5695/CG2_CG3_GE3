@@ -11,8 +11,6 @@ void TitleScene::Finalize() {
     // 汎用機能の解放
     delete  sprite;
     sprite = nullptr;
-    // 音声データ解放
-    SoundPlayer::GetInstance()->SoundUnload(&soundData);
 }
 
 void TitleScene::Initialize() {
