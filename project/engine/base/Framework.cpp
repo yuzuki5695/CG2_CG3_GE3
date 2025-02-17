@@ -21,7 +21,7 @@ void Framework::Run() {
 
 void Framework::Finalize() {
     // シーンマネージャの解放
-    delete sceneManeger_;
+    SceneManeger::GetInstance()->Finalize();
     // 基盤システムの解放
     SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
@@ -94,13 +94,6 @@ void Framework::Initialize() {
     Camerarotation = camera->GetRotate();
 
 #pragma endregion 基盤システムの初期化
-
-#pragma region 最初のシーンの初期化
-
-    // シーンマネージャの生成
-    sceneManeger_ = new SceneManeger();
-
-#pragma endregion 最初のシーンの初期化
 }
 
 void Framework::Update() {

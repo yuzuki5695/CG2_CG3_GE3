@@ -4,8 +4,19 @@
 // シーン管理
 class SceneManeger
 {
+private:
+
+	static SceneManeger* instance;
+
+	SceneManeger() = default;
+	~SceneManeger() = default;
+	SceneManeger(SceneManeger&) = delete;
+	SceneManeger& operator=(SceneManeger&) = delete;
 public: // メンバ関数
-	~SceneManeger();
+	// シングルトンインスタンスの取得
+	static SceneManeger* GetInstance();
+	// 終了
+	void Finalize();
 	// 毎フレーム更新
 	void Update();
 	// 描画

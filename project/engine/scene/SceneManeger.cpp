@@ -1,10 +1,22 @@
 #include "SceneManeger.h"
 
-SceneManeger::~SceneManeger() {
+SceneManeger* SceneManeger::instance = nullptr;
+
+SceneManeger* SceneManeger::GetInstance() {
+	if (instance == nullptr) {
+		instance = new SceneManeger;
+	}
+	return instance;
+}
+
+void SceneManeger::Finalize() {
 	// 最後のシーンの終了と解放
 	scene_->Finalize();
 	delete scene_;
+	delete instance;
+	instance = nullptr;
 }
+
 
 void SceneManeger::Update() {
 	// TODO:シーンの切り替え機構
