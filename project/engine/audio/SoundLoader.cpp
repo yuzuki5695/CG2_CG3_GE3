@@ -3,17 +3,28 @@
 
 using namespace Microsoft::WRL;
 
+SoundLoader* SoundLoader::instance = nullptr;
+
+SoundLoader* SoundLoader::GetInstance() {
+    if (instance == nullptr) {
+        instance = new SoundLoader;
+    }
+    return instance;
+}
+
+void SoundLoader::Finalize() {
+    //xAudio2解放
+    xAudio2.Reset();
+    delete instance;
+    instance = nullptr;
+}
+
 void SoundLoader::Initialize() {
     HRESULT result;
     // XAudioエンジンのインスタンスを生成
     result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
     // マスターボイスの生成
     result = xAudio2->CreateMasteringVoice(&masterVoice);
-}
-
-void SoundLoader::Finalize() {
-    //xAudio2解放
-    xAudio2.Reset();
 }
 
 SoundData SoundLoader::SoundLoadWave(const char* filename)
@@ -42,7 +53,7 @@ SoundData SoundLoader::SoundLoadWave(const char* filename)
     // チャンクヘッダーの確認
     file.read((char*)&format, sizeof(ChunkHeader));
     if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
-        assert(0); 
+        assert(0);
     }
     // チャンク本体の読み込み
     assert(format.chunk.size <= sizeof(format.fmt));

@@ -2,6 +2,20 @@
 
 using namespace Microsoft::WRL;
 
+SpriteCommon* SpriteCommon::instance = nullptr;
+
+SpriteCommon* SpriteCommon::GetInstance() {
+    if (instance == nullptr) {
+        instance = new SpriteCommon;
+    }
+    return instance;
+}
+
+void SpriteCommon::Finalize() {
+    delete instance;
+    instance = nullptr;
+}
+
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
     // 引数を受け取ってメンバ変数に記録する
     dxCommon_ = dxCommon;

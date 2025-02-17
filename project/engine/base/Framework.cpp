@@ -20,12 +20,12 @@ void Framework::Run() {
 }
 
 void Framework::Finalize() {
-    // シーンの解放
-    delete spriteCommon;
-    delete object3dCommon;
+    // 基盤システムの解放
+    SpriteCommon::GetInstance()->Finalize();
+    Object3dCommon::GetInstance()->Finalize();
     delete modelCommon;
     // 入力解放
-    delete input;
+    Input::GetInstance()->Finalize();
     // カメラ
     delete camera;
     // テクスチャマネージャーの終了
@@ -33,12 +33,12 @@ void Framework::Finalize() {
     // 3Dモデルマネージャの終了
     ModelManager::GetInstance()->Finalize();
     // ImGuiマネージャの解放
-    delete imGuiManager;
+    ImGuiManager::GetInstance()->Finalize();
     // SRVマネージャの開放
     delete srvManager;
-    // 音声データ解放
-    delete soundLoader;
-    delete soundPlayer;
+    // 音声データの解放
+    SoundLoader::GetInstance()->Finalize();
+    SoundPlayer::GetInstance()->Finalize();
     // DirectXの解放
     delete dxCommon;
     // WindowsAPIの解放
@@ -57,17 +57,14 @@ void Framework::Initialize() {
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
     // 音声読み込み
-    soundLoader = new SoundLoader();
-    soundLoader->Initialize();
+    SoundLoader::GetInstance()->Initialize();
     // 音声再生
-    soundPlayer = new SoundPlayer();
-    soundPlayer->Initialize(soundLoader);
+    SoundPlayer::GetInstance()->Initialize(SoundLoader::GetInstance());
     // SRVマネージャーの初期化
     srvManager = new SrvManager();
     srvManager->Initialize(dxCommon);
     // ImGuiマネージャの初期化
-    imGuiManager = new ImGuiManager();
-    imGuiManager->Initialize(winApp, dxCommon, srvManager);
+    ImGuiManager::GetInstance()->Initialize(winApp, dxCommon, srvManager);
     // テクスチャマネージャーの初期化
     TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
     // 3Dモデルマネージャの初期化
@@ -76,22 +73,19 @@ void Framework::Initialize() {
 #pragma region 基盤システムの初期化
 
     // 入力の初期化
-    input = new Input();
-    input->Initialize(winApp);
+    Input::GetInstance()->Initialize(winApp);
 
     // スプライト共通部の初期化
-    spriteCommon = new SpriteCommon;
-    spriteCommon->Initialize(dxCommon);
+    SpriteCommon::GetInstance()->Initialize(dxCommon);
 
     // 3Dオブジェクト共通部の初期化
-    object3dCommon = new Object3dCommon;
-    object3dCommon->Initialize(dxCommon);
+    Object3dCommon::GetInstance()->Initialize(dxCommon);
 
     // カメラの初期化
     camera = new Camera();
     camera->SetRotate({ 0.0f,0.0f,0.0f });
     camera->SetTranslate({ 0.0f,0.0f,-700.0f });
-    object3dCommon->SetDefaultCamera(camera);
+    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
 
     // カメラの現在の位置と回転を取得
     Cameraposition = camera->GetTranslate();
@@ -107,9 +101,9 @@ void Framework::Update() {
         endRequst_ = true;
     }
     // 入力の更新
-    input->Update();
+    Input::GetInstance()->Update();
     // ImGuiの受付開始
-    imGuiManager->Begin();
+    ImGuiManager::GetInstance()->Begin();
     /*-------------------------------------------*/
     /*--------------カメラの更新処理---------------*/
     /*------------------------------------------*/

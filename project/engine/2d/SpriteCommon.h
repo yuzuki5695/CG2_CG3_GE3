@@ -1,9 +1,21 @@
 #pragma once
 #include"DirectXCommon.h"
 
+// スプライト共通部
 class SpriteCommon
 {
+private:
+	static SpriteCommon* instance;
+
+	SpriteCommon() = default;
+	~SpriteCommon() = default;
+	SpriteCommon(SpriteCommon&) = delete;
+	SpriteCommon& operator=(SpriteCommon&) = delete;
 public: // メンバ関数
+	// シングルトンインスタンスの取得
+	static SpriteCommon* GetInstance();
+	// 終了
+	void Finalize();
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 	// 共通描画設定

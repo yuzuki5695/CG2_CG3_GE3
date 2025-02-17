@@ -1,6 +1,20 @@
 #include "SoundPlayer.h"
 #include <cassert>
 
+SoundPlayer* SoundPlayer::instance = nullptr;
+
+SoundPlayer* SoundPlayer::GetInstance() {
+    if (instance == nullptr) {
+        instance = new SoundPlayer;
+    }
+    return instance;
+}
+
+void SoundPlayer::Finalize() {
+    delete instance;
+    instance = nullptr;
+}
+
 void SoundPlayer::Initialize(SoundLoader* soundLoader) {
     // NULL検出
     assert(soundLoader);
@@ -20,7 +34,7 @@ void SoundPlayer::SoundPlayWave(const SoundData& soundData, bool loop) {
     XAUDIO2_BUFFER buf{};
     buf.pAudioData = soundData.pBuffer;
     buf.AudioBytes = soundData.bufferSize;
-    
+
     // 再生をループするかどうか
     if (loop) {
         // 無限ループ

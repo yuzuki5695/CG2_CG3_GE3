@@ -4,6 +4,15 @@
 
 using namespace Microsoft::WRL;
 
+ImGuiManager* ImGuiManager::instance = nullptr;
+
+ImGuiManager* ImGuiManager::GetInstance() {
+	if (instance == nullptr) {
+		instance = new ImGuiManager;
+	}
+	return instance;
+}
+
 void ImGuiManager::Finalize() {
 #ifdef USE_IMGUI
 	// ImGuiの終了処理。後始末
@@ -11,9 +20,11 @@ void ImGuiManager::Finalize() {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 #endif // USE_IMGUI
+	delete instance;
+	instance = nullptr;
 }
 
-void ImGuiManager::Initialize([[maybe_unused]]WinApp* winApp, [[maybe_unused]] DirectXCommon* DxCommon, [[maybe_unused]] SrvManager* srvManager) {
+void ImGuiManager::Initialize([[maybe_unused]] WinApp* winApp, [[maybe_unused]] DirectXCommon* DxCommon, [[maybe_unused]] SrvManager* srvManager) {
 #ifdef USE_IMGUI
 	// 引数で受け取ってメンバ変数に記録する
 	this->winApp_ = winApp;
@@ -31,7 +42,7 @@ void ImGuiManager::Initialize([[maybe_unused]]WinApp* winApp, [[maybe_unused]] D
 	ImGuiHandleGPU = srvManager_->GetGPUDescriptorHandle(imguiindex);
 
 	// Win32用初期化
-	ImGui_ImplWin32_Init(winApp_->Gethwnd());	
+	ImGui_ImplWin32_Init(winApp_->Gethwnd());
 	// DirectX12用初期化
 	ImGui_ImplDX12_Init(
 		DxCommon_->GetDevice().Get(),
@@ -40,7 +51,7 @@ void ImGuiManager::Initialize([[maybe_unused]]WinApp* winApp, [[maybe_unused]] D
 		srvManager_->GetDescriptorHeap().Get(),
 		ImGuiHandleCPU,
 		ImGuiHandleGPU
-	); 
+	);
 #endif // USE_IMGUI
 }
 
@@ -65,8 +76,8 @@ void ImGuiManager::Draw() {
 	ComPtr<ID3D12GraphicsCommandList> commandList = DxCommon_->GetCommandList();
 	// デスクリプタヒープの配列をセットするコマンド
 	ComPtr<ID3D12DescriptorHeap> ppheaps[] = { srvManager_->GetDescriptorHeap().Get() };
-	commandList->SetDescriptorHeaps(_countof(ppheaps),ppheaps->GetAddressOf());
+	commandList->SetDescriptorHeaps(_countof(ppheaps), ppheaps->GetAddressOf());
 	// 描画コマンドを発行
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList.Get());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
 #endif // USE_IMGUI
 }

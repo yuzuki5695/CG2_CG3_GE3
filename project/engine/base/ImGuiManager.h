@@ -1,7 +1,6 @@
 #pragma once
 #include<SrvManager.h>
 #ifdef USE_IMGUI
-#include<externals/imgui/imgui.h>
 #include<externals/imgui/imgui_impl_dx12.h>
 #include<externals/imgui/imgui_impl_win32.h>
 #endif // USE_IMGUI
@@ -12,9 +11,16 @@ class DirectXCommon;
 // ImGUIの管理
 class ImGuiManager
 {
+private:
+	static ImGuiManager* instance;
+
+	ImGuiManager() = default;
+	~ImGuiManager() = default;
+	ImGuiManager(ImGuiManager&) = delete;
+	ImGuiManager& operator=(ImGuiManager&) = delete;
 public: // メンバ関数
-	// デストラクタ
-	~ImGuiManager() { Finalize(); }
+	// シングルトンインスタンスの取得
+	static ImGuiManager* GetInstance();
 	///<summary>
 	/// 初期化
 	///</summary>
@@ -30,7 +36,7 @@ public: // メンバ関数
 	/// ImGui受付開始
 	/// </summary>
 	void Begin();
-	
+
 	/// <summary>
 	/// ImGui受付終了
 	/// </summary>

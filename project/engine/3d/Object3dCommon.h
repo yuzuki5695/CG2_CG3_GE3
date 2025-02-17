@@ -5,7 +5,18 @@
 // 3Dオブジェクト共通部
 class Object3dCommon
 {
+private:
+	static Object3dCommon* instance;
+
+	Object3dCommon() = default;
+	~Object3dCommon() = default;
+	Object3dCommon(Object3dCommon&) = delete;
+	Object3dCommon& operator=(Object3dCommon&) = delete;
 public: // メンバ関数
+	// シングルトンインスタンスの取得
+	static Object3dCommon* GetInstance();
+	// 終了
+	void Finalize();
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 	// 共通描画設定

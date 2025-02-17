@@ -3,7 +3,18 @@
 
 // 音声再生
 class SoundPlayer {
+private:
+    static SoundPlayer* instance;
+
+    SoundPlayer() = default;
+    ~SoundPlayer() = default;
+    SoundPlayer(SoundPlayer&) = delete;
+    SoundPlayer& operator=(SoundPlayer&) = delete;
 public: // メンバ関数
+    // シングルトンインスタンスの取得
+    static SoundPlayer* GetInstance();
+    // 終了
+    void Finalize();
     // 初期化
     void Initialize(SoundLoader* soundLoader);
     // 音声再生

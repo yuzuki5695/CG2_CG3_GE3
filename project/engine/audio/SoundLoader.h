@@ -38,15 +38,22 @@ struct SoundData
 
 class SoundLoader
 {
+private:
+    static SoundLoader* instance;
+
+    SoundLoader() = default;
+    ~SoundLoader() = default;
+    SoundLoader(SoundLoader&) = delete;
+    SoundLoader& operator=(SoundLoader&) = delete;
 public: // メンバ関数
-    // デストラクタ
-    ~SoundLoader() { Finalize(); }
+    // シングルトンインスタンスの取得
+    static SoundLoader* GetInstance();
+    // 終了
+    void Finalize();
     // 初期化
     void Initialize();
     // wavファイル読み込み
     static SoundData SoundLoadWave(const char* filename);
-    // 音声データリセット
-    void Finalize();
 private:// メンバ変数
     Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
     IXAudio2MasteringVoice* masterVoice;
