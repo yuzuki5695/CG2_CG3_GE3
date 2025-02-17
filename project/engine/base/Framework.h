@@ -12,6 +12,8 @@
 #include<SrvManager.h>
 #include<ImGuiManager.h>
 #include<SoundPlayer.h>
+#include<TitleScene.h>
+#include<GamePlayScene.h>
 
 // ゲーム全体
 class Framework
@@ -33,6 +35,8 @@ public:// メンバ関数
 	void Run();
 
 private: // メンバ変数
+	// シーン
+	BaseScene* scene_ = nullptr;
 	// ポインタ
 	WinApp* winApp = nullptr;
 	DirectXCommon* dxCommon = nullptr;
