@@ -5,10 +5,12 @@
 #include<Object3dCommon.h>
 #include <Input.h>
 #include <ImGuiManager.h>
+#include"SceneManeger.h"
 
 void TitleScene::Finalize() {
     // 汎用機能の解放
     delete  sprite;
+    sprite = nullptr;
     // 音声データ解放
     SoundPlayer::GetInstance()->SoundUnload(&soundData);
 }
@@ -37,6 +39,14 @@ void TitleScene::Initialize() {
 }
 
 void TitleScene::Update() {
+    // ENTERキーを押したら
+    if (Input::GetInstance()->Triggrkey(DIK_RETURN)) {
+        // ゲームプレイシーン（次シーン）生成
+        BaseScene* scene = new GamePlayScene();
+        // シーン切り替え依頼
+       BaseScene::GetSceneManeger()->SetNextScene(scene);
+    }
+
     // 0を押している間true
     if (Input::GetInstance()->Pushkey(DIK_0)) {
         OutputDebugStringA("Hit 0 \n");

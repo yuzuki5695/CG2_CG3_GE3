@@ -3,7 +3,8 @@
 #include<Object3d.h>
 #include<Model.h>
 #include<SoundPlayer.h>
-#include<BaseScene.h>
+#include<SceneManeger.h>
+#include<GamePlayScene.h>
 
 // ゲームプレイシーン
 class TitleScene : public BaseScene

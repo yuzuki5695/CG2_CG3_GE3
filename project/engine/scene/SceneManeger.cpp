@@ -21,6 +21,8 @@ void SceneManeger::Update() {
 		// シーン切り替え
 		scene_ = nextScene_;
 		nextScene_ = nullptr;
+		// シーンマネージャをセット 
+		scene_->SetSceneManeger(this);
 		// 次のシーンを初期化する
 		scene_->Initialize();
 	}
