@@ -13,8 +13,6 @@ SoundLoader* SoundLoader::GetInstance() {
 }
 
 void SoundLoader::Finalize() {
-    //xAudio2解放
-    xAudio2.Reset();
     delete instance;
     instance = nullptr;
 }
