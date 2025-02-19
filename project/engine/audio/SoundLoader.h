@@ -39,8 +39,6 @@ struct SoundData
 class SoundLoader
 {
 public: // メンバ関数
-    // デストラクタ
-    ~SoundLoader() { Finalize(); }
     // 初期化
     void Initialize();
     // wavファイル読み込み

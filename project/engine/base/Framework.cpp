@@ -37,6 +37,7 @@ void Framework::Finalize() {
     // SRVマネージャの開放
     delete srvManager;
     // 音声データ解放
+    soundLoader->Finalize();
     delete soundLoader;
     delete soundPlayer;
     // DirectXの解放
