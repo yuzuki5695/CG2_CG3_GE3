@@ -29,8 +29,8 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
 	randomEngine = std::mt19937(rd());
     // グラフィックスパイプラインの生成
     GraphicsPipelineGenerate();
-	// 頂点データ
-	VertexDatacreation();
+	//// 頂点データ
+	//VertexDatacreation();
 }
 
 void ParticleManager::RootSignatureGenerate() {
@@ -186,7 +186,7 @@ void ParticleManager::GraphicsPipelineGenerate() {
 
 void ParticleManager::VertexDatacreation() {
     // 関数化したResouceで作成
-    vertexResoruce = dxCommon_->CreateBufferResource(sizeof(VertexData) * modelDate.vertices.size());
+    vertexResoruce = dxCommon_->CreateBufferResource(sizeof(ParticleManager::VertexData) * modelDate.vertices.size());
     //頂点バッファビューを作成する
     // リソースの先頭のアドレスから使う
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
