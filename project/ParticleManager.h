@@ -6,6 +6,7 @@
 #include<Vector3.h>
 #include<Vector4.h>
 #include<Matrix4x4.h>
+#include <Transform.h>
 
 // パーティクルマネージャ
 class ParticleManager
@@ -43,6 +44,27 @@ public:
 		std::vector<VertexData> vertices;
 		MaterialDate material;
 	};
+	// パーティクル
+	struct Particle {
+		Transform transform;
+		Vector4 color;
+	};
+	// インスタンスデータ
+	struct InstanceData
+	{
+		Matrix4x4 WVP;
+		Matrix4x4 World;
+		Vector4 color;
+	};
+	// パーティクルグループ
+	struct ParticleGroup {
+		MaterialDate materialData;                             // マテリアルデータ(テクスチャファイルパスとテクスチャ用SRVインデックス)
+		std::list<Particle> particles;                         // パーティクルのリスト
+		uint32_t srvindex;                                     // インスタンシング用SRVインデックス
+		Microsoft::WRL::ComPtr <ID3D12Resource> Resource;      // インスタンシングリソース
+		uint32_t kNumInstance;                                 // インスタンス数
+		InstanceData* instanceData = nullptr;                  // インスタンシングデータを書き込むためのポインタ	
+	};
 private:
 	// ルートシグネチャの生成
 	void RootSignatureGenerate();
@@ -57,6 +79,10 @@ public: // メンバ関数
 	void Finalize();
 	// 初期化
 	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager);
+
+
+	// パーティクルグループの作成
+	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
@@ -75,8 +101,8 @@ private: // メンバ変数
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 
-
-
+	// パーティクルグループコンテナ
+	std::unordered_map<std::string, ParticleGroup> particleGroups;
 
 
 

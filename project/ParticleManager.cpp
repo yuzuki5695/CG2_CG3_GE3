@@ -199,3 +199,10 @@ void ParticleManager::VertexDatacreation() {
     // 頂点データをリソースにコピー
     std::memcpy(vertexData, modelDate.vertices.data(), sizeof(VertexData) * modelDate.vertices.size());
 }
+
+void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
+
+
+
+
+}

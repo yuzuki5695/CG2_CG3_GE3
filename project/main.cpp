@@ -291,7 +291,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
        // object3d->Draw();
 
         for (Object3d* object3d : objects) {
-            object3d->Draw();
+           // object3d->Draw();
         }
 
 #pragma endregion 全てのObject3d個々の描画
@@ -310,7 +310,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //// Spriteの描画は常にuvCheckerにする
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-        sprite->Draw();
+       // sprite->Draw();
      
 #pragma endregion 全てのSprite個々の描画
 
