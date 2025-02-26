@@ -104,6 +104,8 @@ private: // メンバ変数
 	// パーティクルグループコンテナ
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 
+	//最大インスタンスカウント
+	uint32_t MaxInstanceCount = 100;
 
 
 };

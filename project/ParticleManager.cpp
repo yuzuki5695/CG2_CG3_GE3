@@ -1,5 +1,8 @@
 #include "ParticleManager.h"
 #include <MatrixVector.h>
+#include <cassert>
+#include <ModelManager.h>
+#include <TextureManager.h>
 
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
@@ -201,8 +204,19 @@ void ParticleManager::VertexDatacreation() {
 }
 
 void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
+    //// 既に登録済みかチェック
+    //assert(particleGroups.find(name) == particleGroups.end());
+    //// テクスチャ読み込み
+    //ModelManager::GetInstance()->LoadTexture(textureFilepath);
+    //// 新たなパーティクルグループ
+    //ParticleGroup newGroup(textureFilepath);
+    //// マテリアルデータにテクスチャファイルパスを設定
+    //newGroup.materialData.textureFilePath = textureFilepath;
+    //// マテリアルデータにテクスチャのSRVインデックスを記録
+    //newGroup.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
+    //// インスタンス用のリソースを作成
+    //newGroup.Resource = dxCommon_->CreateBufferResource(sizeof(InstanceData) * MaxInstanceCount);
 
-
-
-
+    //// 新しいパーティクルグループを作成し、コンテナに登録
+    //particleGroups.emplace(name, std::move(newGroup));
 }
