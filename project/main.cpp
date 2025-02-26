@@ -24,6 +24,7 @@
 #include"ModelManager.h"
 #include "Camera.h"
 #include"SrvManager.h"
+#include "ParticleManager.h"
 
 using namespace MatrixVector;
 
@@ -112,6 +113,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     object3d->Initialize(object3dCommon);
     // オブジェクト作成
     object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+
+
+    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
 
 #pragma endregion 最初のシーンの初期化
 
@@ -343,6 +347,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     for (Object3d* object3d : objects) {
         delete object3d;
     }
+    // パーティクルマネージャの開放
+    ParticleManager::GetInstance()->Finalize();
     // 入力解放
     delete input;
     // テクスチャマネージャーの終了
