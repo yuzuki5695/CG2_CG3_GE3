@@ -204,19 +204,36 @@ void ParticleManager::VertexDatacreation() {
 }
 
 void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
-    //// 既に登録済みかチェック
+    // 既に登録済みかチェック
     //assert(particleGroups.find(name) == particleGroups.end());
-    //// テクスチャ読み込み
-    //ModelManager::GetInstance()->LoadTexture(textureFilepath);
-    //// 新たなパーティクルグループ
-    //ParticleGroup newGroup(textureFilepath);
-    //// マテリアルデータにテクスチャファイルパスを設定
-    //newGroup.materialData.textureFilePath = textureFilepath;
-    //// マテリアルデータにテクスチャのSRVインデックスを記録
-    //newGroup.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
-    //// インスタンス用のリソースを作成
-    //newGroup.Resource = dxCommon_->CreateBufferResource(sizeof(InstanceData) * MaxInstanceCount);
+    // テクスチャ読み込み
+    ModelManager::GetInstance()->LoadTexture(textureFilepath);
+    // 新たなパーティクルグループ
+    ParticleGroup newGroup(textureFilepath);
+    // マテリアルデータにテクスチャファイルパスを設定
+    newGroup.materialData.textureFilePath = textureFilepath;
+    // マテリアルデータにテクスチャのSRVインデックスを記録
+    newGroup.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
+    // インスタンス用のリソースを作成
+    newGroup.Resource = dxCommon_->CreateBufferResource(sizeof(InstanceData) * MaxInstanceCount);
+    // インスタンスのデータを初期化
+    InstanceData instanceData;
+    instanceData.WVP = MakeIdentity4x4();
+    instanceData.World = MakeIdentity4x4();
+    instanceData.color = { 1.0f,1.0f,1.0f,0.0f };
+    // インスタンスのデータを登録
+    for (uint32_t index = 0; index < MaxInstanceCount; ++index) {
+        newGroup .instanceData[index] = instanceData;
+    }
 
-    //// 新しいパーティクルグループを作成し、コンテナに登録
-    //particleGroups.emplace(name, std::move(newGroup));
+    newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(newGroup.instanceData));
+    // インスタンシング用にsrvを確保してSRVインデックスの記録
+    newGroup.srvindex = srvmanager_->Allocate();
+
+
+
+    // 新しいパーティクルグループを作成し、コンテナに登録
+    particleGroups.emplace(name, std::move(newGroup));
+    // srv生成
+    srvmanager_->CreateSRVforStructuredBuffer(newGroup.srvindex, newGroup.Resource.Get(), MaxInstanceCount, sizeof(InstanceData));
 }
