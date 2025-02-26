@@ -225,8 +225,8 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     for (uint32_t index = 0; index < MaxInstanceCount; ++index) {
         newGroup .instanceData[index] = instanceData;
     }
-
-    newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(newGroup.instanceData));
+    // 頂点リソースにデータを書き込むためのアドレスを取得
+    newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(&newGroup.instanceData));
     // インスタンシング用にsrvを確保してSRVインデックスの記録
     newGroup.srvindex = srvmanager_->Allocate();
 
