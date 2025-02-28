@@ -41,7 +41,23 @@ void ParticleManager::Update() {
 }
 
 void ParticleManager::Draw() {
+    //// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+    //dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+    //dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+    //// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
+    //dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+
+    //// VertexBufferViewの設定
+    //dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+    //// マテリアルCBufferの場所を設定
+    //dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+    ////SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
+    ////SRVを切り替えて画像を変えるS
+    //dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelDate.material.textureFilePath));
+
+    //// 描画！(今回は球)
+    //dxCommon_->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 }
 
 
