@@ -36,6 +36,15 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
 	//VertexDatacreation();
 }
 
+void ParticleManager::Update() {
+
+}
+
+void ParticleManager::Draw() {
+
+}
+
+
 void ParticleManager::RootSignatureGenerate() {
 
     HRESULT hr;
@@ -205,7 +214,7 @@ void ParticleManager::VertexDatacreation() {
 
 void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
     // 既に登録済みかチェック
-    //assert(particleGroups.find(name) == particleGroups.end());
+    assert(particleGroups.find(name) == particleGroups.end());
     // テクスチャ読み込み
     ModelManager::GetInstance()->LoadTexture(textureFilepath);
     // 新たなパーティクルグループ
@@ -229,9 +238,6 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(&newGroup.instanceData));
     // インスタンシング用にsrvを確保してSRVインデックスの記録
     newGroup.srvindex = srvmanager_->Allocate();
-
-
-
     // 新しいパーティクルグループを作成し、コンテナに登録
     particleGroups.emplace(name, std::move(newGroup));
     // srv生成

@@ -79,7 +79,10 @@ public: // メンバ関数
 	void Finalize();
 	// 初期化
 	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager);
-
+	// 更新処理
+	void Update();
+	// 描画処理
+	void Draw();
 
 	// パーティクルグループの作成
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);

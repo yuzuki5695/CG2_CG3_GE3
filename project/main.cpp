@@ -234,23 +234,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 更新処理
        // object3d->Update();
 
-        size_t index = 0;
-        size_t maxIterations = 2;
-        for (Object3d* object3d : objects) {
-            if (index >= maxIterations) {
-                break; // 指定回数を超えたらループを終了
-            }
-            object3d->Update();
-            Vector3 rotation = object3d->GetRotate();
-            if (index == 0) {
-                rotation.z += 0.01f;
-            } else if (index == 1) {
-                rotation.y += 0.01f;
-            }
-            object3d->SetRotate(rotation);
-            // インクリメントして次へ
-            ++index;
-        }
+        //size_t index = 0;
+        //size_t maxIterations = 2;
+        //for (Object3d* object3d : objects) {
+        //    if (index >= maxIterations) {
+        //        break; // 指定回数を超えたらループを終了
+        //    }
+        //    object3d->Update();
+        //    Vector3 rotation = object3d->GetRotate();
+        //    if (index == 0) {
+        //        rotation.z += 0.01f;
+        //    } else if (index == 1) {
+        //        rotation.y += 0.01f;
+        //    }
+        //    object3d->SetRotate(rotation);
+        //    // インクリメントして次へ
+        //    ++index;
+        //}
+
+
+        ParticleManager::GetInstance()->Update();
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -293,6 +296,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         for (Object3d* object3d : objects) {
            // object3d->Draw();
         }
+
+        ParticleManager::GetInstance()->Draw();
 
 #pragma endregion 全てのObject3d個々の描画
 
