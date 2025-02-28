@@ -3,6 +3,7 @@
 #include <cassert>
 #include <ModelManager.h>
 #include <TextureManager.h>
+#include <numbers>
 
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
@@ -21,45 +22,80 @@ void ParticleManager::Finalize() {
 	instance = nullptr;
 }
 
-void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager) {
+void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera) {
 	// NULL検出
 	assert(birectxcommon);
 	// メンバ変数に記録
 	this->dxCommon_ = birectxcommon;
 	this->srvmanager_ = srvmanager;
+    this->camera_ = camera;
 	// 乱数エンジンを初期化
 	std::random_device rd;// 乱数生成器
 	randomEngine = std::mt19937(rd());
     // グラフィックスパイプラインの生成
     GraphicsPipelineGenerate();
-	//// 頂点データ
-	//VertexDatacreation();
+    // 頂点データ
+    VertexDatacreation();
+    // マテリアルデータ
+    MaterialGenerate();
+    //ビルボード行列作成
+    backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
 void ParticleManager::Update() {
+	//ビルボード行列
+	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix,camera_->GetWorludMatrix());
+	billboardMatrix.m[3][0] = 0.0f;
+	billboardMatrix.m[3][1] = 0.0f;
+	billboardMatrix.m[3][2] = 0.0f;
+    // ビュープロジェクション行列をカメラから取得
+    Matrix4x4 viewMatrix = camera_->GetViewMatrix();
+    Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
+    
+    for (auto& [name, group] : particleGroups) {
+        uint32_t counter = 0;
+        for (std::list<Particle>::iterator particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
 
+            // world行列を計算
+            Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+            Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+            Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
+
+            // waorldViewProjection行列
+            Matrix4x4 worldViewProjetionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+
+            if (counter < group.kNumInstance) {
+                group.instanceData[counter].WVP = worldViewProjetionMatrix;
+                group.instanceData[counter].World = worldMatrix;
+                group.instanceData[counter].color = particleIterator->color;
+                ++counter;
+            }
+            // 次のパーティクルに進む
+            ++particleIterator;
+        }
+    }
 }
 
 void ParticleManager::Draw() {
-    //// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-    //dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-    //dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-    //// 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
-    //dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    // RootSignatureを設定。PSOに設定しているけど別途設定が必要
+    dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+    // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
+    dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
-    //// VertexBufferViewの設定
-    //dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-    //// マテリアルCBufferの場所を設定
-    //dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-    ////SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
-    ////SRVを切り替えて画像を変えるS
-    //dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelDate.material.textureFilePath));
-
-    //// 描画！(今回は球)
-    //dxCommon_->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
+    for (const auto& [name, particleGroup] : particleGroups) {
+        //VertexBufferViewを設定
+        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+        //マテリアルのCBufferの場所を設定
+        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        // インスタンシングデータの SRV を設定
+        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
+        // テクスチャの SRV を設定
+        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+        //描画！
+        dxCommon_->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), particleGroup.kNumInstance, 0, 0);
+    }
 }
-
 
 void ParticleManager::RootSignatureGenerate() {
 
@@ -228,13 +264,24 @@ void ParticleManager::VertexDatacreation() {
     std::memcpy(vertexData, modelDate.vertices.data(), sizeof(VertexData) * modelDate.vertices.size());
 }
 
+void ParticleManager::MaterialGenerate() {
+    // マテリアル用のリソース
+    materialResource = dxCommon_->CreateBufferResource(sizeof(Model::Material));
+    // マテリアル用にデータを書き込むためのアドレスを取得
+    materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+    // マテリアルデータの初期値を書き込む
+    materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    materialData->endbleLighting = true;
+    materialData->uvTransform = MakeIdentity4x4();
+}
+
 void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
     // 既に登録済みかチェック
     assert(particleGroups.find(name) == particleGroups.end());
     // テクスチャ読み込み
     ModelManager::GetInstance()->LoadTexture(textureFilepath);
     // 新たなパーティクルグループ
-    ParticleGroup newGroup(textureFilepath);
+    ParticleGroup& newGroup = particleGroups[textureFilepath];
     // マテリアルデータにテクスチャファイルパスを設定
     newGroup.materialData.textureFilePath = textureFilepath;
     // マテリアルデータにテクスチャのSRVインデックスを記録
@@ -253,7 +300,7 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     // 頂点リソースにデータを書き込むためのアドレスを取得
     newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(&newGroup.instanceData));
     // インスタンシング用にsrvを確保してSRVインデックスの記録
-    newGroup.srvindex = srvmanager_->Allocate();
+    newGroup.srvindex = srvmanager_->Allocate(); 
     // 新しいパーティクルグループを作成し、コンテナに登録
     particleGroups.emplace(name, std::move(newGroup));
     // srv生成

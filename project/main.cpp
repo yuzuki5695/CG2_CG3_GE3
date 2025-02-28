@@ -114,8 +114,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // オブジェクト作成
     object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
-
-    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
+    // パーティクル初期化
+    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager,camera);
+    // パーティクルグループの生成
+    ParticleManager::GetInstance()->CreateParticleGroup("particl", TexturePath01);
 
 #pragma endregion 最初のシーンの初期化
 

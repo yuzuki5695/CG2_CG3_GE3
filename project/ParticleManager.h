@@ -7,6 +7,7 @@
 #include<Vector4.h>
 #include<Matrix4x4.h>
 #include <Transform.h>
+#include<Camera.h>
 
 // パーティクルマネージャ
 class ParticleManager
@@ -72,13 +73,15 @@ private:
 	void GraphicsPipelineGenerate();
 	// 頂点データ作成
 	void VertexDatacreation();
+	// マテリアルデータ作成
+	void MaterialGenerate();
 public: // メンバ関数
 	// シングルトンインスタンスの取得
 	static ParticleManager* GetInstance();
 	// 終了
 	void Finalize();
 	// 初期化
-	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager);
+	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera);
 	// 更新処理
 	void Update();
 	// 描画処理
@@ -86,6 +89,7 @@ public: // メンバ関数
 
 	// パーティクルグループの作成
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
+
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
@@ -107,8 +111,17 @@ private: // メンバ変数
 	// パーティクルグループコンテナ
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 
-	//最大インスタンスカウント
-	uint32_t MaxInstanceCount = 100;
+	//最大インスタンス
+	uint32_t MaxInstanceCount = 50;
+	
+	// カメラ
+	Camera* camera_;
+	//ビルボード行列
+	Matrix4x4 backToFrontMatrix;
 
 
+	//modelマテリアる用のリソースを作る。今回color1つ分のサイズを用意する
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+	//マテリアルにデータを書き込む	
+	Material* materialData = nullptr;
 };
