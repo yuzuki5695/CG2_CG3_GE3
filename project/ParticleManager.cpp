@@ -89,7 +89,6 @@ void ParticleManager::Draw() {
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
     // 形状（プリミティブトポロジ）を設定
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
     // パーティクルグループごとに描画処理
     for (const auto& [name, particleGroup] : particleGroups) {
         // VertexBufferViewの設定
@@ -102,11 +101,7 @@ void ParticleManager::Draw() {
         uint32_t textureSrvIndex = TextureManager::GetInstance()->GetSrvIndex(particleGroup.materialData.textureFilePath);
         srvmanager_->SetGraphicsRootDescriptorTable(2, textureSrvIndex);
         // 描画（インスタンシング）
-        dxCommon_->GetCommandList()->DrawInstanced(
-            static_cast<UINT>(modelDate.vertices.size()),   // 頂点数
-            static_cast<UINT>(particleGroup.kNumInstance), // インスタンス数
-            0, 0                                           // インデックスの開始位置
-        );
+        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
     }
 }
 
