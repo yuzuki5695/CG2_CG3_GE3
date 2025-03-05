@@ -115,7 +115,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
     // パーティクル初期化
-    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager,camera);
+    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager,camera,model);
     // パーティクルグループの生成
     ParticleManager::GetInstance()->CreateParticleGroup("particl", TexturePath01);
 

@@ -22,36 +22,43 @@ void ParticleManager::Finalize() {
 	instance = nullptr;
 }
 
-void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera) {
+void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model) {
 	// NULL検出
 	assert(birectxcommon);
 	// メンバ変数に記録
 	this->dxCommon_ = birectxcommon;
 	this->srvmanager_ = srvmanager;
     this->camera_ = camera;
+    this->model_ = model;
 	// 乱数エンジンを初期化
 	std::random_device rd;// 乱数生成器
 	randomEngine = std::mt19937(rd());
     // グラフィックスパイプラインの生成
     GraphicsPipelineGenerate();
-    // 頂点データ
+    // モデルデータを取得
+    modelDate = LoadObjFile("Resources", "plane.obj");
+    // 頂点データを作成
     VertexDatacreation();
-    // マテリアルデータ
+    // マテリアルの生成と初期化
     MaterialGenerate();
+    // .objの参照しているテクスチャ読み込み
+    TextureManager::GetInstance()->LoadTexture(modelDate.material.textureFilePath);
+    // 読み込んだテクスチャの番号を取得
+    modelDate.material.textureindex = TextureManager::GetInstance()->GetSrvIndex(modelDate.material.textureFilePath);
     //ビルボード行列作成
     backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
 void ParticleManager::Update() {
-	//ビルボード行列
-	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix,camera_->GetWorludMatrix());
-	billboardMatrix.m[3][0] = 0.0f;
-	billboardMatrix.m[3][1] = 0.0f;
-	billboardMatrix.m[3][2] = 0.0f;
+    //ビルボード行列
+    Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());
+    billboardMatrix.m[3][0] = 0.0f;
+    billboardMatrix.m[3][1] = 0.0f;
+    billboardMatrix.m[3][2] = 0.0f;
     // ビュープロジェクション行列をカメラから取得
     Matrix4x4 viewMatrix = camera_->GetViewMatrix();
     Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
-    
+
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
         for (std::list<Particle>::iterator particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
@@ -62,10 +69,10 @@ void ParticleManager::Update() {
             Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
 
             // waorldViewProjection行列
-            Matrix4x4 worldViewProjetionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+            Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
             if (counter < group.kNumInstance) {
-                group.instanceData[counter].WVP = worldViewProjetionMatrix;
+                group.instanceData[counter].WVP = worldViewProjectionMatrix;
                 group.instanceData[counter].World = worldMatrix;
                 group.instanceData[counter].color = particleIterator->color;
                 ++counter;
@@ -83,18 +90,18 @@ void ParticleManager::Draw() {
     // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    for (const auto& [name, particleGroup] : particleGroups) {
-        //VertexBufferViewを設定
-        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-        //マテリアルのCBufferの場所を設定
-        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-        // インスタンシングデータの SRV を設定
-        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
-        // テクスチャの SRV を設定
-        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
-        //描画！
-        dxCommon_->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), particleGroup.kNumInstance, 0, 0);
-    }
+    //for (const auto& [name, particleGroup] : particleGroups) {
+    //    //VertexBufferViewを設定
+    //    dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+    //    //マテリアルのCBufferの場所を設定
+    //    dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+    //    // テクスチャの SRV を設定
+    //    srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+    //    // インスタンシングデータの SRV を設定
+    //    srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
+    //    //描画！
+    //    dxCommon_->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), particleGroup.kNumInstance, 0, 0);
+    //}
 }
 
 void ParticleManager::RootSignatureGenerate() {
@@ -276,33 +283,139 @@ void ParticleManager::MaterialGenerate() {
 }
 
 void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
-    // 既に登録済みかチェック
+    // マテリアルのテクスチャファイルパスでテクスチャをロード
+    TextureManager::GetInstance()->LoadTexture(modelDate.material.textureFilePath);
+    // テクスチャインデックスを取得
+    modelDate.material.textureindex = TextureManager::GetInstance()->GetSrvIndex(modelDate.material.textureFilePath);
+
+    // 既にパーティクルグループが登録されていないことを確認
     assert(particleGroups.find(name) == particleGroups.end());
-    // テクスチャ読み込み
-    ModelManager::GetInstance()->LoadTexture(textureFilepath);
-    // 新たなパーティクルグループ
+
+    // 新しいパーティクルグループを作成
     ParticleGroup& newGroup = particleGroups[textureFilepath];
-    // マテリアルデータにテクスチャファイルパスを設定
-    newGroup.materialData.textureFilePath = textureFilepath;
-    // マテリアルデータにテクスチャのSRVインデックスを記録
-    newGroup.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
-    // インスタンス用のリソースを作成
+    // 新しいパーティクルグループにテクスチャパスとインデックスを設定
+    newGroup.materialData.textureFilePath = modelDate.material.textureFilePath;
+    newGroup.materialData.textureindex = modelDate.material.textureindex;
+    // インスタンス用のリソースバッファを作成
     newGroup.Resource = dxCommon_->CreateBufferResource(sizeof(InstanceData) * MaxInstanceCount);
-    // インスタンスのデータを初期化
-    InstanceData instanceData;
-    instanceData.WVP = MakeIdentity4x4();
-    instanceData.World = MakeIdentity4x4();
-    instanceData.color = { 1.0f,1.0f,1.0f,0.0f };
-    // インスタンスのデータを登録
+    // インスタンスデータを初期化
+    std::vector<InstanceData> instanceData(MaxInstanceCount);
     for (uint32_t index = 0; index < MaxInstanceCount; ++index) {
-        newGroup .instanceData[index] = instanceData;
+        instanceData[index].WVP = MakeIdentity4x4();
+        instanceData[index].World = MakeIdentity4x4();
+        instanceData[index].color = { 1.0f, 1.0f, 1.0f, 0.0f }; // 透明
     }
-    // 頂点リソースにデータを書き込むためのアドレスを取得
-    newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(&newGroup.instanceData));
-    // インスタンシング用にsrvを確保してSRVインデックスの記録
-    newGroup.srvindex = srvmanager_->Allocate(); 
-    // 新しいパーティクルグループを作成し、コンテナに登録
-    particleGroups.emplace(name, std::move(newGroup));
-    // srv生成
+    // インスタンスデータをバッファに書き込むためにマッピング
+    void* mappedData = nullptr;
+    HRESULT hr = newGroup.Resource->Map(0, nullptr, &mappedData);
+    if (FAILED(hr)) {
+        // マッピング失敗時の処理（ログ出力やエラーハンドリング）
+        return;
+    }
+    // マップされたリソースにデータをコピー
+    std::memcpy(mappedData, instanceData.data(), sizeof(InstanceData) * MaxInstanceCount);
+    // 書き込み後にリソースをアンマップ
+    newGroup.Resource->Unmap(0, nullptr);
+    // インスタンスバッファ用のSRVを割り当て、インデックスを記録
+    newGroup.srvindex = srvmanager_->Allocate();
+    // 構造体バッファ用のSRVを作成
     srvmanager_->CreateSRVforStructuredBuffer(newGroup.srvindex, newGroup.Resource.Get(), MaxInstanceCount, sizeof(InstanceData));
+    // 新しいパーティクルグループをコンテナに登録
+    particleGroups.emplace(name, std::move(newGroup));
+}
+
+
+ParticleManager::MaterialDate ParticleManager::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+    // 1. 中で必要となる変数の宣言
+    ParticleManager::MaterialDate materialDate; // 構築するMaterialDate
+    std::string line; // ファイルから読んだ1行を格納するもの
+    std::ifstream file(directoryPath + "/" + filename); // 2.ファイルを開く
+    assert(file.is_open()); // とりあえず開けなかったら止める
+    // 3. 実際にファイルを読み、MaterialDateを構築していく
+    while (std::getline(file, line)) {
+        std::string identifier;
+        std::istringstream s(line);
+        s >> identifier;
+
+        // identifierの応じた処理
+        if (identifier == "map_Kd") {
+            std::string textureFilename;
+            s >> textureFilename;
+            // 連結してファイルパスにする
+            materialDate.textureFilePath = directoryPath + "/" + textureFilename;
+        }
+    }
+    return materialDate;
+}
+
+ParticleManager::ModelDate ParticleManager::LoadObjFile(const std::string& directoryPath, const std::string& filename) {
+    // 1. 中で必要となる変数の宣言
+    ParticleManager::ModelDate modelDate; // 構築するModelDate
+    std::vector<Vector4> positions; // 位置
+    std::vector<Vector3> normals; // 法線
+    std::vector<Vector2> texcoords; // テクスチャ座標
+    std::string line; // ファイルから読んだ1桁を格納するもの
+    // 2.  ファイルを開く
+    std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
+    assert(file.is_open()); // とりあえず開けなかったら止める
+
+    // 3. 実際にファイルを読み、ModelDateを構築していく
+    while (std::getline(file, line)) {
+        std::string identifier;
+        std::istringstream s(line);
+        s >> identifier;// 先頭の識別子を読む
+
+        // identifierの応じた処理
+        if (identifier == "v") {
+            Vector4 position;
+            s >> position.x >> position.y >> position.z;
+            position.x *= -1.0f;// 位置のx成分を反転
+            position.w = 1.0f;
+            positions.push_back(position);
+        } else if (identifier == "vt") {
+            Vector2 texcoord;
+            s >> texcoord.x >> texcoord.y;
+            texcoord.y = 1.0f - texcoord.y;
+            texcoords.push_back(texcoord);
+        } else if (identifier == "vn") {
+            Vector3 normal;
+            s >> normal.x >> normal.y >> normal.z;
+            normal.x *= -1.0f;// 法線のx成分を反転
+            normals.push_back(normal);
+        } else if (identifier == "f") {
+            ParticleManager::VertexData triangle[3];
+            // 面は三角形限定。その他は未対応
+            for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
+                std::string vertexDefinition;
+                s >> vertexDefinition;
+                // 頂点の要素へのIndexは、[位置/UV/法線]で格納されているので、分解してIndexを取得する
+                std::istringstream v(vertexDefinition);
+                uint32_t elementIndices[3];
+                for (uint32_t element = 0; element < 3; ++element) {
+                    std::string index;
+                    std::getline(v, index, '/');// /区切りでインデックスを読んでいく
+                    elementIndices[element] = std::stoi(index);
+                }
+                // 要素のIndexから、実際の要素の値を取得して、頂点を構築する
+                Vector4 position = positions[elementIndices[0] - 1];
+                Vector2 texcoord = texcoords[elementIndices[1] - 1];
+                Vector3 normal = normals[elementIndices[2] - 1];
+                //VertexData vertex = { position,texcoord,normal };
+                //modelDate.vertices.push_back(vertex);
+                triangle[faceVertex] = { position,texcoord,normal };
+            }
+            // 頂点を逆順で登録することで、回り順を逆にする
+            modelDate.vertices.push_back(triangle[2]);
+            modelDate.vertices.push_back(triangle[1]);
+            modelDate.vertices.push_back(triangle[0]);
+        } else if (identifier == "mtllib") {
+            // materialTemplateLibrarvファイルの名前を取得する
+            std::string materialFilename;
+            s >> materialFilename;
+            // 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
+            modelDate.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
+        }
+    }
+    // 4. ModelDateを返す
+    return modelDate;
 }

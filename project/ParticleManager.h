@@ -8,6 +8,7 @@
 #include<Matrix4x4.h>
 #include <Transform.h>
 #include<Camera.h>
+#include<Model.h>
 
 // パーティクルマネージャ
 class ParticleManager
@@ -81,7 +82,7 @@ public: // メンバ関数
 	// 終了
 	void Finalize();
 	// 初期化
-	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera);
+	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model);
 	// 更新処理
 	void Update();
 	// 描画処理
@@ -90,10 +91,18 @@ public: // メンバ関数
 	// パーティクルグループの作成
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
 
+	// .mtlファイルの読み取り
+	static MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+	// .objファイルの読み取り
+	static ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
+
+
+
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
 	SrvManager* srvmanager_;
+	Model* model_;
 	// ランダムエンジン
 	std::mt19937 randomEngine;
 	// RootSignature
@@ -107,13 +116,11 @@ private: // メンバ変数
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
-
 	// パーティクルグループコンテナ
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
-
 	//最大インスタンス
 	uint32_t MaxInstanceCount = 50;
-	
+
 	// カメラ
 	Camera* camera_;
 	//ビルボード行列
