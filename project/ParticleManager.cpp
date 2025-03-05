@@ -84,24 +84,30 @@ void ParticleManager::Update() {
 }
 
 void ParticleManager::Draw() {
-    // RootSignatureを設定。PSOに設定しているけど別途設定が必要
+    // RootSignatureとPipelineStateを設定（PSOにはRootSignatureが含まれているが、明示的に設定する）
     dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-    // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
+    // 形状（プリミティブトポロジ）を設定
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    //for (const auto& [name, particleGroup] : particleGroups) {
-    //    //VertexBufferViewを設定
-    //    dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-    //    //マテリアルのCBufferの場所を設定
-    //    dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-    //    // テクスチャの SRV を設定
-    //    srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
-    //    // インスタンシングデータの SRV を設定
-    //    srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
-    //    //描画！
-    //    dxCommon_->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), particleGroup.kNumInstance, 0, 0);
-    //}
+    // パーティクルグループごとに描画処理
+    for (const auto& [name, particleGroup] : particleGroups) {
+        // VertexBufferViewの設定
+        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+        // マテリアルのCBufferの設定
+        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        // テクスチャSRVを設定
+        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+        // インスタンシングデータ用のSRVを設定
+        uint32_t textureSrvIndex = TextureManager::GetInstance()->GetSrvIndex(particleGroup.materialData.textureFilePath);
+        srvmanager_->SetGraphicsRootDescriptorTable(2, textureSrvIndex);
+        // 描画（インスタンシング）
+        dxCommon_->GetCommandList()->DrawInstanced(
+            static_cast<UINT>(modelDate.vertices.size()),   // 頂点数
+            static_cast<UINT>(particleGroup.kNumInstance), // インスタンス数
+            0, 0                                           // インデックスの開始位置
+        );
+    }
 }
 
 void ParticleManager::RootSignatureGenerate() {
