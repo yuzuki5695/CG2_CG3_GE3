@@ -103,14 +103,9 @@ void ParticleManager::Draw() {
         // パーティクルのテクスチャ SRV を設定
         srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
         // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
-        dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
+        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
         // 描画（インスタンシング）を実行
-        dxCommon_->GetCommandList()->DrawInstanced(
-            static_cast<UINT>(modelDate.vertices.size()), // 描画する頂点数
-            static_cast<UINT>(particleGroup.kNumInstance), // インスタンス数
-            0, // インデックスの開始位置
-            0  // インスタンスの開始位置
-        );
+        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
     }
 }
 
@@ -267,7 +262,7 @@ void ParticleManager::GraphicsPipelineGenerate() {
 
 void ParticleManager::VertexDatacreation() {
     // 関数化したResouceで作成
-    vertexResoruce = dxCommon_->CreateBufferResource(sizeof(ParticleManager::VertexData) * modelDate.vertices.size());
+    vertexResoruce = dxCommon_->CreateBufferResource(sizeof(VertexData) * modelDate.vertices.size());
     //頂点バッファビューを作成する
     // リソースの先頭のアドレスから使う
     vertexBufferView.BufferLocation = vertexResoruce->GetGPUVirtualAddress();
@@ -316,14 +311,13 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
         instanceData[index].color = { 1.0f, 1.0f, 1.0f, 0.0f }; // 透明
     }
     // インスタンスデータをバッファに書き込むためにマッピング
-    void* mappedData = nullptr;
-    HRESULT hr = newGroup.Resource->Map(0, nullptr, &mappedData);
+    HRESULT hr = newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(&newGroup.instanceData));
     if (FAILED(hr)) {
         // マッピング失敗時の処理（ログ出力やエラーハンドリング）
         return;
     }
     // マップされたリソースにデータをコピー
-    std::memcpy(mappedData, instanceData.data(), sizeof(InstanceData) * MaxInstanceCount);
+    std::memcpy(newGroup.instanceData, instanceData.data(), sizeof(InstanceData) * MaxInstanceCount);
     // 書き込み後にリソースをアンマップ
     newGroup.Resource->Unmap(0, nullptr);
     // インスタンスバッファ用のSRVを割り当て、インデックスを記録
