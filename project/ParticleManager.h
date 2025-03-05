@@ -82,7 +82,7 @@ public: // メンバ関数
 	// 終了
 	void Finalize();
 	// 初期化
-	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model);
+	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model, const std::string& directorypath, const std::string& filename);
 	// 更新処理
 	void Update();
 	// 描画処理
@@ -92,16 +92,17 @@ public: // メンバ関数
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
 
 	// .mtlファイルの読み取り
-	static MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+	static ParticleManager::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	// .objファイルの読み取り
-	static ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
+	static ParticleManager::ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
-
+	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
 	SrvManager* srvmanager_;
+	Camera* camera_;
 	Model* model_;
 	// ランダムエンジン
 	std::mt19937 randomEngine;
@@ -121,8 +122,6 @@ private: // メンバ変数
 	//最大インスタンス
 	uint32_t MaxInstanceCount = 50;
 
-	// カメラ
-	Camera* camera_;
 	//ビルボード行列
 	Matrix4x4 backToFrontMatrix;
 

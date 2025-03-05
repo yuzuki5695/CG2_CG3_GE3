@@ -22,9 +22,10 @@ void ParticleManager::Finalize() {
 	instance = nullptr;
 }
 
-void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model) {
+void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model, const std::string& directorypath, const std::string& filename) {
 	// NULL検出
 	assert(birectxcommon);
+    assert(camera);
 	// メンバ変数に記録
 	this->dxCommon_ = birectxcommon;
 	this->srvmanager_ = srvmanager;
@@ -36,7 +37,7 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // グラフィックスパイプラインの生成
     GraphicsPipelineGenerate();
     // モデルデータを取得
-    modelDate = LoadObjFile("Resources", "plane.obj");
+    modelDate = LoadObjFile(directorypath, filename);
     // 頂点データを作成
     VertexDatacreation();
     // マテリアルの生成と初期化
@@ -82,24 +83,34 @@ void ParticleManager::Update() {
 }
 
 void ParticleManager::Draw() {
-    // RootSignatureとPipelineStateを設定（PSOにはRootSignatureが含まれているが、明示的に設定する）
+    // RootSignature と PipelineState を設定
     dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-    // 形状（プリミティブトポロジ）を設定
+
+    // プリミティブトポロジー（ここでは三角形リスト）を設定
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    // パーティクルグループごとに描画処理
+
+    // パーティクルグループごとに描画処理を行う
     for (const auto& [name, particleGroup] : particleGroups) {
-        // VertexBufferViewの設定
+        // インスタンス数が0の場合は描画しない
+        if (particleGroup.kNumInstance == 0) {
+            continue;
+        }
+        // VertexBufferView を設定
         dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-        // マテリアルのCBufferの設定
+        // マテリアル用の定数バッファを設定
         dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-        // テクスチャSRVを設定
+        // パーティクルのテクスチャ SRV を設定
         srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
-        // インスタンシングデータ用のSRVを設定
-        uint32_t textureSrvIndex = TextureManager::GetInstance()->GetSrvIndex(particleGroup.materialData.textureFilePath);
-        srvmanager_->SetGraphicsRootDescriptorTable(2, textureSrvIndex);
-        // 描画（インスタンシング）
-        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
+        // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
+        dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
+        // 描画（インスタンシング）を実行
+        dxCommon_->GetCommandList()->DrawInstanced(
+            static_cast<UINT>(modelDate.vertices.size()), // 描画する頂点数
+            static_cast<UINT>(particleGroup.kNumInstance), // インスタンス数
+            0, // インデックスの開始位置
+            0  // インスタンスの開始位置
+        );
     }
 }
 
@@ -417,4 +428,28 @@ ParticleManager::ModelDate ParticleManager::LoadObjFile(const std::string& direc
     }
     // 4. ModelDateを返す
     return modelDate;
+}
+
+void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
+    // パーティクルグループが存在しない場合、エラーを発生させる
+    auto it = particleGroups.find(name);
+    if (it == particleGroups.end()) {
+        assert(false && "Particle group not found.");
+        return;
+    }
+    // 既存のパーティクルグループを取得
+    ParticleGroup& group = it->second;
+    // count 回のパーティクルを発生させる
+    for (uint32_t i = 0; i < count; ++i) {
+        // パーティクルの位置と色を指定
+        Vector4 color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);  // デフォルトの色（白）
+        // 新しいパーティクルを生成
+        Particle newParticle;
+        newParticle.transform.translate = position;  // パーティクルの位置を設定
+        newParticle.color = color;  // パーティクルの色を設定
+        // パーティクルをグループに追加
+        group.particles.push_back(newParticle);
+    }
+    // インスタンシングデータの更新（必要に応じて）
+    group.kNumInstance += count; // インスタンス数を更新
 }
