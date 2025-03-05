@@ -62,12 +62,10 @@ void ParticleManager::Update() {
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
         for (std::list<Particle>::iterator particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
-
             // world行列を計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
             Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
             Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
-
             // waorldViewProjection行列
             Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
