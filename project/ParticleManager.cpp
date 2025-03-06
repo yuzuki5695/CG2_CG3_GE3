@@ -101,12 +101,12 @@ void ParticleManager::Draw() {
         // マテリアル用の定数バッファを設定
         dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(1, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
-        //// インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
-        //srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
-        //// SRVで画像を表示
-        //srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
-        //// 描画（インスタンシング）を実行
-        //dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
+        // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
+        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+        // SRVで画像を表示
+        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
+        // 描画（インスタンシング）を実行
+        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
     }
 }
 
@@ -265,9 +265,9 @@ void ParticleManager::GraphicsPipelineGenerate() {
     /*----------------------------------------------------------------------------------*/
     /*--------------------------------ShaderをCompile-----------------------------------*/
     /*----------------------------------------------------------------------------------*/
-    ComPtr <IDxcBlob> vertexShaderBlob = dxCommon_->CompileShader(L"Particle.VS.hlsl", L"vs_6_0");
+    ComPtr <IDxcBlob> vertexShaderBlob = dxCommon_->CompileShader(L"Resources/shaders/Particle.VS.hlsl", L"vs_6_0");
     assert(vertexShaderBlob != nullptr);
-    ComPtr <IDxcBlob> pixelShaderBlob = dxCommon_->CompileShader(L"Particle.PS.hlsl", L"ps_6_0");
+    ComPtr <IDxcBlob> pixelShaderBlob = dxCommon_->CompileShader(L"Resources/shaders/Particle.PS.hlsl", L"ps_6_0");
     assert(pixelShaderBlob != nullptr);
 
     /*-----------------------------------------------------------------------------------*/
@@ -351,6 +351,7 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     }
     // マップされたリソースにデータをコピー
     std::memcpy(newGroup.instanceData, newGroup.instanceData, sizeof(InstanceData) * MaxInstanceCount);
+
     // 書き込み後にリソースをアンマップ
     newGroup.Resource->Unmap(0, nullptr);
     // インスタンスバッファ用のSRVを割り当て、インデックスを記録
