@@ -467,13 +467,19 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
     }
     // 既存のパーティクルグループを取得
     ParticleGroup& group = it->second;
+    // 乱数範囲設定（-0.5 ~ 0.5 のランダムなオフセット）
+    std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+
     // count 回のパーティクルを発生させる
     for (uint32_t i = 0; i < count; ++i) {
+        Vector3 offset(dist(randomEngine), dist(randomEngine), dist(randomEngine)); // ランダムオフセット
         // パーティクルの位置と色を指定
         Vector4 color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);  // デフォルトの色（白）
         // 新しいパーティクルを生成
         Particle newParticle;
-        newParticle.transform.translate = position;  // パーティクルの位置を設定
+        newParticle.transform.translate.x = position.x + offset.x;  // パーティクルの位置を設定
+        newParticle.transform.translate.y = position.y + offset.y;  // パーティクルの位置を設定
+        newParticle.transform.translate.z = position.z;
         newParticle.transform.rotate = { 0.0f,0.0f,0.0f };
         newParticle.transform.scale = { 1.0f,1.0f,1.0f };
         newParticle.color = color;  // パーティクルの色を設定
