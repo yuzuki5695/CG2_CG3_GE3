@@ -474,6 +474,8 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
         // 新しいパーティクルを生成
         Particle newParticle;
         newParticle.transform.translate = position;  // パーティクルの位置を設定
+        newParticle.transform.rotate = { 0.0f,0.0f,0.0f };
+        newParticle.transform.scale = { 1.0f,1.0f,1.0f };
         newParticle.color = color;  // パーティクルの色を設定
         // パーティクルをグループに追加
         group.particles.push_back(newParticle);

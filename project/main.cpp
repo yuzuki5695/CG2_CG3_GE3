@@ -51,13 +51,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // DirectXの初期化
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
-    
+
     // SRVマネージャーの初期化
     srvManager = new SrvManager();
     srvManager->Initialize(dxCommon);
 
     // テクスチャマネージャーの初期化
-    TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
+    TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
     // 3Dモデルマネージャの初期化
     ModelManager::GetInstance()->Initialize(dxCommon);
 
@@ -102,7 +102,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
-    sprite->Crrate(TexturePath01,{ 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
+    sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dモデルの初期化
     Model* model = new Model;;
@@ -115,10 +115,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
     // パーティクル初期化
-    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager,camera,model, "Resources", ModelPath01);
+    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager, camera, model, "Resources", ModelPath01);
     // パーティクルグループの生成
     ParticleManager::GetInstance()->CreateParticleGroup("particl", TexturePath01);
-    ParticleManager::GetInstance()->Emit("particl",Vector3{1.0f,1.0f,1.0f}, 4);
+    ParticleManager::GetInstance()->Emit("particl", Vector3{ 0.0f, -0.5f, 0.0f }, 4);
 
 #pragma endregion 最初のシーンの初期化
 
