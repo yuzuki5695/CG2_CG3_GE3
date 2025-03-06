@@ -118,7 +118,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ParticleManager::GetInstance()->Initialize(dxCommon, srvManager, camera, model, "Resources", ModelPath01);
     // パーティクルグループの生成
     ParticleManager::GetInstance()->CreateParticleGroup("particl", TexturePath01);
-    ParticleManager::GetInstance()->Emit("particl", Vector3{ 0.0f, -0.5f, 0.0f }, 4);
+    ParticleManager::GetInstance()->Emit("particl", Vector3{ 0.0f, -0.5f, 0.0f }, 10);
 
 #pragma endregion 最初のシーンの初期化
 

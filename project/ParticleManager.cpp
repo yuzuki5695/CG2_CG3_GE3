@@ -468,7 +468,7 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
     // 既存のパーティクルグループを取得
     ParticleGroup& group = it->second;
     // 乱数範囲設定（-0.5 ~ 0.5 のランダムなオフセット）
-    std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+    std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
 
     // count 回のパーティクルを発生させる
     for (uint32_t i = 0; i < count; ++i) {
