@@ -123,7 +123,6 @@ private: // メンバ変数
 	uint32_t MaxInstanceCount = 50;
 	//ビルボード行列
 	Matrix4x4 backToFrontMatrix;
-
 	//modelマテリアる用のリソースを作る。今回color1つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	//マテリアルにデータを書き込む	

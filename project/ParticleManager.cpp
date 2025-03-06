@@ -100,10 +100,13 @@ void ParticleManager::Draw() {
         dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
         // マテリアル用の定数バッファを設定
         dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-        // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
-        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
-        // 描画（インスタンシング）を実行
-        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
+        dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(1, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
+        //// インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
+        //srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+        //// SRVで画像を表示
+        //srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
+        //// 描画（インスタンシング）を実行
+        //dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
     }
 }
 
