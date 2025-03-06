@@ -121,7 +121,6 @@ private: // メンバ変数
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 	//最大インスタンス
 	uint32_t MaxInstanceCount = 50;
-
 	//ビルボード行列
 	Matrix4x4 backToFrontMatrix;
 
