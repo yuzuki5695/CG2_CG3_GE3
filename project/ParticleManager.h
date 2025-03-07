@@ -49,6 +49,9 @@ public:
 	// パーティクル
 	struct Particle {
 		Transform transform;
+		Vector3 Velocity;
+		float lifetime;
+		float currentTime;
 		Vector4 color;
 	};
 	// インスタンスデータ

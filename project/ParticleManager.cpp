@@ -62,7 +62,20 @@ void ParticleManager::Update() {
 
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
-        for (std::list<Particle>::iterator particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
+        for (std::list<Particle>::iterator particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {  
+            // 寿命をランダムに設定されているので、そのまま削除処理を実行
+            if ((*particleIterator).lifetime <= (*particleIterator).currentTime) {
+                particleIterator = group.particles.erase(particleIterator);
+                continue;
+            }
+
+            // パーティクルの更新
+            (*particleIterator).transform.translate += (*particleIterator).vertices * 1.0f / 60.0f;
+            (*particleIterator).currentTime += 1.0f / 60.0f;
+
+            float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifetime);
+            (*particleIterator).color.w = alpha; // 徐々に透明になる
+
             // world行列を計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
             Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
