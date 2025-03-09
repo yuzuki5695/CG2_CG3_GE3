@@ -45,6 +45,8 @@ void Framework::Finalize() {
     SoundLoader::GetInstance()->GetIXAudio2();
     SoundLoader::GetInstance()->Finalize();
     SoundPlayer::GetInstance()->Finalize();
+    // グラフィックスパイプラインの解放
+    GraphicsPipeline::GetInstance()->Finalize();
     // DirectXの解放
     delete dxCommon;
     // WindowsAPIの解放
@@ -62,6 +64,8 @@ void Framework::Initialize() {
     // DirectXの初期化
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
+    // グラフィックスパイプラインの初期化
+    GraphicsPipeline::GetInstance()->Initialize(dxCommon);
     // 音声読み込み
     SoundLoader::GetInstance()->Initialize();
     // 音声再生
@@ -116,7 +120,6 @@ void Framework::Update() {
     camera->Update();
     camera->SetTranslate(Cameraposition);
     camera->SetRotate(Camerarotation);
-
     // シーンマネージャの更新処理
     SceneManager::GetInstance()->Update();
 }

@@ -22,15 +22,7 @@ public: // メンバ関数
 	void Commondrawing();
 
 	DirectXCommon* GetDxCommon() const { return  dxCommon_; }
-
 private:
-	// ルートシグネチャの生成
-	void RootSignatureGenerate();
-	// グラフィックスパイプラインの生成
-	void GraphicsPipelineGenerate();
-private:
+	// ポインタ
 	DirectXCommon* dxCommon_;
-	// RootSignature
-	Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature = nullptr;
-	Microsoft::WRL::ComPtr <ID3D12PipelineState> graphicsPipelineState = nullptr;
 };

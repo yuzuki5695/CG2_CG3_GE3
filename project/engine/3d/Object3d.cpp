@@ -71,9 +71,9 @@ void Object3d::SetModel(const std::string& filePath) {
     model = ModelManager::GetInstance()->FindModel(filePath);
 }
 
-void Object3d::Create(std::string filePath, Transform transform) {
+void Object3d::Create(std::string& filePath, Transform transform) {
     // モデルを検索してセットする
-    model = ModelManager::GetInstance()->FindModel(filePath);
+    SetModel(filePath);
     transform_ = transform;
     this->camera = object3dCommon->GetDefaultCamera();
 }

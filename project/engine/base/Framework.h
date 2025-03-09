@@ -14,6 +14,7 @@
 #include<SoundPlayer.h>
 #include<SceneManager.h>
 #include "SceneFactory.h"
+#include"GraphicsPipeline.h"
 
 // ゲーム全体
 class Framework
@@ -44,7 +45,6 @@ private: // メンバ変数
 	ModelCommon* modelCommon = nullptr;
 	SrvManager* srvManager = nullptr;
 	Camera* camera = nullptr;
-
 	// カメラの現在の位置と回転を取得
 	Vector3 Cameraposition;
 	Vector3 Camerarotation;

@@ -10,7 +10,7 @@
 void TitleScene::Finalize() {
     // 汎用機能の解放
     delete  sprite;
-    sprite = nullptr;
+    delete  model;
 }
 
 void TitleScene::Initialize() {
@@ -21,14 +21,25 @@ void TitleScene::Initialize() {
     TexturePath01 = "Resources/uvChecker.png";
     TexturePath02 = "Resources/monsterBall.png";
 
+    // .objファイルからモデルを読み込む
+    ModelManager::GetInstance()->LoadModel("plane.obj"); 
+    // 変数に代入
+    ModelPath01 = "plane.obj";
+
     // 音声ファイルを追加
     soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
+
+
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
     sprite = new Sprite;
     sprite->Initialize(SpriteCommon::GetInstance());
     sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
+
+    // 3Dモデルの初期化
+    model = new Model;;
+    model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -47,9 +58,8 @@ void TitleScene::Update() {
         OutputDebugStringA("Hit 0 \n");
     }
 
-
     if (Input::GetInstance()->Triggrkey(DIK_SPACE) && soundfige == 0) {
-        soundfige = 1;
+        //soundfige = 1;
     }
 
     if (soundfige == 1) {

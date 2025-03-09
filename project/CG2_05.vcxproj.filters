@@ -165,6 +165,9 @@
     <ClCompile Include="application\base\SceneFactory.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
+    <ClCompile Include="engine\base\GraphicsPipeline.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\2d\Sprite.h">
@@ -271,6 +274,9 @@
     </ClInclude>
     <ClInclude Include="application\MyGame.h">
       <Filter>ヘッダー ファイル\application</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\base\GraphicsPipeline.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

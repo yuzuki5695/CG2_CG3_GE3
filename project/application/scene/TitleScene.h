@@ -21,10 +21,15 @@ private: // メンバ変数
     // オブジェクトデータ
     // Sprite
     Sprite* sprite = nullptr;
+    // Object3d
+    Model* model = nullptr;
+
     /*-----ファイルデータ----*/
     // Texture
     std::string TexturePath01;
     std::string TexturePath02;
+    // Model
+    std::string ModelPath01;
     // 音声
     SoundData soundData;
     /*-----ファイルデータ----*/
