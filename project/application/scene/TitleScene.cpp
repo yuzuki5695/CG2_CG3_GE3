@@ -50,7 +50,7 @@ void TitleScene::Update() {
 
 
     if (Input::GetInstance()->Triggrkey(DIK_SPACE) && soundfige == 0) {
-        soundfige = 1;
+       // soundfige = 1;
     }
 
     if (soundfige == 1) {
