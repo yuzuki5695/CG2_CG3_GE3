@@ -11,7 +11,6 @@
 void TitleScene::Finalize() {
     // 汎用機能の解放
     delete  sprite;
-    ParticleManager::GetInstance()->Finalize();
     delete  model;
 }
 
@@ -42,9 +41,9 @@ void TitleScene::Initialize() {
     model = new Model;
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
-    ParticleManager::GetInstance()->SetParticleModel(model, "Resources", ModelPath01);
-    ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 10);
+    //ParticleManager::GetInstance()->SetParticleModel(model, "Resources", ModelPath01);
+    //ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
+    //ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 10);
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -82,7 +81,7 @@ void TitleScene::Update() {
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
 
-    ParticleManager::GetInstance()->Update();
+   // ParticleManager::GetInstance()->Update();
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -108,7 +107,7 @@ void TitleScene::Draw() {
     /*----------------------------------3Dオブジェクトの描画処理開始--------------------------------------------*/
     /*-----------------------------------------------------------------------------------------------------*/
 
-   // ParticleManager::GetInstance()->Draw();
+    ParticleManager::GetInstance()->Draw();
 
     /*------------------------------------------------------------------------------------------------------*/
     /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/

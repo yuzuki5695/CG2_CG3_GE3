@@ -32,6 +32,8 @@ void Framework::Finalize() {
     Input::GetInstance()->Finalize();
     // カメラ
     delete camera;
+    // パーティクルマネージャの開放
+   // ParticleManager::GetInstance()->Finalize();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
@@ -46,7 +48,7 @@ void Framework::Finalize() {
     SoundLoader::GetInstance()->Finalize();
     SoundPlayer::GetInstance()->Finalize();
     // グラフィックスパイプラインの解放
-    GraphicsPipeline::GetInstance()->Finalize();
+  //  GraphicsPipeline::GetInstance()->Finalize();
     // DirectXの解放
     delete dxCommon;
     // WindowsAPIの解放
@@ -65,7 +67,7 @@ void Framework::Initialize() {
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
     // グラフィックスパイプラインの初期化
-    GraphicsPipeline::GetInstance()->Initialize(dxCommon);
+    //GraphicsPipeline::GetInstance()->Initialize(dxCommon);
     // 音声読み込み
     SoundLoader::GetInstance()->Initialize();
     // 音声再生
@@ -102,7 +104,7 @@ void Framework::Initialize() {
     Camerarotation = camera->GetRotate();
 
     // パーティクルマネージャの初期化
-    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager, camera);
+   // ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
 
 #pragma endregion 基盤システムの初期化
 }

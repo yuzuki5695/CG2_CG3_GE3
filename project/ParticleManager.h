@@ -81,7 +81,7 @@ public: // メンバ関数
 	// 終了
 	void Finalize();
 	// 初期化
-	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera);
+	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager);
 	// 更新処理
 	void Update();
 	// 描画処理
@@ -95,7 +95,7 @@ public: // メンバ関数
 	//void SetModel(Model* model, const std::string& directorypath, const std::string& filename);
 	//void SetParticleModel(const std::string& filename);
 
-	void SetParticleModel(Model* model, const std::string& directorypath, const std::string& filename);
+	void SetParticleModel(Camera* camera,Model* model, const std::string& directorypath, const std::string& filename);
 
 	// .mtlファイルの読み取り
 	static MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
