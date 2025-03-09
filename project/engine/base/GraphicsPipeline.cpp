@@ -25,9 +25,13 @@ void GraphicsPipeline::Initialize(DirectXCommon* dxCommon) {
     this->dxCommon_ = dxCommon;
 
     // グラフィックスパイプラインを設定
+    
+    // スプライト
     GraphicsPipelineGenerateSprite();
-    //GraphicsPipelineGenerateObject3d();
-    //GraphicsPipelineGenerateParticle();
+    // object3d
+    GraphicsPipelineGenerateObject3d();
+    // パーティクル
+    GraphicsPipelineGenerateParticle();
 }
 
 void GraphicsPipeline::RootSignatureGenerateSprite() {
