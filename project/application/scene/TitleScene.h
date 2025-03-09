@@ -28,6 +28,7 @@ private: // メンバ変数
     // Texture
     std::string TexturePath01;
     std::string TexturePath02;
+    std::string TexturePath03;
     // Model
     std::string ModelPath01;
     // 音声

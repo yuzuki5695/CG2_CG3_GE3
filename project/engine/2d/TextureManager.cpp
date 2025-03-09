@@ -84,3 +84,15 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& f
 	assert(textureDatas.size() + KSRVIndexTop < SrvManager::kMaxSRVCount);
 	return textureDatas.at(filepath).srvHandleGPU;
 }
+
+void TextureManager::SetTexture(ID3D12GraphicsCommandList* commandList, uint32_t rootParameterIndex, const std::string& filePath){
+	// テクスチャが読み込まれていない場合はエラー
+	if (!textureDatas.contains(filePath)) {
+		assert(false);
+		return;
+	}
+	// 指定されたテクスチャのSRVインデックスを取得
+	uint32_t srvIndex = textureDatas[filePath].srvIndex;
+	// SRVをシェーダーにバインド
+	srvmanager_->SetGraphicsRootDescriptorTable(rootParameterIndex, srvIndex);
+}

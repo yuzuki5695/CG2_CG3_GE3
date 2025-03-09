@@ -22,9 +22,11 @@ void TitleScene::Initialize() {
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/circle.png");
     // 変数に代入
     TexturePath01 = "Resources/uvChecker.png";
     TexturePath02 = "Resources/monsterBall.png";
+    TexturePath03 = "Resources/circle.png";
 
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj"); 
@@ -57,7 +59,7 @@ void TitleScene::Initialize() {
 
     ParticleManager::GetInstance()->SetParticleModel(camera, model, "Resources", ModelPath01);
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 10);
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -89,8 +91,10 @@ void TitleScene::Update() {
 #pragma region  ImGuiの更新処理開始
     // スプライト
    // sprite->DebugUpdata();
-    // パーティクル
+   // パーティクル
     ParticleManager::GetInstance()->DebugUpdata();
+
+   
 #pragma endregion ImGuiの更新処理終了
     /*-------------------------------------------*/
     /*--------------カメラの更新処理---------------*/

@@ -20,7 +20,6 @@ public: // メンバ関数
 	/// 初期化
 	/// </summary>
 	void Initialize(DirectXCommon* dxCommon);
-
 private:
 	// ルートシグネチャ生成とグラフィックスパイプライン設定
 	// スプライト用

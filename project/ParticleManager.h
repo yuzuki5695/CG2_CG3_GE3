@@ -101,6 +101,12 @@ public: // メンバ関数
 	void SetParticleModel(Camera* camera,Model* model, const std::string& directorypath, const std::string& filename);
 	
 	void DebugUpdata();
+
+	// ルートシグネチャの生成
+	void RootSignatureGenerate();
+	// グラフィックスパイプラインの生成
+	void GraphicsPipelineGenerate();
+
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
@@ -120,11 +126,31 @@ private: // メンバ変数
 	// パーティクルグループコンテナ
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 	//最大インスタンス
-	uint32_t MaxInstanceCount = 50;
+	uint32_t MaxInstanceCount = 30;
 	//ビルボード行列
 	Matrix4x4 backToFrontMatrix;
 	//modelマテリアる用のリソースを作る。今回color1つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	//マテリアルにデータを書き込む	
 	Material* materialData = nullptr;
+
+	// 発生間隔の設定
+	float frequencyTime = 0.0f;  // 時間を保持
+	const float frequency = 0.5f;  // 発生頻度（秒）
+
+
+	// RootSignature
+	Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature = nullptr;
+	Microsoft::WRL::ComPtr <ID3D12PipelineState> graphicsPipelineState = nullptr;
+
+public:
+	ParticleGroup* GetParticleGroup(const std::string& name) {
+		// 指定されたパーティクルグループが存在するか確認
+		auto it = particleGroups.find(name);
+		if (it != particleGroups.end()) {
+			return &(it->second);
+		}
+		return nullptr; // 見つからなかった場合は nullptr を返す
+	}
+
 };
