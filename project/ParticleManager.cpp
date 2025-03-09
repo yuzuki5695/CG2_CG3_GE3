@@ -129,7 +129,6 @@ void ParticleManager::Draw() {
     dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 
-
     // プリミティブトポロジー（ここでは三角形リスト）を設定
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
