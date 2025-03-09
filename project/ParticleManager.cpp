@@ -107,13 +107,6 @@ void ParticleManager::Draw() {
         // マテリアル用の定数バッファを設定
         dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(1, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
-       
-        std::cout << "Binding SRV for index: " << particleGroup.srvindex << std::endl;
-
-        // GetGPUDescriptorHandleが正しいGPU仮想アドレスを返しているか確認
-        auto gpuHandle = srvmanager_->GetGPUDescriptorHandle(particleGroup.srvindex);
-        std::cout << "GPU handle: " << gpuHandle.ptr << std::endl;
-
         // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
         srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
         // SRVで画像を表示
