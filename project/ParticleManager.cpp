@@ -4,6 +4,7 @@
 #include <ModelManager.h>
 #include <TextureManager.h>
 #include <numbers>
+#include<externals/imgui/imgui.h>
 
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
@@ -70,11 +71,13 @@ void ParticleManager::Update() {
             }
 
             // パーティクルの更新
-            (*particleIterator).transform.translate += (*particleIterator).vertices * 1.0f / 60.0f;
+            (*particleIterator).transform.translate.x += (*particleIterator).Velocity.x * 1.0f / 60.0f;
+            (*particleIterator).transform.translate.y += (*particleIterator).Velocity.y * 1.0f / 60.0f;
+            (*particleIterator).transform.translate.z += (*particleIterator).Velocity.z * 1.0f / 60.0f;
             (*particleIterator).currentTime += 1.0f / 60.0f;
 
-            float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifetime);
-            (*particleIterator).color.w = alpha; // 徐々に透明になる
+            //float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifetime);
+            //(*particleIterator).color.w = alpha; // 徐々に透明になる
 
             // world行列を計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);

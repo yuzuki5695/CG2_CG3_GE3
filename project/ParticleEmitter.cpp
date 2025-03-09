@@ -1,11 +1,11 @@
 #include "ParticleEmitter.h"
 #include "ParticleManager.h"
 
-ParticleEmitter::ParticleEmitter(const std::string& name,	const Vector3& position,	const uint32_t count,	const float time,	const float Remainingtimee){
+ParticleEmitter::ParticleEmitter(const std::string& name, const Vector3& position, const uint32_t count, const float time, const float Remainingtimee) {
 	name_ = name;
 	position_ = position;
 	count_ = count;
-	time_ = time;	
+	time_ = time;
 	Remainingtime_ = Remainingtimee;
 }
 

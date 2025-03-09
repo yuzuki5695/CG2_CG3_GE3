@@ -25,6 +25,7 @@
 #include "Camera.h"
 #include"SrvManager.h"
 #include "ParticleManager.h"
+#include "ParticleEmitter.h"
 
 using namespace MatrixVector;
 
@@ -105,7 +106,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     sprite->Crrate(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dモデルの初期化
-    Model* model = new Model;;
+    Model* model = new Model;
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
     // 3Dオブジェクトの初期化
@@ -173,6 +174,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     Vector3 Cameraposition = camera->GetTranslate();
     Vector3 Camerarotation = camera->GetRotate();
 
+    bool isSpaceKeyPressed = false;
+
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
         // Windowのメッセージ処理
@@ -188,6 +191,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 0を押している間true
         if (input->Pushkey(DIK_0)) {
             OutputDebugStringA("Hit 0 \n");
+        }
+
+        // スペースキーが押されたかどうかを確認
+        if (input->Pushkey(DIK_SPACE)) {
+            if (!isSpaceKeyPressed) {
+                // スペースキーが初めて押された場合、一度だけパーティクルを生成
+                ParticleManager::GetInstance()->Emit("particl", Vector3{ 0.0f, -0.5f, 0.0f }, 10);
+
+                // フラグを立てて再度押された時にパーティクルを生成しないようにする
+                isSpaceKeyPressed = true;
+            }
+        } else {
+            // スペースキーが離されたらフラグをリセットして次回押された時に再度パーティクルを生成できるようにする
+            isSpaceKeyPressed = false;
         }
 
         //ImGui_ImplDX12_NewFrame();
@@ -254,7 +271,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //    // インクリメントして次へ
         //    ++index;
         //}
-
 
         ParticleManager::GetInstance()->Update();
 
