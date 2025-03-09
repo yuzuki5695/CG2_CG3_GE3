@@ -6,6 +6,7 @@
 #include<Input.h>
 #include<ImGuiManager.h>
 #include<SceneManager.h>
+#include"ParticleManager.h"
 
 void TitleScene::Finalize() {
     // 汎用機能の解放
@@ -39,6 +40,8 @@ void TitleScene::Initialize() {
     // 3Dモデルの初期化
     model = new Model;;
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
+
+    ParticleManager::GetInstance()->
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ

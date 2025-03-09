@@ -15,6 +15,7 @@
 #include<SceneManager.h>
 #include "SceneFactory.h"
 #include"GraphicsPipeline.h"
+#include"ParticleManager.h"
 
 // ゲーム全体
 class Framework

@@ -101,6 +101,9 @@ void Framework::Initialize() {
     Cameraposition = camera->GetTranslate();
     Camerarotation = camera->GetRotate();
 
+    // パーティクルマネージャの初期化
+    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager, camera);
+
 #pragma endregion 基盤システムの初期化
 }
 
