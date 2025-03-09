@@ -44,7 +44,7 @@ public: // メンバ関数
 	void Draw();
 
 	// .mtlファイルの読み取り
-	static Model::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+	static MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	// .objファイルの読み取り
 	static ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
 private:
@@ -66,4 +66,8 @@ private:
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	Material* materialData = nullptr;
+public:
+	const std::string& GetMaterialTextureFilePath() const { return modelDate.material.textureFilePath; }
+	uint32_t GetMaterialTextureIndex() const { return modelDate.material.textureindex; }
+	const ModelDate& GetModelDate() const { return modelDate; }
 };

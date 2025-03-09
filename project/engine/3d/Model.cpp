@@ -69,7 +69,6 @@ void Model::MaterialGenerate() {
     materialData->uvTransform = MakeIdentity4x4();
 }
 
-
 Model::MaterialDate Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
     Model::MaterialDate materialDate; // 構築するMaterialDate

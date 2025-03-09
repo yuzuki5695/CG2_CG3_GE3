@@ -90,16 +90,18 @@ public: // メンバ関数
 	// パーティクルグループの作成
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
 
-	// .mtlファイルの読み取り
-	static ParticleManager::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
-	// .objファイルの読み取り
-	static ParticleManager::ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
-
 	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
 	//void SetModel(Model* model, const std::string& directorypath, const std::string& filename);
+	//void SetParticleModel(const std::string& filename);
 
-	void SetParticleModel(const std::string& filename);
+	void SetParticleModel(Model* model, const std::string& directorypath, const std::string& filename);
+
+	// .mtlファイルの読み取り
+	static MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+	// .objファイルの読み取り
+	static ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
+
 
 private: // メンバ変数
 	// ポインタ
@@ -111,20 +113,22 @@ private: // メンバ変数
 	std::mt19937 randomEngine;
 	// Objファイルのデータ
 	ModelDate modelDate;
+	// パーティクルグループコンテナ
+	std::unordered_map<std::string, ParticleGroup> particleGroups;
+	//最大インスタンス
+	uint32_t MaxInstanceCount = 100;
+	//ビルボード行列
+	Matrix4x4 backToFrontMatrix;
+
 	// バッファリソース
 	Microsoft::WRL::ComPtr <ID3D12Resource> vertexResoruce;
 	// バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
-	// パーティクルグループコンテナ
-	std::unordered_map<std::string, ParticleGroup> particleGroups;
-	//最大インスタンス
-	uint32_t MaxInstanceCount = 50;
-	//ビルボード行列
-	Matrix4x4 backToFrontMatrix;
-	//modelマテリアる用のリソースを作る。今回color1つ分のサイズを用意する
+
+	// マテリアル用のリソースを作る。今回color1つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	//マテリアルにデータを書き込む	
+	// マテリアルにデータを書き込む	
 	Material* materialData = nullptr;
 };
