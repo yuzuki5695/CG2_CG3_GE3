@@ -29,7 +29,6 @@ void TitleScene::Initialize() {
     // 音声ファイルを追加
     soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
 
-
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
