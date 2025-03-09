@@ -69,7 +69,11 @@ public:
 		uint32_t srvindex;                                     // インスタンシング用SRVインデックス
 		Microsoft::WRL::ComPtr <ID3D12Resource> Resource;      // インスタンシングリソース
 		uint32_t kNumInstance;                                 // インスタンス数
-		InstanceData* instanceData = nullptr;                  // インスタンシングデータを書き込むためのポインタ	
+		InstanceData* instanceData = nullptr;                  // インスタンシングデータを書き込むためのポインタ
+		// 発生間隔管理用のメンバー
+		float spawnTime = 0.0f;  // 現在の発生までの経過時間
+		float spawnFrequency = 0.5f;  // 0.5秒ごとに発生
+
 	};
 private:
 	// 頂点データ作成
@@ -133,11 +137,6 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	//マテリアルにデータを書き込む	
 	Material* materialData = nullptr;
-
-	// 発生間隔の設定
-	float frequencyTime = 0.0f;  // 時間を保持
-	const float frequency = 0.5f;  // 発生頻度（秒）
-
 
 	// RootSignature
 	Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature = nullptr;

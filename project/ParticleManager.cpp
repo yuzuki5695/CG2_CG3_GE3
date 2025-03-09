@@ -60,7 +60,7 @@ void ParticleManager::SetParticleModel(Camera* camera, Model* model, const std::
 
 void ParticleManager::Update() {
     // ビルボード行列
-    Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());  // "GetWorludMatrix" のタイプミス修正
+    Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());
     billboardMatrix.m[3][0] = 0.0f;
     billboardMatrix.m[3][1] = 0.0f;
     billboardMatrix.m[3][2] = 0.0f;
@@ -69,48 +69,35 @@ void ParticleManager::Update() {
     Matrix4x4 viewMatrix = camera_->GetViewMatrix();
     Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
 
-    // 時間のカウントアップ
-    frequencyTime += 1.0f / 60.0f;  // 60fpsとしてカウントアップ
-
-    // 発生頻度より大きいならパーティクルを発生
-    if (frequencyTime > frequency) {
-        // パーティクルを発生させる (発生位置や数などは適宜設定)
-        Emit("Particles", Vector3{0.0f, 0.0f, 0.0f}, 1); // 実際のパーティクル発生処理を呼び出す
-
-        // 時間をリセット
-        frequencyTime = 0.0f;
-    }
-
     // 各パーティクルグループの処理
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
         for (auto particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
-            // パーティクルの寿命を減らす
-            (*particleIterator).currentTime += 1.0f / 60.0f;
+            // パーティクルの現在の時間を増加させる
+            (*particleIterator).currentTime += 1.0f / 60.0f;  // 60fpsで時間をカウントアップ
 
-            // パーティクルの寿命が尽きたらグループから外す
+            // パーティクルの寿命が尽きたら削除
             if ((*particleIterator).currentTime >= (*particleIterator).lifetime) {
-                // パーティクルの寿命が尽きたので消す
-                particleIterator = group.particles.erase(particleIterator);
-                continue;  // 次のパーティクルに進む
+                particleIterator = group.particles.erase(particleIterator);  // パーティクル削除
+                continue;
             }
 
-            // パーティクルの位置を更新
+            // パーティクルの位置や動きを更新
             (*particleIterator).transform.translate.x += (*particleIterator).Velocity.x * (1.0f / 60.0f);
 
-            // 透明度（アルファ）の減少
+            // 透明度の更新（時間に基づいてフェード）
             float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
             (*particleIterator).color.w = alpha;
 
-            // world行列を計算
+            // world行列の計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
             Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
             Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
 
-            // worldViewProjection行列
+            // worldViewProjection行列の計算
             Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
-            // インスタンスデータを設定
+            // インスタンスデータに更新した行列を設定
             if (counter < group.kNumInstance) {
                 group.instanceData[counter].WVP = worldViewProjectionMatrix;
                 group.instanceData[counter].World = worldMatrix;
@@ -121,9 +108,18 @@ void ParticleManager::Update() {
             // 次のパーティクルに進む
             ++particleIterator;
         }
+
+        // パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
+        if (group.spawnTime >= group.spawnFrequency) {
+            // 新しいパーティクルを発生させる
+            Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 1);  // 実際の発生処理を呼び出す
+            group.spawnTime = 0.0f;  // 発生時間をリセット
+        } else {
+            // 発生時間を増加
+            group.spawnTime += 1.0f / 60.0f;
+        }
     }
 }
-
 
 void ParticleManager::Draw() {
     // RootSignature と PipelineState を設定
@@ -338,6 +334,13 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 
     // 既存のパーティクルグループを取得
     ParticleGroup& group = it->second;
+
+    // 現在のパーティクル数がMaxInstanceCountを超えている場合、追加するパーティクル数を調整
+    uint32_t currentParticleCount = group.particles.size();
+    if (currentParticleCount + count > MaxInstanceCount) {
+        count = MaxInstanceCount - currentParticleCount;  // 最大数を超えないように調整
+    }
+
     std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
 
     // count 回のパーティクルを発生させる
@@ -350,19 +353,21 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 
         // 新しいパーティクルを生成
         Particle newParticle;
-        newParticle.transform.translate = { position.x + offset.x, position.y + offset.y, position.z + offset.z};
+        newParticle.transform.translate = { position.x + offset.x, position.y + offset.y, position.z + offset.z };
         newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };  // 回転の初期化（必要に応じて後で変更可能）
         newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };  // スケールの初期化
         newParticle.color = color;
         newParticle.lifetime = 1.0f;  // 新しく発生したパーティクルのライフタイムを設定
         newParticle.currentTime = 0.0f;  // 寿命の初期化
         newParticle.Velocity = { 1.0f,1.0f,1.0f };
+        group. spawnTime = 0.0f;
+        group.spawnFrequency = 0.5f;
         // パーティクルをグループに追加
         group.particles.push_back(newParticle);
     }
 
     // インスタンシングデータの更新
-    group.kNumInstance += count;
+    group.kNumInstance += count;  // 新たに追加したインスタンス数を反映
 }
 
 void ParticleManager::DebugUpdata() {

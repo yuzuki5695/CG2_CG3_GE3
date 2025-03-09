@@ -59,6 +59,7 @@ void TitleScene::Initialize() {
 
     ParticleManager::GetInstance()->SetParticleModel(camera, model, "Resources", ModelPath01);
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
+    ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
     ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
 
 #pragma endregion 最初のシーンの初期化
