@@ -1,4 +1,3 @@
-
 #include "ParticleManager.h"
 #include <MatrixVector.h>
 #include <cassert>
@@ -25,13 +24,18 @@ void ParticleManager::Finalize() {
     instance = nullptr;
 }
 
-void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model, const std::string& directorypath, const std::string& filename) {
+void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager) {
     // NULL検出
     assert(birectxcommon);
-    assert(camera);
     // メンバ変数に記録
     this->dxCommon_ = birectxcommon;
     this->srvmanager_ = srvmanager;
+}
+
+void ParticleManager::SetParticleModel(Camera* camera, Model* model, const std::string& directorypath, const std::string& filename) {
+    // NULL検出
+    assert(camera);
+    // メンバ変数に記録
     this->camera_ = camera;
     this->model_ = model;
     // 乱数エンジンを初期化

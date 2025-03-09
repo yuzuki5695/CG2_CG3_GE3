@@ -30,10 +30,6 @@ void Framework::Finalize() {
     delete modelCommon;
     // 入力解放
     Input::GetInstance()->Finalize();
-    // カメラ
-    delete camera;
-    // パーティクルマネージャの開放
-   // ParticleManager::GetInstance()->Finalize();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
@@ -92,19 +88,9 @@ void Framework::Initialize() {
 
     // 3Dオブジェクト共通部の初期化
     Object3dCommon::GetInstance()->Initialize(dxCommon);
-
-    // カメラの初期化
-    camera = new Camera();
-    camera->SetRotate({ 0.0f,0.0f,0.0f });
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
-    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
-
-    // カメラの現在の位置と回転を取得
-    Cameraposition = camera->GetTranslate();
-    Camerarotation = camera->GetRotate();
-
-    // パーティクルマネージャの初期化
-   // ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
+    
+    //パーティクル
+    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
 
 #pragma endregion 基盤システムの初期化
 }
@@ -119,12 +105,6 @@ void Framework::Update() {
     Input::GetInstance()->Update();
     // ImGuiの受付開始
     ImGuiManager::GetInstance()->Begin();
-    /*-------------------------------------------*/
-    /*--------------カメラの更新処理---------------*/
-    /*------------------------------------------*/
-    camera->Update();
-    camera->SetTranslate(Cameraposition);
-    camera->SetRotate(Camerarotation);
     // シーンマネージャの更新処理
     SceneManager::GetInstance()->Update();
 }

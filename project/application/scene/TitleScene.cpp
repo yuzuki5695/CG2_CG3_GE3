@@ -9,9 +9,13 @@
 #include"ParticleManager.h"
 
 void TitleScene::Finalize() {
-    // 汎用機能の解放
+    // 汎用機能の解放 
+    // パーティクルマネージャの開放
+    ParticleManager::GetInstance()->Finalize();
     delete  sprite;
     delete  model;
+    // カメラ
+    delete camera;
 }
 
 void TitleScene::Initialize() {
@@ -45,6 +49,19 @@ void TitleScene::Initialize() {
     //ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
     //ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 10);
 
+    // カメラの初期化
+    camera = new Camera();
+    camera->SetRotate({ 0.0f,0.0f,0.0f });
+    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
+
+    // カメラの現在の位置と回転を取得
+    Cameraposition = camera->GetTranslate();
+    Camerarotation = camera->GetRotate();
+
+    ParticleManager::GetInstance()->SetParticleModel(camera, model, "Resources", ModelPath01);
+
+
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
     soundfige = 0;
@@ -54,7 +71,7 @@ void TitleScene::Update() {
     // ENTERキーを押したら
     if (Input::GetInstance()->Triggrkey(DIK_RETURN)) {
         // シーン切り替え
-        SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+      //  SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
     }
 
     // 0を押している間true
@@ -76,6 +93,12 @@ void TitleScene::Update() {
     // スプライト
     sprite->DebugUpdata();
 #pragma endregion ImGuiの更新処理終了
+    /*-------------------------------------------*/
+    /*--------------カメラの更新処理---------------*/
+    /*------------------------------------------*/
+    camera->Update();
+    camera->SetTranslate(Cameraposition);
+    camera->SetRotate(Camerarotation);
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/

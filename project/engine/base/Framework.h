@@ -45,10 +45,6 @@ private: // メンバ変数
 	DirectXCommon* dxCommon = nullptr;
 	ModelCommon* modelCommon = nullptr;
 	SrvManager* srvManager = nullptr;
-	Camera* camera = nullptr;
-	// カメラの現在の位置と回転を取得
-	Vector3 Cameraposition;
-	Vector3 Camerarotation;
 
 	// ゲーム終了フラグ
 	bool endRequst_ = false;
@@ -56,9 +52,7 @@ public:
 	// getter 
 	WinApp* GetWinApp() const { return winApp; }
 	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
-	Camera* GetCamera() const { return camera; }
 	SrvManager* GetSrvManager() const { return srvManager; }
-	//SceneManeger* GetSceneManeger() const { return sceneManeger_; }
 	// 終了フラグのチェック
 	virtual bool IsEndRequst() { return  endRequst_; }
 };

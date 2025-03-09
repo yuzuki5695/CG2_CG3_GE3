@@ -82,7 +82,7 @@ public: // メンバ関数
 	// 終了
 	void Finalize();
 	// 初期化
-	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager, Camera* camera, Model* model, const std::string& directorypath, const std::string& filename);
+	void Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager);
 	// 更新処理
 	void Update();
 	// 描画処理
@@ -98,9 +98,8 @@ public: // メンバ関数
 
 	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
-	// 例: ImGui の描画関数内でボタンを表示
-	void RenderParticleEmitterUI();
-
+	void SetParticleModel(Camera* camera,Model* model, const std::string& directorypath, const std::string& filename);
+	
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
