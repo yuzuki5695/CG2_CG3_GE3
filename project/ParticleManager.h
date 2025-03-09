@@ -100,6 +100,7 @@ public: // メンバ関数
 
 	void SetParticleModel(Camera* camera,Model* model, const std::string& directorypath, const std::string& filename);
 	
+	void DebugUpdata();
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;

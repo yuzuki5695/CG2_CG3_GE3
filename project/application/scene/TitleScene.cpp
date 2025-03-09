@@ -88,7 +88,9 @@ void TitleScene::Update() {
 
 #pragma region  ImGuiの更新処理開始
     // スプライト
-    sprite->DebugUpdata();
+   // sprite->DebugUpdata();
+    // パーティクル
+    ParticleManager::GetInstance()->DebugUpdata();
 #pragma endregion ImGuiの更新処理終了
     /*-------------------------------------------*/
     /*--------------カメラの更新処理---------------*/

@@ -4,9 +4,8 @@
 #include <ModelManager.h>
 #include <TextureManager.h>
 #include <numbers>
-#include<externals/imgui/imgui.h>
 #include <GraphicsPipeline.h>
-#include <iostream>
+#include<ImGuiManager.h>
 
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
@@ -307,4 +306,13 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
     }
     // インスタンシングデータの更新（必要に応じて）
     group.kNumInstance += count; // インスタンス数を更新
+}
+
+void ParticleManager::DebugUpdata() {
+#ifdef USE_IMGUI
+    // ウィンドウサイズを指定
+    ImGui::SetNextWindowSize(ImVec2(250, 100));
+    ImGui::Begin("Particle");
+    ImGui::End();
+#endif // USE_IMGUI
 }
