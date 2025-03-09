@@ -48,7 +48,7 @@ void Framework::Finalize() {
     SoundLoader::GetInstance()->Finalize();
     SoundPlayer::GetInstance()->Finalize();
     // グラフィックスパイプラインの解放
-  //  GraphicsPipeline::GetInstance()->Finalize();
+    GraphicsPipeline::GetInstance()->Finalize();
     // DirectXの解放
     delete dxCommon;
     // WindowsAPIの解放
@@ -67,7 +67,7 @@ void Framework::Initialize() {
     dxCommon = new DirectXCommon();
     dxCommon->Initialize(winApp);
     // グラフィックスパイプラインの初期化
-    //GraphicsPipeline::GetInstance()->Initialize(dxCommon);
+    GraphicsPipeline::GetInstance()->Initialize(dxCommon);
     // 音声読み込み
     SoundLoader::GetInstance()->Initialize();
     // 音声再生
