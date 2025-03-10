@@ -106,11 +106,6 @@ public: // メンバ関数
 	
 	void DebugUpdata();
 
-	// ルートシグネチャの生成
-	void RootSignatureGenerate();
-	// グラフィックスパイプラインの生成
-	void GraphicsPipelineGenerate();
-
 private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;

@@ -31,7 +31,7 @@ void GraphicsPipeline::Initialize(DirectXCommon* dxCommon) {
     // object3d
     GraphicsPipelineGenerateObject3d();
     // パーティクル
-   // GraphicsPipelineGenerateParticle();
+    GraphicsPipelineGenerateParticle();
 }
 
 void GraphicsPipeline::RootSignatureGenerateSprite() {
