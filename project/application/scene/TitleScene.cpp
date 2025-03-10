@@ -13,7 +13,6 @@ void TitleScene::Finalize() {
     // パーティクルマネージャの開放
     ParticleManager::GetInstance()->Finalize();
     delete  sprite;
-    delete  model;
     // カメラ
     delete camera;
 }
@@ -25,16 +24,9 @@ void TitleScene::Initialize() {
     TextureManager::GetInstance()->LoadTexture("Resources/circle.png");
     // 変数に代入
     TexturePath01 = "Resources/uvChecker.png";
-    TexturePath02 = "Resources/monsterBall.png";
-    TexturePath03 = "Resources/circle.png";
 
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj"); 
-    // 変数に代入
-    ModelPath01 = "plane.obj";
-
-    // 音声ファイルを追加
-    soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
 
 #pragma region 最初のシーンの初期化
 
@@ -42,10 +34,6 @@ void TitleScene::Initialize() {
     sprite = new Sprite;
     sprite->Initialize(SpriteCommon::GetInstance());
     sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
-
-    // 3Dモデルの初期化
-    model = new Model;
-    model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
     // カメラの初期化
     camera = new Camera();
@@ -57,45 +45,19 @@ void TitleScene::Initialize() {
     Cameraposition = camera->GetTranslate();
     Camerarotation = camera->GetRotate();
 
-    ParticleManager::GetInstance()->SetParticleModel(camera, model, "Resources", ModelPath01);
-    ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
-    ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
-
 #pragma endregion 最初のシーンの初期化
-    // 音声プレイフラグ
-    soundfige = 0;
 }
 
 void TitleScene::Update() {
     // ENTERキーを押したら
     if (Input::GetInstance()->Triggrkey(DIK_RETURN)) {
         // シーン切り替え
-      //  SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
-    }
-
-    // 0を押している間true
-    if (Input::GetInstance()->Pushkey(DIK_0)) {
-        OutputDebugStringA("Hit 0 \n");
-    }
-
-    if (Input::GetInstance()->Triggrkey(DIK_SPACE) && soundfige == 0) {
-        //soundfige = 1;
-    }
-
-    if (soundfige == 1) {
-        // 音声再生
-        SoundPlayer::GetInstance()->SoundPlayWave(soundData, false);
-        soundfige = 2;
+        SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
     }
 
 #pragma region  ImGuiの更新処理開始
     // スプライト
-   // sprite->DebugUpdata();
-   // パーティクル
-    ParticleManager::GetInstance()->DebugUpdata();
-
-   
+    sprite->DebugUpdata();
 #pragma endregion ImGuiの更新処理終了
     /*-------------------------------------------*/
     /*--------------カメラの更新処理---------------*/
@@ -108,9 +70,6 @@ void TitleScene::Update() {
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
 
-    // パーティクルの更新処理
-    ParticleManager::GetInstance()->Update();
-
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
@@ -121,7 +80,7 @@ void TitleScene::Update() {
     /*---------------------------------------------------------------------------------------------------*/
 
     // 更新処理
-   // sprite->Update();
+    sprite->Update();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -135,9 +94,6 @@ void TitleScene::Draw() {
     /*----------------------------------3Dオブジェクトの描画処理開始--------------------------------------------*/
     /*-----------------------------------------------------------------------------------------------------*/
 
-    // パーティクルの描画処理 
-    ParticleManager::GetInstance()->Draw();
-
     /*------------------------------------------------------------------------------------------------------*/
     /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/
     /*-----------------------------------------------------------------------------------------------------*/
@@ -150,7 +106,7 @@ void TitleScene::Draw() {
     //// Spriteの描画は常にuvCheckerにする
     //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-    //sprite->Draw();
+    sprite->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/

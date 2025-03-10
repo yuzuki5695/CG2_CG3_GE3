@@ -6,30 +6,32 @@
 #include<Input.h>
 #include<ImGuiManager.h>
 #include<SceneManager.h>
+#include"ParticleManager.h"
 
 void GamePlayScene::Finalize() {
-    // 汎用機能の解放
+    // パーティクルマネージャの開放
+    ParticleManager::GetInstance()->Finalize();
     delete  sprite;
-    // 3Dモデルの解放
-    delete model;
-    // 3Dオブジェクトの解放
-    delete  object3d;
+    delete  model;
+    // カメラ
+    delete camera;
 }
 
 void GamePlayScene::Initialize() {
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/circle.png");
     // 変数に代入
     TexturePath01 = "Resources/uvChecker.png";
     TexturePath02 = "Resources/monsterBall.png";
+    TexturePath03 = "Resources/circle.png";
 
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj");
     ModelManager::GetInstance()->LoadModel("axis.obj");
     // 変数に代入
     ModelPath01 = "plane.obj";
-    ModelPath02 = "axis.obj";
 
 #pragma region 最初のシーンの初期化
 
@@ -39,14 +41,23 @@ void GamePlayScene::Initialize() {
     sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dモデルの初期化
-    model = new Model;;
+    model = new Model;
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
-    // 3Dオブジェクトの初期化
-    object3d = new Object3d;
-    object3d->Initialize(Object3dCommon::GetInstance());
-    // オブジェクト作成
-    object3d->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+    // カメラの初期化
+    camera = new Camera();
+    camera->SetRotate({ 0.0f,0.0f,0.0f });
+    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
+
+    // カメラの現在の位置と回転を取得
+    Cameraposition = camera->GetTranslate();
+    Camerarotation = camera->GetRotate();
+
+    ParticleManager::GetInstance()->SetParticleModel(camera, model, "Resources", ModelPath01);
+    ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
+    ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
 
 #pragma endregion 最初のシーンの初期化
 }
@@ -56,15 +67,18 @@ void GamePlayScene::Update() {
     // デモウィンドウの表示
     //ImGui::ShowDemoWindow();
     // スプライト
-    sprite->DebugUpdata();
+    //sprite->DebugUpdata();
+ 
+    ParticleManager::GetInstance()->DebugUpdata();
+
 #pragma endregion ImGuiの更新処理終了
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
 
-    // 更新処理
-    object3d->Update();
+    // パーティクルの更新処理
+    ParticleManager::GetInstance()->Update();
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -76,7 +90,7 @@ void GamePlayScene::Update() {
     /*---------------------------------------------------------------------------------------------------*/
 
     // 更新処理
-    sprite->Update();
+   // sprite->Update();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -90,7 +104,8 @@ void GamePlayScene::Draw() {
     /*----------------------------------3Dオブジェクトの描画処理開始--------------------------------------------*/
     /*-----------------------------------------------------------------------------------------------------*/
 
-    object3d->Draw();
+    // パーティクルの描画処理 
+    ParticleManager::GetInstance()->Draw();
 
     /*------------------------------------------------------------------------------------------------------*/
     /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/
@@ -104,7 +119,7 @@ void GamePlayScene::Draw() {
     //// Spriteの描画は常にuvCheckerにする
     //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-    sprite->Draw();
+    //sprite->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/

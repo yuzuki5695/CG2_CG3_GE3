@@ -13,7 +13,7 @@ void MyGame::Initialize() {
     sceneFactory_ = new SceneFactory();
     SceneManager::GetInstance()->SetSceneFactory(sceneFactory_);
     // シーンマネージャに最初のシーンをセットした
-    SceneManager::GetInstance()->ChangeScene("TITLE");
+    SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
 }
 
 void MyGame::Update() {
