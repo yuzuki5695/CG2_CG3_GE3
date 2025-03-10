@@ -370,6 +370,7 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 }
 
 void ParticleManager::DebugUpdata() {
+#ifdef USE_IMGUI
     // テクスチャ選択のコンボボックス
     ImGui::Text("Select texture for particles:");
     const char* textureOptions[] = { "uvChecker", "circle" }; // 使用するテクスチャの選択肢
@@ -402,6 +403,7 @@ void ParticleManager::DebugUpdata() {
         // パーティクルを発生させる
         Emit((textureIndex == 0) ? "uvChecker" : "circle", { 0.0f, 0.0f, 0.0f }, 1);
     }
+#endif // USE_IMGUI
 }
 
 void ParticleManager::RootSignatureGenerate() {
