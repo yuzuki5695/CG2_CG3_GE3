@@ -113,7 +113,6 @@ private: // メンバ変数
 	DirectXCommon* dxCommon_;
 	SrvManager* srvmanager_;
 	Camera* camera_;
-	GraphicsPipeline* graphicsPipeline;
 	// ランダムエンジン
 	std::mt19937 randomEngine;
 	// Objファイルのデータ

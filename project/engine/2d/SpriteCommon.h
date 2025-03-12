@@ -26,5 +26,4 @@ public: // メンバ関数
 private:
 	// ポインタ
 	DirectXCommon* dxCommon_;
-	GraphicsPipeline* graphicsPipeline;
 };

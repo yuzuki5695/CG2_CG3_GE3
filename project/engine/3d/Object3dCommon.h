@@ -26,7 +26,6 @@ private:
 	// ポインタ
 	DirectXCommon* dxCommon_;
 	Camera* defaultCamera = nullptr;
-	GraphicsPipeline* graphicsPipeline_;
 public:
 	// setter
 	void SetDefaultCamera(Camera* camera) { this->defaultCamera = camera; }

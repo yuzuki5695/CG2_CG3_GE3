@@ -23,14 +23,12 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
     assert(dxCommon);
     // 引数を受け取ってメンバ変数に記録する
     dxCommon_ = dxCommon;
-    graphicsPipeline_ = GraphicsPipeline::GetInstance();
-    graphicsPipeline_->GenerateObject3d();
 }
 
 void Object3dCommon::Commondrawing() {
     // RootSignatureを設定。PSOに設定しているけど別途設定が必要
-    dxCommon_->GetCommandList()->SetGraphicsRootSignature(graphicsPipeline_->GetRootSignatureObject3d().Get());
-    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipeline_->GetGraphicsPipelineStateObject3d().Get());
+    dxCommon_->GetCommandList()->SetGraphicsRootSignature(GraphicsPipeline::GetInstance()->GetRootSignatureObject3d().Get());
+    dxCommon_->GetCommandList()->SetPipelineState(GraphicsPipeline::GetInstance()->GetGraphicsPipelineStateObject3d().Get());
     // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

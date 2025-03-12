@@ -30,8 +30,6 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // メンバ変数に記録
     this->dxCommon_ = birectxcommon;
     this->srvmanager_ = srvmanager;
-    graphicsPipeline = GraphicsPipeline::GetInstance();
-    graphicsPipeline->GenerateParticle();
     // 乱数エンジンを初期化
     std::random_device rd;// 乱数生成器
     randomEngine = std::mt19937(rd());
@@ -118,10 +116,11 @@ void ParticleManager::Update() {
         }
     }
 }
+
 void ParticleManager::Commondrawing() {
     // RootSignature と PipelineState を設定
-    dxCommon_->GetCommandList()->SetGraphicsRootSignature(graphicsPipeline->GetRootSignatureParticle().Get());
-    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipeline->GetGraphicsPipelineStateParticle().Get());
+    dxCommon_->GetCommandList()->SetGraphicsRootSignature(GraphicsPipeline::GetInstance()->GetRootSignatureParticle().Get());
+    dxCommon_->GetCommandList()->SetPipelineState(GraphicsPipeline::GetInstance()->GetGraphicsPipelineStateParticle().Get());
     // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
