@@ -71,11 +71,18 @@ void Object3d::SetModel(const std::string& filePath) {
     model = ModelManager::GetInstance()->FindModel(filePath);
 }
 
-void Object3d::Create(std::string& filePath, Transform transform) {
+std::shared_ptr<Object3d> Object3d::Create(std::string& filePath, Transform transform) {
+    auto object3d = std::make_shared<Object3d>();
+    if (object3d == nullptr) {
+        return nullptr;
+    }
+    // 初期化
+    object3d->Initialize(Object3dCommon::GetInstance());
     // モデルを検索してセットする
-    SetModel(filePath);
-    transform_ = transform;
-    this->camera = object3dCommon->GetDefaultCamera();
+    object3d->SetModel(filePath);
+    object3d->transform_ = transform;
+    object3d->camera = Object3dCommon::GetInstance()->GetDefaultCamera();
+    return object3d;
 }
 
 void Object3d::DebugUpdata() {

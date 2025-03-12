@@ -11,9 +11,6 @@
 void GamePlayScene::Finalize() {
     // パーティクルマネージャの開放
     ParticleManager::GetInstance()->Finalize();
-    delete  sprite;
-    delete object_;
-    delete  model;
 }
 
 void GamePlayScene::Initialize() {
@@ -37,17 +34,16 @@ void GamePlayScene::Initialize() {
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
-    sprite = new Sprite;
+    sprite = std::make_unique <Sprite>();
     sprite->Initialize(SpriteCommon::GetInstance());
     sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dモデルの初期化
-    model = new Model;
+    model = std::make_unique <Model>();
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
-    object_ = new Object3d();
-    object_->Initialize(Object3dCommon::GetInstance()); 
-    object_->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+    // object3dの初期化
+    object_ = Object3d::Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
     ParticleManager::GetInstance()->SetParticleModel(camera,"Resources", ModelPath01);
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);

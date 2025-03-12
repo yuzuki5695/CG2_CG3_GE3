@@ -1,6 +1,7 @@
 #pragma once
 #include"Model.h"
 #include "Camera.h"
+#include<memory>
 
 class Object3dCommon;
 
@@ -29,10 +30,9 @@ public: // メンバ関数
 	void Draw();
 
 	// 3Dobject作成関数
-	void Create(std::string& filePath, Transform transform);
-
+	static std::shared_ptr<Object3d> Create(std::string& filePath, Transform transform);
+	// imgui
 	void DebugUpdata();
-
 private:
 	// リソース
 	// トランスフォームマトリックス

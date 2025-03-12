@@ -46,7 +46,7 @@ private: // メンバ変数
 	std::unique_ptr<DirectXCommon> dxCommon = nullptr;
 	std::unique_ptr <ModelCommon> modelCommon = nullptr;
 	std::unique_ptr <SrvManager> srvManager = nullptr;
-	std::unique_ptr <Camera> camera = nullptr;
+	std::shared_ptr <Camera> camera = nullptr;
 
 	// カメラの現在の位置と回転を取得
 	Vector3 Cameraposition;
