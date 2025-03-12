@@ -16,6 +16,7 @@
 #include "SceneFactory.h"
 #include"GraphicsPipeline.h"
 #include"ParticleManager.h"
+#include<memory>
 
 // ゲーム全体
 class Framework
@@ -41,11 +42,11 @@ protected:
 	AbstractSceneFactory* sceneFactory_ = nullptr;
 private: // メンバ変数
 	// ポインタ
-	WinApp* winApp = nullptr;
-	DirectXCommon* dxCommon = nullptr;
-	ModelCommon* modelCommon = nullptr;
-	SrvManager* srvManager = nullptr;
-	Camera* camera = nullptr;
+	std::unique_ptr <WinApp> winApp = nullptr;
+	std::unique_ptr<DirectXCommon> dxCommon = nullptr;
+	std::unique_ptr <ModelCommon> modelCommon = nullptr;
+	std::unique_ptr <SrvManager> srvManager = nullptr;
+	std::unique_ptr <Camera> camera = nullptr;
 
 	// カメラの現在の位置と回転を取得
 	Vector3 Cameraposition;
@@ -55,10 +56,7 @@ private: // メンバ変数
 	bool endRequst_ = false;
 public:
 	// getter 
-	WinApp* GetWinApp() const { return winApp; }
-	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
-	SrvManager* GetSrvManager() const { return srvManager; }
-	Camera* Getcamera()const { camera; }
+	DirectXCommon* GetDirectXCommon() const { return dxCommon.get(); }
 	// 終了フラグのチェック
 	virtual bool IsEndRequst() { return  endRequst_; }
 };

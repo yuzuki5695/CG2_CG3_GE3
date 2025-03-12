@@ -27,11 +27,10 @@ void Framework::Finalize() {
     // 基盤システムの解放
     SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
-    delete modelCommon;
     // 入力解放
     Input::GetInstance()->Finalize();
     // カメラ
-    delete camera;
+    camera.reset();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
@@ -39,7 +38,7 @@ void Framework::Finalize() {
     // ImGuiマネージャの解放
     ImGuiManager::GetInstance()->Finalize();
     // SRVマネージャの開放
-    delete srvManager;
+    srvManager.reset();
     // 音声データの解放
     //xAudio2解放
     SoundLoader::GetInstance()->GetIXAudio2();
@@ -47,10 +46,12 @@ void Framework::Finalize() {
     SoundPlayer::GetInstance()->Finalize();
     // グラフィックスパイプラインの解放
     GraphicsPipeline::GetInstance()->Finalize();
+    // ユニークポインタは自動的に解放
+    // 明示的に開放した場合
     // DirectXの解放
-    delete dxCommon;
+    dxCommon.reset(); 
     // WindowsAPIの解放
-    delete winApp;
+    winApp.reset();
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
 }
@@ -59,46 +60,46 @@ void Framework::Initialize() {
     OutputDebugStringA("Hello,Directx!\n");
     // ウィンドウ作成
     // WindowsAPIの初期化
-    winApp = new WinApp();
+    winApp = std::make_unique <WinApp>();
     winApp->Initialize();
     // DirectXの初期化
-    dxCommon = new DirectXCommon();
-    dxCommon->Initialize(winApp);
+    dxCommon = std::make_unique <DirectXCommon>();
+    dxCommon->Initialize(winApp.get());
     // グラフィックスパイプラインの初期化
-    GraphicsPipeline::GetInstance()->Initialize(dxCommon);
+    GraphicsPipeline::GetInstance()->Initialize(dxCommon.get());
     // 音声読み込み
     SoundLoader::GetInstance()->Initialize();
     // 音声再生
     SoundPlayer::GetInstance()->Initialize(SoundLoader::GetInstance());
     // SRVマネージャーの初期化
-    srvManager = new SrvManager();
-    srvManager->Initialize(dxCommon);
+    srvManager = std::make_unique <SrvManager>();
+    srvManager->Initialize(dxCommon.get());
     // ImGuiマネージャの初期化
-    ImGuiManager::GetInstance()->Initialize(winApp, dxCommon, srvManager);
+    ImGuiManager::GetInstance()->Initialize(winApp.get(), dxCommon.get(), srvManager.get());
     // テクスチャマネージャーの初期化
-    TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
+    TextureManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
     // 3Dモデルマネージャの初期化
-    ModelManager::GetInstance()->Initialize(dxCommon);
+    ModelManager::GetInstance()->Initialize(dxCommon.get());
 
 #pragma region 基盤システムの初期化
 
     // 入力の初期化
-    Input::GetInstance()->Initialize(winApp);
+    Input::GetInstance()->Initialize(winApp.get());
 
     // スプライト共通部の初期化
-    SpriteCommon::GetInstance()->Initialize(dxCommon);
+    SpriteCommon::GetInstance()->Initialize(dxCommon.get());
 
     // 3Dオブジェクト共通部の初期化
-    Object3dCommon::GetInstance()->Initialize(dxCommon);
+    Object3dCommon::GetInstance()->Initialize(dxCommon.get());
     
     //パーティクル
-    ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
+    ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
 
     // カメラの初期化
-    camera = new Camera();
+    camera = std::make_unique <Camera>();
     camera->SetRotate({ 0.0f,0.0f,0.0f });
     camera->SetTranslate({ 0.0f,0.0f,-1000.0f });
-    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
+    Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
     // カメラの現在の位置と回転を取得
     Cameraposition = camera->GetTranslate();
