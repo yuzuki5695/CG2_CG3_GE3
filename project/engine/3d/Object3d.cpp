@@ -1,4 +1,3 @@
-
 #include "Object3d.h"
 #include "Object3dCommon.h"
 #include<fstream>
@@ -6,6 +5,7 @@
 #include <cassert>
 #include "MatrixVector.h"
 #include "ModelManager.h"
+#include<ImGuiManager.h>
 
 using namespace MatrixVector;
 
@@ -76,4 +76,14 @@ void Object3d::Create(std::string& filePath, Transform transform) {
     SetModel(filePath);
     transform_ = transform;
     this->camera = object3dCommon->GetDefaultCamera();
+}
+
+void Object3d::DebugUpdata() {
+#ifdef USE_IMGUI
+    // ウィンドウサイズを指定
+    ImGui::SetNextWindowSize(ImVec2(500, 100));
+    ImGui::Begin("Object3d");
+    ImGui::SliderFloat3("position", &transform_.translate.x, 0.0f, 0.1f, "%.01f");
+    ImGui::End();
+#endif // USE_IMGUI
 }

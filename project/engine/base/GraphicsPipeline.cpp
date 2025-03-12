@@ -27,10 +27,22 @@ void GraphicsPipeline::Initialize(DirectXCommon* dxCommon) {
     // グラフィックスパイプラインを設定
     
     // スプライト
-    GraphicsPipelineGenerateSprite();
+   // GraphicsPipelineGenerateSprite();
     // object3d
-    GraphicsPipelineGenerateObject3d();
+    //GraphicsPipelineGenerateObject3d();
     // パーティクル
+    //GraphicsPipelineGenerateParticle();
+}
+
+void GraphicsPipeline::GenerateSprite() {
+    GraphicsPipelineGenerateSprite();
+}
+
+void GraphicsPipeline::GenerateObject3d() {
+    GraphicsPipelineGenerateObject3d();
+}
+
+void GraphicsPipeline::GenerateParticle() {
     GraphicsPipelineGenerateParticle();
 }
 
@@ -181,8 +193,6 @@ void GraphicsPipeline::GraphicsPipelineGenerateSprite() {
     hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineStateSprite));
     assert(SUCCEEDED(hr));
 }
-
-
 
 void GraphicsPipeline::RootSignatureGenerateObject3d() {
 

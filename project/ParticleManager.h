@@ -1,4 +1,3 @@
-
 #pragma once
 #include<DirectXCommon.h>
 #include<SrvManager.h>
@@ -10,6 +9,7 @@
 #include <Transform.h>
 #include<Camera.h>
 #include<Model.h>
+#include<GraphicsPipeline.h>
 
 // パーティクルマネージャ
 class ParticleManager
@@ -112,6 +112,7 @@ private: // メンバ変数
 	SrvManager* srvmanager_;
 	Camera* camera_;
 	Model* model_;
+	GraphicsPipeline* graphicsPipeline;
 	// ランダムエンジン
 	std::mt19937 randomEngine;
 	// Objファイルのデータ

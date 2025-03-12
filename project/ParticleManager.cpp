@@ -4,7 +4,6 @@
 #include <ModelManager.h>
 #include <TextureManager.h>
 #include <numbers>
-#include <GraphicsPipeline.h>
 #include<ImGuiManager.h>
 #include <externals/DirectXTex/d3dx12.h>
 
@@ -31,6 +30,8 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // メンバ変数に記録
     this->dxCommon_ = birectxcommon;
     this->srvmanager_ = srvmanager;
+    graphicsPipeline = GraphicsPipeline::GetInstance();
+    graphicsPipeline->GenerateParticle();
     // 乱数エンジンを初期化
     std::random_device rd;// 乱数生成器
     randomEngine = std::mt19937(rd());
@@ -121,8 +122,8 @@ void ParticleManager::Update() {
 
 void ParticleManager::Draw() {
     // RootSignature と PipelineState を設定
-    dxCommon_->GetCommandList()->SetGraphicsRootSignature(GraphicsPipeline::GetInstance()->GetRootSignatureParticle().Get());
-    dxCommon_->GetCommandList()->SetPipelineState(GraphicsPipeline::GetInstance()->GetGraphicsPipelineStateParticle().Get());
+    dxCommon_->GetCommandList()->SetGraphicsRootSignature(graphicsPipeline->GetRootSignatureParticle().Get());
+    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipeline->GetGraphicsPipelineStateParticle().Get());
 
     // プリミティブトポロジー（ここでは三角形リスト）を設定
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

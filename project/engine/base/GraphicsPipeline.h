@@ -20,6 +20,11 @@ public: // メンバ関数
 	/// 初期化
 	/// </summary>
 	void Initialize(DirectXCommon* dxCommon);
+
+	void GenerateSprite();
+	void GenerateObject3d();
+	void GenerateParticle();
+
 private:
 	// ルートシグネチャ生成とグラフィックスパイプライン設定
 	// スプライト用

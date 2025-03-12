@@ -1,5 +1,6 @@
 #pragma once
 #include"DirectXCommon.h"
+#include<GraphicsPipeline.h>
 
 // スプライト共通部
 class SpriteCommon
@@ -25,4 +26,5 @@ public: // メンバ関数
 private:
 	// ポインタ
 	DirectXCommon* dxCommon_;
+	GraphicsPipeline* graphicsPipeline;
 };

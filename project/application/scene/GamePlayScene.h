@@ -23,7 +23,7 @@ private: // メンバ変数
     Sprite* sprite = nullptr;
     // Object3d
     Model* model = nullptr;
-
+    Object3d* object_ = nullptr;
     /*-----ファイルデータ----*/
     // Texture
     std::string TexturePath01;
@@ -32,6 +32,8 @@ private: // メンバ変数
     // Model
     std::string ModelPath01;
     /*-----ファイルデータ----*/
+
+    Transform objtrans_;
 
     Camera* camera = nullptr;
     // カメラの現在の位置と回転を取得

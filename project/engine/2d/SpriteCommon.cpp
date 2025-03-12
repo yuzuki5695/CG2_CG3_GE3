@@ -22,12 +22,15 @@ void SpriteCommon::Finalize() {
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
     // 引数を受け取ってメンバ変数に記録する
     dxCommon_ = dxCommon;
+    graphicsPipeline = GraphicsPipeline::GetInstance();
+    graphicsPipeline->Initialize(dxCommon_);
+    graphicsPipeline->GenerateSprite();
 }
 
 void SpriteCommon::Commondrawing() {
     // RootSignatureを設定。PSOに設定しているけど別途設定が必要
-    dxCommon_->GetCommandList()->SetGraphicsRootSignature(GraphicsPipeline::GetInstance()->GetRootSignatureSprite().Get());
-    dxCommon_->GetCommandList()->SetPipelineState(GraphicsPipeline::GetInstance()->GetGraphicsPipelineStateSprite().Get());
+    dxCommon_->GetCommandList()->SetGraphicsRootSignature(graphicsPipeline->GetRootSignatureSprite().Get());
+    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipeline->GetGraphicsPipelineStateSprite().Get());
     // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

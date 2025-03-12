@@ -12,6 +12,7 @@ void GamePlayScene::Finalize() {
     // パーティクルマネージャの開放
     ParticleManager::GetInstance()->Finalize();
     delete  sprite;
+    delete object_;
     delete  model;
     // カメラ
     delete camera;
@@ -44,6 +45,13 @@ void GamePlayScene::Initialize() {
     model = new Model;
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
+    object_ = new Object3d();
+    object_->Initialize(Object3dCommon::GetInstance());
+    
+    objtrans_ = { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } };
+
+    object_->Create(ModelPath01, objtrans_);
+
     // カメラの初期化
     camera = new Camera();
     camera->SetRotate({ 0.0f,0.0f,0.0f });
@@ -68,17 +76,27 @@ void GamePlayScene::Update() {
     //ImGui::ShowDemoWindow();
     // スプライト
     //sprite->DebugUpdata();
- 
-    ParticleManager::GetInstance()->DebugUpdata();
+    // object3d
+    object_->DebugUpdata();
+    // パーティクル
+    //ParticleManager::GetInstance()->DebugUpdata();
 
-#pragma endregion ImGuiの更新処理終了
+#pragma endregion ImGuiの更新処理終了  
+    /*-------------------------------------------*/
+    /*--------------カメラの更新処理---------------*/
+    /*------------------------------------------*/
+    camera->Update();
+    camera->SetTranslate(Cameraposition);
+    camera->SetRotate(Camerarotation);
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
 
     // パーティクルの更新処理
-    ParticleManager::GetInstance()->Update();
+    //ParticleManager::GetInstance()->Update();
+
+    object_->Update();
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -90,7 +108,7 @@ void GamePlayScene::Update() {
     /*---------------------------------------------------------------------------------------------------*/
 
     // 更新処理
-   // sprite->Update();
+    sprite->Update();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -105,7 +123,9 @@ void GamePlayScene::Draw() {
     /*-----------------------------------------------------------------------------------------------------*/
 
     // パーティクルの描画処理 
-    ParticleManager::GetInstance()->Draw();
+    //ParticleManager::GetInstance()->Draw();
+
+    object_->Draw();
 
     /*------------------------------------------------------------------------------------------------------*/
     /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/
@@ -119,7 +139,7 @@ void GamePlayScene::Draw() {
     //// Spriteの描画は常にuvCheckerにする
     //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-    //sprite->Draw();
+    sprite->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
