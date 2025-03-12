@@ -33,4 +33,7 @@ private: // メンバ変数
     std::string ModelPath01;
     /*-----ファイルデータ----*/
 
+
+    Camera* camera = nullptr;
+
 };

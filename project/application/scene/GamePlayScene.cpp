@@ -17,6 +17,8 @@ void GamePlayScene::Finalize() {
 }
 
 void GamePlayScene::Initialize() {
+    this->camera = Object3dCommon::GetInstance()->GetDefaultCamera();
+
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
@@ -47,10 +49,10 @@ void GamePlayScene::Initialize() {
     object_->Initialize(Object3dCommon::GetInstance()); 
     object_->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
-   /* ParticleManager::GetInstance()->SetParticleModel(camera,"Resources", ModelPath01);
+    ParticleManager::GetInstance()->SetParticleModel(camera,"Resources", ModelPath01);
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
     ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);*/
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
 
 #pragma endregion 最初のシーンの初期化
 }
@@ -64,7 +66,7 @@ void GamePlayScene::Update() {
     // object3d
     //object_->DebugUpdata();
     // パーティクル
-    //ParticleManager::GetInstance()->DebugUpdata();
+    ParticleManager::GetInstance()->DebugUpdata();
 
 #pragma endregion ImGuiの更新処理終了  
 
@@ -73,7 +75,7 @@ void GamePlayScene::Update() {
     /*------------------------------------------------------------------------------------------------------*/
 
     // パーティクルの更新処理
-  //  ParticleManager::GetInstance()->Update();
+    ParticleManager::GetInstance()->Update();
 
     object_->Update();
 
@@ -127,6 +129,6 @@ void GamePlayScene::Draw() {
     // パーティクルの描画準備。パーティクルの描画に共通のグラフィックスコマンドを積む
     ParticleManager::GetInstance()->Commondrawing();
 
-    // パーティクルの描画処理 
-   // ParticleManager::GetInstance()->Draw();
+    // パーティクルの描画処理  
+    ParticleManager::GetInstance()->Draw();
 }

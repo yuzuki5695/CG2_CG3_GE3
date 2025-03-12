@@ -58,6 +58,7 @@ public:
 	WinApp* GetWinApp() const { return winApp; }
 	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
 	SrvManager* GetSrvManager() const { return srvManager; }
+	Camera* Getcamera()const { camera; }
 	// 終了フラグのチェック
 	virtual bool IsEndRequst() { return  endRequst_; }
 };
