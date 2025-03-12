@@ -6,6 +6,7 @@
 #include <numbers>
 #include<ImGuiManager.h>
 #include <externals/DirectXTex/d3dx12.h>
+#include <Object3dCommon.h>
 
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
@@ -30,6 +31,7 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // メンバ変数に記録
     this->dxCommon_ = birectxcommon;
     this->srvmanager_ = srvmanager;
+    camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
     // 乱数エンジンを初期化
     std::random_device rd;// 乱数生成器
     randomEngine = std::mt19937(rd());
@@ -39,11 +41,7 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
-void ParticleManager::SetParticleModel(Camera* camera,const std::string& directorypath, const std::string& filename) {
-    // NULL検出
-    assert(camera);
-    // メンバ変数に記録
-    this->camera_ = camera;
+void ParticleManager::SetParticleModel(const std::string& directorypath, const std::string& filename) {
     // モデルデータを取得
     modelDate = LoadObjFile(directorypath, filename);
     // 頂点データを作成
@@ -55,13 +53,21 @@ void ParticleManager::SetParticleModel(Camera* camera,const std::string& directo
 }
 
 void ParticleManager::Update() {
-    // ビルボード行列
-    Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());
+    Matrix4x4 billboardMatrix;
+    // ビルボード行列: パーティクルがカメラに向くように変換
+    if (camera_) {
+        // カメラのワールド行列を取得し、ビルボード行列を計算
+        billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());  // 修正: GetWorldMatrix
+    } else {
+        // カメラがない場合の処理（必要であれば）
+    }
+
+    // パーティクルの位置をカメラの方向に合わせるために設定
     billboardMatrix.m[3][0] = 0.0f;
     billboardMatrix.m[3][1] = 0.0f;
     billboardMatrix.m[3][2] = 0.0f;
 
-    // ビュープロジェクション行列をカメラから取得
+    // カメラからビュー行列とプロジェクション行列を取得
     Matrix4x4 viewMatrix = camera_->GetViewMatrix();
     Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
 

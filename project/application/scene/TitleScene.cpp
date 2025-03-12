@@ -12,7 +12,6 @@ void TitleScene::Finalize() {
     // 汎用機能の解放 
     // パーティクルマネージャの開放
     ParticleManager::GetInstance()->Finalize();
-    delete  sprite;
 }
 
 void TitleScene::Initialize() {
@@ -29,9 +28,7 @@ void TitleScene::Initialize() {
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
-    sprite = new Sprite;
-    sprite->Initialize(SpriteCommon::GetInstance());
-    sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
+    sprite = Sprite::Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
 #pragma endregion 最初のシーンの初期化
 }

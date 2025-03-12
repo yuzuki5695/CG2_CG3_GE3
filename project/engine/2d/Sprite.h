@@ -8,6 +8,7 @@
 #include<d3d12.h>
 #include<cstdint>
 #include<fstream>
+#include<memory>
 
 class SpriteCommon;
 
@@ -45,7 +46,7 @@ public: // メンバ関数
 	void Draw();
 
 	// スプライト作成関数
-	void Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
+	static std::shared_ptr<Sprite> Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
 
 	// ImGuiの更新
 	void DebugUpdata();

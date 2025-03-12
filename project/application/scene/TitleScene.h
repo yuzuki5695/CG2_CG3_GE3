@@ -20,7 +20,7 @@ public: // メンバ関数
 private: // メンバ変数
     // オブジェクトデータ
     // Sprite
-    Sprite* sprite = nullptr;
+    std::shared_ptr <Sprite> sprite = nullptr;
 
     /*-----ファイルデータ----*/
     // Texture

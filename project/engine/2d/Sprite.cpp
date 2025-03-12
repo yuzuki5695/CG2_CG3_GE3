@@ -162,26 +162,33 @@ void Sprite::AdjustTextureSize() {
 	size_ = textureSize;
 }
 
-void Sprite::Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size) {
+std::shared_ptr<Sprite> Sprite::Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size) {
+	auto sprite = std::make_shared<Sprite>();
+	if (sprite == nullptr) {
+		return nullptr;
+	}
+	// 初期化
+	sprite->Initialize(SpriteCommon::GetInstance());
 	// 引数で受け取ってメンバ変数に記録する
-	textureFilePath_ = textureFilePath;
+	sprite->textureFilePath_ = textureFilePath;
 	// 単位行列を書き込んでおく
-	textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilePath_);
-	position_ = position;
-	rotation_ = rotation;
-	size_ = size;
+	sprite->textureindex = TextureManager::GetInstance()->GetSrvIndex(sprite->textureFilePath_);
+	sprite->position_ = position;
+	sprite->rotation_ = rotation;
+	sprite->size_ = size;
 	// 頂点データの作成
-	VertexDatacreation();
+	sprite->VertexDatacreation();
 	// マテリアルの生成、初期化
-	MaterialGenerate();
+	sprite->MaterialGenerate();
 	// テクスチャサイズをイメージに合わせる
 	//AdjustTextureSize();
 	// WVP,World用のリソースの生成、初期化
-	TransformationMatrixGenerate();
+	sprite->TransformationMatrixGenerate();
 	// トランスフォームの初期化
-	transform.translate = { position_.x,position_.y,0.0f };
-	transform.rotate = { 0.0f,0.0f,rotation_ };
-	transform.scale = { size_.x,size_.y,1.0f };
+	sprite->transform.translate = { sprite->position_.x,sprite->position_.y,0.0f };
+	sprite->transform.rotate = { 0.0f,0.0f,sprite->rotation_ };
+	sprite->transform.scale = { sprite->size_.x,sprite->size_.y,1.0f };
+	return sprite;
 }
 
 void Sprite::DebugUpdata() {

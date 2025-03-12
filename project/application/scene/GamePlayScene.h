@@ -4,7 +4,6 @@
 #include<Model.h>
 #include<SoundPlayer.h>
 #include<BaseScene.h>
-#include<memory>
 
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
@@ -21,10 +20,10 @@ public: // メンバ関数
 private: // メンバ変数
     // オブジェクトデータ
     // Sprite
-    std::unique_ptr <Sprite> sprite = nullptr;
+    std::shared_ptr <Sprite> sprite;
     // Object3d
-    std::unique_ptr <Model> model = nullptr;
-    std::shared_ptr<Object3d> object_ = nullptr;
+    std::unique_ptr <Model> model;
+    std::shared_ptr<Object3d> object;
     /*-----ファイルデータ----*/
     // Texture
     std::string TexturePath01;
@@ -33,8 +32,4 @@ private: // メンバ変数
     // Model
     std::string ModelPath01;
     /*-----ファイルデータ----*/
-
-
-    Camera* camera = nullptr;
-
 };

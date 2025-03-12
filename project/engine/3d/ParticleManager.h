@@ -104,7 +104,7 @@ public: // メンバ関数
 
 	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
-	void SetParticleModel(Camera* camera,const std::string& directorypath, const std::string& filename);
+	void SetParticleModel(const std::string& directorypath, const std::string& filename);
 	
 	void DebugUpdata();
 

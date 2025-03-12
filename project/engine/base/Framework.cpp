@@ -92,14 +92,14 @@ void Framework::Initialize() {
     // 3Dオブジェクト共通部の初期化
     Object3dCommon::GetInstance()->Initialize(dxCommon.get());
     
-    //パーティクル
-    ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
-
     // カメラの初期化
     camera = std::make_unique <Camera>();
     camera->SetRotate({ 0.0f,0.0f,0.0f });
     camera->SetTranslate({ 0.0f,0.0f,-1000.0f });
     Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
+
+    //パーティクル
+    ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
 
     // カメラの現在の位置と回転を取得
     Cameraposition = camera->GetTranslate();
