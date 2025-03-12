@@ -54,10 +54,15 @@ void ParticleManager::SetParticleModel(const std::string& directorypath, const s
 
 void ParticleManager::Update() {
     Matrix4x4 billboardMatrix;
+    Matrix4x4 viewMatrix;
+    Matrix4x4 projectionMatrix;
     // ビルボード行列: パーティクルがカメラに向くように変換
     if (camera_) {
         // カメラのワールド行列を取得し、ビルボード行列を計算
         billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());  // 修正: GetWorldMatrix
+        // カメラからビュー行列とプロジェクション行列を取得
+        viewMatrix = camera_->GetViewMatrix();
+        projectionMatrix = camera_->GetProjectionMatrix();
     } else {
         // カメラがない場合の処理（必要であれば）
     }
@@ -66,10 +71,6 @@ void ParticleManager::Update() {
     billboardMatrix.m[3][0] = 0.0f;
     billboardMatrix.m[3][1] = 0.0f;
     billboardMatrix.m[3][2] = 0.0f;
-
-    // カメラからビュー行列とプロジェクション行列を取得
-    Matrix4x4 viewMatrix = camera_->GetViewMatrix();
-    Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
 
     // 各パーティクルグループの処理
     for (auto& [name, group] : particleGroups) {
