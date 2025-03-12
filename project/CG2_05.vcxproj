@@ -129,7 +129,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\MyGame.cpp" />
     <ClCompile Include="engine\base\SceneManager.cpp" />
     <ClCompile Include="application\base\SceneFactory.cpp" />
-    <ClCompile Include="ParticleManager.cpp" />
+    <ClCompile Include="engine\3d\ParticleManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\base\AbstractSceneFactory.h" />
@@ -168,7 +168,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\scene\TitleScene.h" />
     <ClInclude Include="engine\base\SceneManager.h" />
     <ClInclude Include="application\base\SceneFactory.h" />
-    <ClInclude Include="ParticleManager.h" />
+    <ClInclude Include="engine\3d\ParticleManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
