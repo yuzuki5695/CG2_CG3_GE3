@@ -34,7 +34,6 @@ void Model::Draw() {
     //SRVのDescriptortableの先頭を設定。２はrootParameter[2]である。
     //SRVを切り替えて画像を変えるS
     modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelDate.material.textureFilePath));
-
     // 描画！(今回は球)
     modelCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelDate.vertices.size()), 1, 0, 0);
 }
@@ -71,7 +70,7 @@ void Model::MaterialGenerate() {
 
 Model::MaterialDate Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
-    Model::MaterialDate materialDate; // 構築するMaterialDate
+    MaterialDate materialDate; // 構築するMaterialDate
     std::string line; // ファイルから読んだ1行を格納するもの
     std::ifstream file(directoryPath + "/" + filename); // 2.ファイルを開く
     assert(file.is_open()); // とりあえず開けなかったら止める
@@ -94,7 +93,7 @@ Model::MaterialDate Model::LoadMaterialTemplateFile(const std::string& directory
 
 Model::ModelDate Model::LoadObjFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
-    Model::ModelDate modelDate; // 構築するModelDate
+    ModelDate modelDate; // 構築するModelDate
     std::vector<Vector4> positions; // 位置
     std::vector<Vector3> normals; // 法線
     std::vector<Vector2> texcoords; // テクスチャ座標
@@ -127,7 +126,7 @@ Model::ModelDate Model::LoadObjFile(const std::string& directoryPath, const std:
             normal.x *= -1.0f;// 法線のx成分を反転
             normals.push_back(normal);
         } else if (identifier == "f") {
-            Model::VertexData triangle[3];
+            VertexData triangle[3];
             // 面は三角形限定。その他は未対応
             for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
                 std::string vertexDefinition;

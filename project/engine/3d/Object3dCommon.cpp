@@ -28,7 +28,6 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
 }
 
 void Object3dCommon::Commondrawing() {
-
     // RootSignatureを設定。PSOに設定しているけど別途設定が必要
     dxCommon_->GetCommandList()->SetGraphicsRootSignature(graphicsPipeline_->GetRootSignatureObject3d().Get());
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipeline_->GetGraphicsPipelineStateObject3d().Get());

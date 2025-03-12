@@ -118,4 +118,6 @@ void Framework::Draw() {
     Object3dCommon::GetInstance()->Commondrawing();
     // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
     SpriteCommon::GetInstance()->Commondrawing();
+    // パーティクルの描画準備。パーティクルの描画に共通のグラフィックスコマンドを積む
+    ParticleManager::GetInstance()->Commondrawing();
 }

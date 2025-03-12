@@ -35,6 +35,10 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // 乱数エンジンを初期化
     std::random_device rd;// 乱数生成器
     randomEngine = std::mt19937(rd());
+    // マテリアルの生成と初期化
+    MaterialGenerate();
+    //ビルボード行列作成
+    backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
 void ParticleManager::SetParticleModel(Camera* camera, Model* model, const std::string& directorypath, const std::string& filename) {
@@ -47,14 +51,10 @@ void ParticleManager::SetParticleModel(Camera* camera, Model* model, const std::
     modelDate = LoadObjFile(directorypath, filename);
     // 頂点データを作成
     VertexDatacreation();
-    // マテリアルの生成と初期化
-    MaterialGenerate();
     // .objの参照しているテクスチャ読み込み
     TextureManager::GetInstance()->LoadTexture(modelDate.material.textureFilePath);
     // 読み込んだテクスチャの番号を取得
     modelDate.material.textureindex = TextureManager::GetInstance()->GetSrvIndex(modelDate.material.textureFilePath);
-    //ビルボード行列作成
-    backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
 void ParticleManager::Update() {
@@ -119,14 +119,15 @@ void ParticleManager::Update() {
         }
     }
 }
-
-void ParticleManager::Draw() {
+void ParticleManager::Commondrawing() {
     // RootSignature と PipelineState を設定
     dxCommon_->GetCommandList()->SetGraphicsRootSignature(graphicsPipeline->GetRootSignatureParticle().Get());
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipeline->GetGraphicsPipelineStateParticle().Get());
-
-    // プリミティブトポロジー（ここでは三角形リスト）を設定
+    // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
     dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void ParticleManager::Draw() {
 
     // パーティクルグループごとに描画処理を行う
     for (const auto& [name, particleGroup] : particleGroups) {
@@ -223,10 +224,9 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     }
 }
 
-
 ParticleManager::MaterialDate ParticleManager::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
-    ParticleManager::MaterialDate materialDate; // 構築するMaterialDate
+    MaterialDate materialDate; // 構築するMaterialDate
     std::string line; // ファイルから読んだ1行を格納するもの
     std::ifstream file(directoryPath + "/" + filename); // 2.ファイルを開く
     assert(file.is_open()); // とりあえず開けなかったら止める
@@ -249,7 +249,7 @@ ParticleManager::MaterialDate ParticleManager::LoadMaterialTemplateFile(const st
 
 ParticleManager::ModelDate ParticleManager::LoadObjFile(const std::string& directoryPath, const std::string& filename) {
     // 1. 中で必要となる変数の宣言
-    ParticleManager::ModelDate modelDate; // 構築するModelDate
+    ModelDate modelDate; // 構築するModelDate
     std::vector<Vector4> positions; // 位置
     std::vector<Vector3> normals; // 法線
     std::vector<Vector2> texcoords; // テクスチャ座標
@@ -282,7 +282,7 @@ ParticleManager::ModelDate ParticleManager::LoadObjFile(const std::string& direc
             normal.x *= -1.0f;// 法線のx成分を反転
             normals.push_back(normal);
         } else if (identifier == "f") {
-            ParticleManager::VertexData triangle[3];
+            VertexData triangle[3];
             // 面は三角形限定。その他は未対応
             for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
                 std::string vertexDefinition;

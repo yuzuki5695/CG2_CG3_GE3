@@ -91,6 +91,8 @@ public: // メンバ関数
 	void Update();
 	// 描画処理
 	void Draw();
+	// 共通描画設定
+	void Commondrawing();
 
 	// パーティクルグループの作成
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
