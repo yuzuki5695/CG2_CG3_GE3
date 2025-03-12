@@ -41,9 +41,13 @@ void GamePlayScene::Initialize() {
     // object3dの初期化
     object = Object3d::Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
+    // パーティクル
+    // モデル生成
     ParticleManager::GetInstance()->SetParticleModel("Resources", ModelPath01);
+    // テクスチャ生成
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
     ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
+    // 発生
     ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
 
 #pragma endregion 最初のシーンの初期化
