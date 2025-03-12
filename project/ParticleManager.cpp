@@ -48,7 +48,7 @@ void ParticleManager::SetParticleModel(Camera* camera, Model* model, const std::
     this->camera_ = camera;
     this->model_ = model;
     // モデルデータを取得
-    modelDate = LoadObjFile(directorypath, filename);
+    modelDate = model_->GetModelDate();
     // 頂点データを作成
     VertexDatacreation();
     // .objの参照しているテクスチャ読み込み

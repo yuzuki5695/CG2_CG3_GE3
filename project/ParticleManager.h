@@ -104,7 +104,7 @@ public: // メンバ関数
 
 	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
-	void SetParticleModel(Camera* camera,Model* model, const std::string& directorypath, const std::string& filename);
+	void SetParticleModel(Camera* camera,Model* model,const std::string& directorypath, const std::string& filename);
 	
 	void DebugUpdata();
 
@@ -141,6 +141,9 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr <ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 public:
+
+	ModelDate GetModelDate() { return modelDate; }
+
 	ParticleGroup* GetParticleGroup(const std::string& name) {
 		// 指定されたパーティクルグループが存在するか確認
 		auto it = particleGroups.find(name);
