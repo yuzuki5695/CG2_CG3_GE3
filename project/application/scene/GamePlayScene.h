@@ -33,10 +33,4 @@ private: // メンバ変数
     std::string ModelPath01;
     /*-----ファイルデータ----*/
 
-    Transform objtrans_;
-
-    Camera* camera = nullptr;
-    // カメラの現在の位置と回転を取得
-    Vector3 Cameraposition;
-    Vector3 Camerarotation;
 };

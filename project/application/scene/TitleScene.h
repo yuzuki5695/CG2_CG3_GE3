@@ -27,8 +27,4 @@ private: // メンバ変数
     std::string TexturePath01;
     /*-----ファイルデータ----*/
 
-    Camera* camera = nullptr;
-    // カメラの現在の位置と回転を取得
-    Vector3 Cameraposition;
-    Vector3 Camerarotation;
 };

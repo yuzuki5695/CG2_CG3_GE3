@@ -14,8 +14,6 @@ void GamePlayScene::Finalize() {
     delete  sprite;
     delete object_;
     delete  model;
-    // カメラ
-    delete camera;
 }
 
 void GamePlayScene::Initialize() {
@@ -46,26 +44,13 @@ void GamePlayScene::Initialize() {
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
     object_ = new Object3d();
-    object_->Initialize(Object3dCommon::GetInstance());
-    
-    objtrans_ = { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } };
+    object_->Initialize(Object3dCommon::GetInstance()); 
+    object_->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
-    object_->Create(ModelPath01, objtrans_);
-
-    // カメラの初期化
-    camera = new Camera();
-    camera->SetRotate({ 0.0f,0.0f,0.0f });
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
-    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
-
-    // カメラの現在の位置と回転を取得
-    Cameraposition = camera->GetTranslate();
-    Camerarotation = camera->GetRotate();
-
-    ParticleManager::GetInstance()->SetParticleModel(camera,"Resources", ModelPath01);
+   /* ParticleManager::GetInstance()->SetParticleModel(camera,"Resources", ModelPath01);
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
     ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);*/
 
 #pragma endregion 最初のシーンの初期化
 }
@@ -82,19 +67,13 @@ void GamePlayScene::Update() {
     //ParticleManager::GetInstance()->DebugUpdata();
 
 #pragma endregion ImGuiの更新処理終了  
-    /*-------------------------------------------*/
-    /*--------------カメラの更新処理---------------*/
-    /*------------------------------------------*/
-    camera->Update();
-    camera->SetTranslate(Cameraposition);
-    camera->SetRotate(Camerarotation);
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
 
     // パーティクルの更新処理
-    ParticleManager::GetInstance()->Update();
+  //  ParticleManager::GetInstance()->Update();
 
     object_->Update();
 
@@ -149,5 +128,5 @@ void GamePlayScene::Draw() {
     ParticleManager::GetInstance()->Commondrawing();
 
     // パーティクルの描画処理 
-    ParticleManager::GetInstance()->Draw();
+   // ParticleManager::GetInstance()->Draw();
 }

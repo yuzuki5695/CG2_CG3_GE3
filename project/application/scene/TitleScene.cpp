@@ -13,8 +13,6 @@ void TitleScene::Finalize() {
     // パーティクルマネージャの開放
     ParticleManager::GetInstance()->Finalize();
     delete  sprite;
-    // カメラ
-    delete camera;
 }
 
 void TitleScene::Initialize() {
@@ -35,16 +33,6 @@ void TitleScene::Initialize() {
     sprite->Initialize(SpriteCommon::GetInstance());
     sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
-    // カメラの初期化
-    camera = new Camera();
-    camera->SetRotate({ 0.0f,0.0f,0.0f });
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
-    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
-
-    // カメラの現在の位置と回転を取得
-    Cameraposition = camera->GetTranslate();
-    Camerarotation = camera->GetRotate();
-
 #pragma endregion 最初のシーンの初期化
 }
 
@@ -59,12 +47,6 @@ void TitleScene::Update() {
     // スプライト
     sprite->DebugUpdata();
 #pragma endregion ImGuiの更新処理終了
-    /*-------------------------------------------*/
-    /*--------------カメラの更新処理---------------*/
-    /*------------------------------------------*/
-    camera->Update();
-    camera->SetTranslate(Cameraposition);
-    camera->SetRotate(Camerarotation);
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/

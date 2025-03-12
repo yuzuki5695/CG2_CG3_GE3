@@ -45,6 +45,11 @@ private: // メンバ変数
 	DirectXCommon* dxCommon = nullptr;
 	ModelCommon* modelCommon = nullptr;
 	SrvManager* srvManager = nullptr;
+	Camera* camera = nullptr;
+
+	// カメラの現在の位置と回転を取得
+	Vector3 Cameraposition;
+	Vector3 Camerarotation;
 
 	// ゲーム終了フラグ
 	bool endRequst_ = false;
