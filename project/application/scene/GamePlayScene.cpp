@@ -62,7 +62,7 @@ void GamePlayScene::Initialize() {
     Cameraposition = camera->GetTranslate();
     Camerarotation = camera->GetRotate();
 
-    ParticleManager::GetInstance()->SetParticleModel(camera, model, "Resources", ModelPath01);
+    ParticleManager::GetInstance()->SetParticleModel(camera,"Resources", ModelPath01);
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", TexturePath01);
     ParticleManager::GetInstance()->CreateParticleGroup("uvChecker", TexturePath01);
     ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);

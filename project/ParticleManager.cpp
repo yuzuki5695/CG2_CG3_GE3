@@ -41,14 +41,13 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
-void ParticleManager::SetParticleModel(Camera* camera, Model* model, const std::string& directorypath, const std::string& filename) {
+void ParticleManager::SetParticleModel(Camera* camera,const std::string& directorypath, const std::string& filename) {
     // NULL検出
     assert(camera);
     // メンバ変数に記録
     this->camera_ = camera;
-    this->model_ = model;
     // モデルデータを取得
-    modelDate = model_->GetModelDate();
+    modelDate = LoadObjFile(directorypath, filename);
     // 頂点データを作成
     VertexDatacreation();
     // .objの参照しているテクスチャ読み込み
@@ -331,9 +330,9 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
     ParticleGroup& group = it->second;
 
     // 現在のパーティクル数がMaxInstanceCountを超えている場合、追加するパーティクル数を調整
-    uint32_t currentParticleCount = group.particles.size();
+    size_t currentParticleCount = group.particles.size();
     if (currentParticleCount + count > MaxInstanceCount) {
-        count = MaxInstanceCount - currentParticleCount;  // 最大数を超えないように調整
+        count = static_cast<uint32_t>(MaxInstanceCount - currentParticleCount);  // 型変換
     }
 
     std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
@@ -354,9 +353,8 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
         newParticle.color = color;
         newParticle.lifetime = 1.0f;  // 新しく発生したパーティクルのライフタイムを設定
         newParticle.currentTime = 0.0f;  // 寿命の初期化
-        newParticle.Velocity = { 1.0f,1.0f,1.0f };
-        group. spawnTime = 0.0f;
-        group.spawnFrequency = 0.5f;
+        newParticle.Velocity = { 1.0f, 1.0f, 1.0f };
+
         // パーティクルをグループに追加
         group.particles.push_back(newParticle);
     }

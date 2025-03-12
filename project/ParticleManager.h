@@ -104,7 +104,7 @@ public: // メンバ関数
 
 	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
-	void SetParticleModel(Camera* camera,Model* model,const std::string& directorypath, const std::string& filename);
+	void SetParticleModel(Camera* camera,const std::string& directorypath, const std::string& filename);
 	
 	void DebugUpdata();
 
@@ -113,7 +113,6 @@ private: // メンバ変数
 	DirectXCommon* dxCommon_;
 	SrvManager* srvmanager_;
 	Camera* camera_;
-	Model* model_;
 	GraphicsPipeline* graphicsPipeline;
 	// ランダムエンジン
 	std::mt19937 randomEngine;
