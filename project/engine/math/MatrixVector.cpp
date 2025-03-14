@@ -225,3 +225,14 @@ namespace MatrixVector {
         return result;
     };
 };
+
+Vector3 Lerp(const Vector3& a, const Vector3& b, float t)
+{
+    Vector3 ans;
+
+    ans.x = t * a.x + (1.0f - t) * b.x;
+    ans.y = t * a.y + (1.0f - t) * b.y;
+    ans.z = t * a.z + (1.0f - t) * b.z;
+
+    return ans;
+}

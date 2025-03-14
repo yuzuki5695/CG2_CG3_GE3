@@ -47,4 +47,7 @@ namespace MatrixVector
 
 	// 3次元アフィン変換
 	Matrix4x4 MakeAftineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
+
+	// 線形補間
+	Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
 };
