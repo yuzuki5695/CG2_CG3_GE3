@@ -7,13 +7,14 @@
 class Object3dCommon
 {
 private:
-	static Object3dCommon* instance;
+	static std::unique_ptr<Object3dCommon> instance;
 
-	Object3dCommon() = default;
-	~Object3dCommon() = default;
 	Object3dCommon(Object3dCommon&) = delete;
 	Object3dCommon& operator=(Object3dCommon&) = delete;
 public: // メンバ関数
+	Object3dCommon() = default;
+	~Object3dCommon() = default;
+
 	// シングルトンインスタンスの取得
 	static Object3dCommon* GetInstance();
 	// 終了
