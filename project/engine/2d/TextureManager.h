@@ -11,13 +11,14 @@
 class TextureManager
 {
 private:
-	static TextureManager* instance;
+	static std::unique_ptr<TextureManager> instance;
 
-	TextureManager() = default;
-	~TextureManager() = default;
 	TextureManager(TextureManager&) = delete;
 	TextureManager& operator=(TextureManager&) = delete;
 public: // メンバ関数
+	TextureManager() = default;
+	~TextureManager() = default;
+
 	// シングルトンインスタンスの取得
 	static TextureManager* GetInstance();
 	// 終了

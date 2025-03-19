@@ -1,19 +1,23 @@
 #include "TextureManager.h"
 
-TextureManager* TextureManager::instance = nullptr;
 // ImGuiで0番目に使用するため、1番から使用
 uint32_t TextureManager::KSRVIndexTop = 1;
 
+// 静的メンバ変数の定義
+std::unique_ptr<TextureManager> TextureManager::instance = nullptr;
+
+// シングルトンインスタンスの取得
 TextureManager* TextureManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new TextureManager;
+	if (!instance) {
+		instance = std::make_unique<TextureManager>();
 	}
-	return instance;
+	return instance.get();
 }
 
+
+// 終了
 void TextureManager::Finalize() {
-	delete instance;
-	instance = nullptr;
+	instance.reset();
 }
 
 void TextureManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager) {
