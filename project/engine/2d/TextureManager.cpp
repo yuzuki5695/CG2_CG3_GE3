@@ -17,7 +17,9 @@ TextureManager* TextureManager::GetInstance() {
 
 // 終了
 void TextureManager::Finalize() {
-	instance.reset();
+	if (instance) {
+		instance.reset();
+	}
 }
 
 void TextureManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager) {

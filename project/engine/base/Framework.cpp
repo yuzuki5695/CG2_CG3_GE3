@@ -22,10 +22,8 @@ void Framework::Run() {
 void Framework::Finalize() {
     // シーンマネージャの解放
     SceneManager::GetInstance()->Finalize();
-    // シーンファクトリの解放
-    delete sceneFactory_;
     // カメラ
-    camera.reset();
+    //camera.reset();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了

@@ -39,7 +39,7 @@ public:// メンバ関数
 
 protected:
 	// シーンファクトリー
-	AbstractSceneFactory* sceneFactory_ = nullptr;
+	std::unique_ptr <AbstractSceneFactory> sceneFactory_ = nullptr;
 private: // メンバ変数
 	// ポインタ
 	std::unique_ptr <WinApp> winApp = nullptr;
