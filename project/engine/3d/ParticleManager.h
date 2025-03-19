@@ -15,11 +15,8 @@
 class ParticleManager
 {
 private:
+	static std::unique_ptr<ParticleManager> instance;
 
-	static ParticleManager* instance;
-
-	ParticleManager() = default;
-	~ParticleManager() = default;
 	ParticleManager(ParticleManager&) = delete;
 	ParticleManager& operator=(ParticleManager&) = delete;
 public:
@@ -81,6 +78,9 @@ private:
 	// マテリアルデータ作成
 	void MaterialGenerate();
 public: // メンバ関数
+	ParticleManager() = default;
+	~ParticleManager() = default;
+
 	// シングルトンインスタンスの取得
 	static ParticleManager* GetInstance();
 	// 終了

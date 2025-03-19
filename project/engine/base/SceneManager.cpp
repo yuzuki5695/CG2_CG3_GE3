@@ -1,22 +1,26 @@
 #include "SceneManager.h"
 #include <cassert>
 
-SceneManager* SceneManager::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<SceneManager> SceneManager::instance = nullptr;
 
+// シングルトンインスタンスの取得
 SceneManager* SceneManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new SceneManager;
+	if (!instance) {
+		instance = std::make_unique<SceneManager>();
 	}
-	return instance;
+	return instance.get();
 }
 
+// 終了
 void SceneManager::Finalize() {
 	// 最後のシーンの終了と解放
-	scene_->Finalize();
-	delete scene_;
-	scene_ = nullptr;
-	delete instance;
-	instance = nullptr;
+	if (scene_) {
+		scene_->Finalize();
+		scene_ = nullptr;
+	}
+	// シーンマネージャのインスタンスの解放
+	instance.reset();
 }
 
 void SceneManager::Update() {
@@ -28,11 +32,10 @@ void SceneManager::Update() {
 		// 旧シーンの終了
 		if (scene_) {
 			scene_->Finalize();
-			delete scene_;
 		}
 
 		// シーン切り替え
-		scene_ = nextScene_;
+		scene_ = std::move(nextScene_); // 所有権を移動
 		nextScene_ = nullptr;
 		// シーンマネージャをセット 
 		scene_->SetSceneManeger(this);
@@ -53,5 +56,5 @@ void SceneManager::ChangeScene(const std::string& sceneName) {
 	assert(nextScene_ == nullptr);
 
 	//次シーン生成
-	nextScene_ = sceneFactory_->CreateScene(sceneName);
+	nextScene_ = std::unique_ptr<BaseScene>(sceneFactory_->CreateScene(sceneName));
 }

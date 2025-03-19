@@ -12,13 +12,14 @@ class DirectXCommon;
 class ImGuiManager
 {
 private:
-	static ImGuiManager* instance;
+	static std::unique_ptr<ImGuiManager> instance;
 
+	ImGuiManager(const ImGuiManager&) = delete;
+	ImGuiManager& operator=(const ImGuiManager&) = delete;
+public: // メンバ関数
 	ImGuiManager() = default;
 	~ImGuiManager() = default;
-	ImGuiManager(ImGuiManager&) = delete;
-	ImGuiManager& operator=(ImGuiManager&) = delete;
-public: // メンバ関数
+
 	// シングルトンインスタンスの取得
 	static ImGuiManager* GetInstance();
 	///<summary>

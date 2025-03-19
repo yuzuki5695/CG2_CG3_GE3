@@ -7,14 +7,14 @@
 class ModelManager
 {
 private:
+	static std::unique_ptr<ModelManager> instance;
 
-	static ModelManager* instance;
-
-	ModelManager() = default;
-	~ModelManager() = default;
 	ModelManager(ModelManager&) = delete;
 	ModelManager& operator=(ModelManager&) = delete;
-public:// メンバ関数
+public: // メンバ関数
+	ModelManager() = default;
+	~ModelManager() = default;
+
 	// シングルトンインスタンスの取得
 	static ModelManager* GetInstance();
 	// 終了

@@ -1,17 +1,19 @@
 #include "ModelManager.h"
 
-ModelManager* ModelManager::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<ModelManager> ModelManager::instance = nullptr;
 
+// シングルトンインスタンスの取得
 ModelManager* ModelManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new ModelManager;
+	if (!instance) {
+		instance = std::make_unique<ModelManager>();
 	}
-	return instance;
+	return instance.get();
 }
 
+// 終了
 void ModelManager::Finalize() {
-	delete instance;
-	instance = nullptr;
+	instance.reset();
 }
 
 void ModelManager::Initialize(DirectXCommon* dxCommon) {

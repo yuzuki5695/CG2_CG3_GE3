@@ -11,18 +11,20 @@
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
 
-ParticleManager* ParticleManager::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<ParticleManager> ParticleManager::instance = nullptr;
 
+// シングルトンインスタンスの取得
 ParticleManager* ParticleManager::GetInstance() {
-    if (instance == nullptr) {
-        instance = new ParticleManager;
+    if (!instance) {
+        instance = std::make_unique<ParticleManager>();
     }
-    return instance;
+    return instance.get();
 }
 
+// 終了
 void ParticleManager::Finalize() {
-    delete instance;
-    instance = nullptr;
+    instance.reset();
 }
 
 void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvmanager) {

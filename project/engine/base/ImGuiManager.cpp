@@ -4,13 +4,15 @@
 
 using namespace Microsoft::WRL;
 
-ImGuiManager* ImGuiManager::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<ImGuiManager> ImGuiManager::instance = nullptr;
 
+// シングルトンインスタンスの取得
 ImGuiManager* ImGuiManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new ImGuiManager;
+	if (!instance) {
+		instance = std::make_unique<ImGuiManager>();
 	}
-	return instance;
+	return instance.get();
 }
 
 void ImGuiManager::Finalize() {
@@ -20,8 +22,7 @@ void ImGuiManager::Finalize() {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 #endif // USE_IMGUI
-	delete instance;
-	instance = nullptr;
+	instance.reset();
 }
 
 void ImGuiManager::Initialize([[maybe_unused]] WinApp* winApp, [[maybe_unused]] DirectXCommon* DxCommon, [[maybe_unused]] SrvManager* srvManager) {

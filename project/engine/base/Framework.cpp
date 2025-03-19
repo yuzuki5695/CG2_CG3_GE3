@@ -22,8 +22,6 @@ void Framework::Run() {
 void Framework::Finalize() {
     // シーンマネージャの解放
     SceneManager::GetInstance()->Finalize();
-    // カメラ
-    //camera.reset();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
@@ -34,8 +32,7 @@ void Framework::Finalize() {
     srvManager.reset();
     // グラフィックスパイプラインの解放
     GraphicsPipeline::GetInstance()->Finalize();
-    // ユニークポインタは自動的に解放
-    // 明示的に開放した場合
+    // 明示的に開放
     // DirectXの解放
     dxCommon.reset(); 
     // WindowsAPIの解放
