@@ -5,14 +5,15 @@
 // スプライト共通部
 class SpriteCommon
 {
-private:
-	static SpriteCommon* instance;
-
-	SpriteCommon() = default;
-	~SpriteCommon() = default;
+private:  
+	static std::unique_ptr<SpriteCommon> instance;
+	
 	SpriteCommon(SpriteCommon&) = delete;
 	SpriteCommon& operator=(SpriteCommon&) = delete;
 public: // メンバ関数
+	SpriteCommon() = default;
+	~SpriteCommon() = default;
+
 	// シングルトンインスタンスの取得
 	static SpriteCommon* GetInstance();
 	// 終了

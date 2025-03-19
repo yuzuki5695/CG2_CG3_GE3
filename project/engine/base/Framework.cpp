@@ -25,7 +25,7 @@ void Framework::Finalize() {
     // シーンファクトリの解放
     delete sceneFactory_;
     // 基盤システムの解放
-    SpriteCommon::GetInstance()->Finalize();
+   // SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
     // 入力解放
     Input::GetInstance()->Finalize();
