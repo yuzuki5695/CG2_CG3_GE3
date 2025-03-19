@@ -1,19 +1,22 @@
 #include "SoundPlayer.h"
 #include <cassert>
 
-SoundPlayer* SoundPlayer::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<SoundPlayer> SoundPlayer::instance = nullptr;
 
+// シングルトンインスタンスの取得
 SoundPlayer* SoundPlayer::GetInstance() {
-    if (instance == nullptr) {
-        instance = new SoundPlayer;
+    if (!instance) {
+        instance = std::make_unique<SoundPlayer>();
     }
-    return instance;
+    return instance.get();
 }
 
+// 終了
 void SoundPlayer::Finalize() {
-    delete instance;
-    instance = nullptr;
+    instance.reset();
 }
+
 
 void SoundPlayer::Initialize(SoundLoader* soundLoader) {
     // NULL検出

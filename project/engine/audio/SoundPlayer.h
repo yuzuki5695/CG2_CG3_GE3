@@ -4,13 +4,14 @@
 // 音声再生
 class SoundPlayer {
 private:
-    static SoundPlayer* instance;
+    static std::unique_ptr<SoundPlayer> instance;
 
-    SoundPlayer() = default;
-    ~SoundPlayer() = default;
     SoundPlayer(SoundPlayer&) = delete;
     SoundPlayer& operator=(SoundPlayer&) = delete;
 public: // メンバ関数
+    SoundPlayer() = default;
+    ~SoundPlayer() = default;
+
     // シングルトンインスタンスの取得
     static SoundPlayer* GetInstance();
     // 終了

@@ -13,8 +13,9 @@ class TextureManager
 private:
 	static std::unique_ptr<TextureManager> instance;
 
-	TextureManager(TextureManager&) = delete;
-	TextureManager& operator=(TextureManager&) = delete;
+	TextureManager(const TextureManager&) = delete;
+	TextureManager& operator=(const TextureManager&) = delete;
+
 public: // メンバ関数
 	TextureManager() = default;
 	~TextureManager() = default;

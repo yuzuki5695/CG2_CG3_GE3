@@ -32,11 +32,6 @@ void Framework::Finalize() {
     ImGuiManager::GetInstance()->Finalize();
     // SRVマネージャの開放
     srvManager.reset();
-    // 音声データの解放
-    //xAudio2解放
-    SoundLoader::GetInstance()->GetIXAudio2();
-    SoundLoader::GetInstance()->Finalize();
-    SoundPlayer::GetInstance()->Finalize();
     // グラフィックスパイプラインの解放
     GraphicsPipeline::GetInstance()->Finalize();
     // ユニークポインタは自動的に解放
