@@ -4,18 +4,20 @@
 
 using namespace Microsoft::WRL;
 
-GraphicsPipeline* GraphicsPipeline::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<GraphicsPipeline> GraphicsPipeline::instance = nullptr;
 
+// シングルトンインスタンスの取得
 GraphicsPipeline* GraphicsPipeline::GetInstance() {
-    if (instance == nullptr) {
-        instance = new GraphicsPipeline;
+    if (!instance) {
+        instance = std::make_unique<GraphicsPipeline>();
     }
-    return instance;
+    return instance.get();
 }
 
+// 終了
 void GraphicsPipeline::Finalize() {
-    delete instance;
-    instance = nullptr;
+    instance.reset();
 }
 
 void GraphicsPipeline::Initialize(DirectXCommon* dxCommon) {

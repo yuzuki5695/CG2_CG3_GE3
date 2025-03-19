@@ -4,13 +4,14 @@
 class GraphicsPipeline
 {
 private:
-	static GraphicsPipeline* instance;
+	static std::unique_ptr<GraphicsPipeline> instance;
 
-	GraphicsPipeline() = default;
-	~GraphicsPipeline() = default;
 	GraphicsPipeline(GraphicsPipeline&) = delete;
 	GraphicsPipeline& operator=(GraphicsPipeline&) = delete;
 public: // メンバ関数
+	GraphicsPipeline() = default;
+	~GraphicsPipeline() = default;
+
 	// シングルトンインスタンスの取得
 	static GraphicsPipeline* GetInstance();
 	// 終了
