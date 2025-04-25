@@ -4,7 +4,9 @@
 #include<SpriteCommon.h>
 #include<Object3dCommon.h>
 #include<Input.h>
+#ifdef USE_IMGUI
 #include<ImGuiManager.h>
+#endif // USE_IMGUI
 #include<SceneManager.h>
 
 void GamePlayScene::Finalize() {

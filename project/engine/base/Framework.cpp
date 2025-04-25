@@ -89,8 +89,6 @@ void Framework::Initialize() {
 
     // カメラの初期化
     camera = new Camera();
-    camera->SetRotate({ 0.0f,0.0f,0.0f });
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
     Object3dCommon::GetInstance()->SetDefaultCamera(camera);
 
     // カメラの現在の位置と回転を取得
@@ -113,9 +111,12 @@ void Framework::Update() {
     /*-------------------------------------------*/
     /*--------------カメラの更新処理---------------*/
     /*------------------------------------------*/
+
+    camera->DebugUpdata();
+
     camera->Update();
-    camera->SetTranslate(Cameraposition);
-    camera->SetRotate(Camerarotation);
+    //camera->SetTranslate(Cameraposition);
+    //camera->SetRotate(Camerarotation);
 
     // シーンマネージャの更新処理
     SceneManager::GetInstance()->Update();

@@ -16,7 +16,7 @@ void MyGame::Initialize() {
 
     // TITLE
     // GAMEPLAY
-    SceneManager::GetInstance()->ChangeScene("TITLE");
+    SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
 }
 
 void MyGame::Update() {

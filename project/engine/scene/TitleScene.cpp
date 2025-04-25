@@ -1,11 +1,10 @@
 #include "TitleScene.h"
 #include<TextureManager.h>
 #include<ModelManager.h>
-#include<SpriteCommon.h>
-#include<Object3dCommon.h>
 #include<Input.h>
+#ifdef USE_IMGUI
 #include<ImGuiManager.h>
-#include<GamePlayScene.h>
+#endif // USE_IMGUI
 #include<SceneManager.h>
 
 void TitleScene::Finalize() {

@@ -4,7 +4,9 @@
 #include "MatrixVector.h"
 #include "TextureManager.h"
 #include "SrvManager.h"
+#ifdef USE_IMGUI
 #include<ImGuiManager.h>
+#endif // USE_IMGUI
 
 using namespace MatrixVector;
 

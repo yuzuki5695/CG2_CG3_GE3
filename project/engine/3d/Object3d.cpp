@@ -1,4 +1,3 @@
-
 #include "Object3d.h"
 #include "Object3dCommon.h"
 #include<fstream>
@@ -6,6 +5,9 @@
 #include <cassert>
 #include "MatrixVector.h"
 #include "ModelManager.h"
+#ifdef USE_IMGUI
+#include<ImGuiManager.h>
+#endif // USE_IMGUI
 
 using namespace MatrixVector;
 
