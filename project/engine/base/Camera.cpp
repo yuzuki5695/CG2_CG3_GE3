@@ -6,7 +6,7 @@
 using namespace MatrixVector;
 
 Camera::Camera()
-	: transform({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-500.0f} })
+	: transform({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
 	, fovY(0.45f)
 	, aspectRatio(float(WinApp::kClientWidth) / float(WinApp::kClientHeight))
 	, nearClip(0.1f)
@@ -28,11 +28,9 @@ void Camera::Update() {
 void Camera::DebugUpdata() {
 #ifdef USE_IMGUI
 	// 開発用UIの処理
-	ImGui::Begin("SetCamera");
-	ImGui::DragFloat3("CameraTranslate", &transform.translate.x, 0.01f, -10.0f, 10.0f);
-	ImGui::SliderAngle("CameraRotateX", &transform.rotate.x);
-	ImGui::SliderAngle("CameraRotateY", &transform.rotate.y);
-	ImGui::SliderAngle("CameraRotateZ", &transform.rotate.z);
+	ImGui::Begin("Camera");
+	ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
+	ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.0001f);
 	ImGui::End();
 #endif // USE_IMGUI
 }

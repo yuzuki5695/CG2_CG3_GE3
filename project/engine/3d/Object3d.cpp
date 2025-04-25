@@ -16,6 +16,7 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
     assert(object3dCommon);
     // 引数で受け取ってメンバ変数に記録する
     this->object3dCommon = object3dCommon;
+    this->camera = object3dCommon->GetDefaultCamera();
     // WVP,World用のリソースの生成、初期化
     TransformationMatrixGenerate();
     // 平行光源の生成,初期化
@@ -23,16 +24,16 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
 }
 
 void Object3d::Update() {
-    Matrix4x4 worludMatrix = MakeAftineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+    Matrix4x4 worldMatrix = MakeAftineMatrix(transform_.scale, transform_.rotate, transform_.translate);
     Matrix4x4 worldViewProjectionMatrix;
     if (camera) {
         const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
-        worldViewProjectionMatrix = Multiply(worludMatrix, viewProjectionMatrix);
+        worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
     } else {
-        worldViewProjectionMatrix = worludMatrix;
+        worldViewProjectionMatrix = worldMatrix;
     }
-    transformationMatrixData->World = worludMatrix;
     transformationMatrixData->WVP = worldViewProjectionMatrix;
+    transformationMatrixData->World = worldMatrix;
 }
 
 void Object3d::Draw() {
@@ -77,5 +78,4 @@ void Object3d::Create(std::string filePath, Transform transform) {
     // モデルを検索してセットする
     model = ModelManager::GetInstance()->FindModel(filePath);
     transform_ = transform;
-    this->camera = object3dCommon->GetDefaultCamera();
 }

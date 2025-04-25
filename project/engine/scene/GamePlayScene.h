@@ -22,7 +22,6 @@ private: // メンバ変数
     // Sprite
     Sprite* sprite = nullptr;
     // Object3d
-    Model* model = nullptr;
     Object3d* object3d = nullptr;
     /*-----ファイルデータ----*/
     // Texture
@@ -37,4 +36,12 @@ private: // メンバ変数
 
     // 音声プレイフラグ
     uint32_t soundfige;
+
+
+    Camera* camera = nullptr;
+    // カメラの現在の位置と回転を取得
+    Vector3 Cameraposition;
+    Vector3 Camerarotation;
+
+
 };

@@ -10,10 +10,10 @@
 #include<SceneManager.h>
 
 void GamePlayScene::Finalize() {
+    // カメラ
+    delete camera;
     // 汎用機能の解放
     delete  sprite;
-    // 3Dモデルの解放
-    delete model;
     // 3Dオブジェクトの解放
     delete  object3d;
     // 音声データ解放
@@ -21,6 +21,18 @@ void GamePlayScene::Finalize() {
 }
 
 void GamePlayScene::Initialize() {
+
+    // カメラの初期化
+    camera = new Camera();
+    camera->SetRotate(Vector3(0.0f, 0.0f, 0.0f));
+    camera->SetTranslate(Vector3(0.0f, 0.0f, -1000.0f));
+    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
+
+    // カメラの現在の位置と回転を取得
+    Cameraposition = camera->GetTranslate();
+    Camerarotation = camera->GetRotate();
+
+
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
@@ -46,15 +58,12 @@ void GamePlayScene::Initialize() {
     sprite->Initialize(SpriteCommon::GetInstance());
     sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
-    // 3Dモデルの初期化
-    model = new Model;;
-    model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
-
     // 3Dオブジェクトの初期化
     object3d = new Object3d;
     object3d->Initialize(Object3dCommon::GetInstance());
     // オブジェクト作成
     object3d->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+    object3d->SetCamera(camera);
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -62,11 +71,6 @@ void GamePlayScene::Initialize() {
 }
 
 void GamePlayScene::Update() {
-    // 0を押している間true
-    if (Input::GetInstance()->Pushkey(DIK_0)) {
-        OutputDebugStringA("Hit 0 \n");
-    }
-
 
     if (Input::GetInstance()->Pushkey(DIK_SPACE) && soundfige == 0) {
         soundfige = 1;
@@ -83,7 +87,17 @@ void GamePlayScene::Update() {
     //ImGui::ShowDemoWindow();
     // スプライト
     sprite->DebugUpdata();
+    // 
+    camera->DebugUpdata();
+
 #pragma endregion ImGuiの更新処理終了
+    
+    /*-------------------------------------------*/
+    /*--------------カメラの更新処理---------------*/
+    /*------------------------------------------*/
+
+    camera->Update();
+
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
