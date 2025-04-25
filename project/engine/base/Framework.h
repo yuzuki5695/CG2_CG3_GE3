@@ -12,10 +12,8 @@
 #include<SrvManager.h>
 #include<ImGuiManager.h>
 #include<SoundPlayer.h>
-#include<TitleScene.h>
-#include<GamePlayScene.h>
 #include<SceneManager.h>
-#include "SceneFactory.h"
+#include<SceneFactory.h>
 
 // ゲーム全体
 class Framework
