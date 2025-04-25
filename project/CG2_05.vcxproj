@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\base\Logger.cpp" />
     <ClCompile Include="engine\scene\BaseScene.cpp" />
     <ClCompile Include="engine\scene\GamePlayScene.cpp" />
+    <ClCompile Include="engine\scene\SceneFactory.cpp" />
     <ClCompile Include="engine\scene\TitleScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="engine\math\MatrixVector.cpp" />
@@ -157,9 +158,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="engine\math\Vector4.h" />
     <ClInclude Include="engine\base\WinApp.h" />
     <ClInclude Include="engine\base\SrvManager.h" />
+    <ClInclude Include="engine\scene\AbstractSceneFactory.h" />
     <ClInclude Include="engine\scene\BaseScene.h" />
     <ClInclude Include="engine\scene\GamePlayScene.h" />
     <ClInclude Include="engine\scene\MyGame.h" />
+    <ClInclude Include="engine\scene\SceneFactory.h" />
     <ClInclude Include="engine\scene\TitleScene.h" />
     <ClInclude Include="engine\scene\SceneManager.h" />
   </ItemGroup>

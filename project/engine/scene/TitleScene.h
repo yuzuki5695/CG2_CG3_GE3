@@ -18,17 +18,5 @@ public: // メンバ関数
     // 描画
     void Draw() override;
 private: // メンバ変数
-    // オブジェクトデータ
-    // Sprite
-    Sprite* sprite = nullptr;
-    /*-----ファイルデータ----*/
-    // Texture
-    std::string TexturePath01;
-    std::string TexturePath02;
-    // 音声
-    SoundData soundData;
-    /*-----ファイルデータ----*/
 
-    // 音声プレイフラグ
-    uint32_t soundfige;
 };

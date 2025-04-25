@@ -9,64 +9,27 @@
 #include<SceneManager.h>
 
 void TitleScene::Finalize() {
-    // 汎用機能の解放
-    delete  sprite;
-    sprite = nullptr;
-    // 音声データ解放
-    SoundPlayer::GetInstance()->SoundUnload(&soundData);
 }
 
 void TitleScene::Initialize() {
-    // テクスチャを読み込む
-    TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
-    TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
-    // 変数に代入
-    TexturePath01 = "Resources/uvChecker.png";
-    TexturePath02 = "Resources/monsterBall.png";
-
-    // 音声ファイルを追加
-    soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
 
 #pragma region 最初のシーンの初期化
 
-    // スプライトの初期化
-    sprite = new Sprite;
-    sprite->Initialize(SpriteCommon::GetInstance());
-    sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
 #pragma endregion 最初のシーンの初期化
-    // 音声プレイフラグ
-    soundfige = 0;
+
 }
 
 void TitleScene::Update() {
     // ENTERキーを押したら
     if (Input::GetInstance()->Triggrkey(DIK_RETURN)) {
-        // ゲームプレイシーン（次シーン）生成
-        BaseScene* scene = new GamePlayScene();
-        // シーン切り替え依頼
-       BaseScene::GetSceneManeger()->SetNextScene(scene);
-    }
-
-    // 0を押している間true
-    if (Input::GetInstance()->Pushkey(DIK_0)) {
-        OutputDebugStringA("Hit 0 \n");
-    }
-
-
-    if (Input::GetInstance()->Triggrkey(DIK_SPACE) && soundfige == 0) {
-        soundfige = 1;
-    }
-
-    if (soundfige == 1) {
-        // 音声再生
-        SoundPlayer::GetInstance()->SoundPlayWave(soundData, false);
-        soundfige = 2;
+        // シーン切り替え
+        SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
     }
 
 #pragma region  ImGuiの更新処理開始
-    // スプライト
-    sprite->DebugUpdata();
+
+
 #pragma endregion ImGuiの更新処理終了
 
     /*-------------------------------------------------------------------------------------------------------*/
@@ -83,8 +46,6 @@ void TitleScene::Update() {
     /*---------------------------------------Spriteの更新処理----------------------------------------------*/
     /*---------------------------------------------------------------------------------------------------*/
 
-    // 更新処理
-    sprite->Update();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -108,10 +69,6 @@ void TitleScene::Draw() {
     /*------------------------------------Spriteの描画処理開始----------------------------------------------*/
     /*---------------------------------------------------------------------------------------------------*/
 
-    //// Spriteの描画は常にuvCheckerにする
-    //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-    sprite->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/

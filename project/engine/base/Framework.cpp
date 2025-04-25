@@ -20,6 +20,8 @@ void Framework::Run() {
 }
 
 void Framework::Finalize() {
+    // シーンファクトリの解放
+    delete sceneFactory_;
     // シーンマネージャの解放
     SceneManager::GetInstance()->Finalize();
     // 基盤システムの解放

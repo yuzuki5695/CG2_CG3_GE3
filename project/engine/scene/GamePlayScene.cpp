@@ -29,8 +29,9 @@ void GamePlayScene::Initialize() {
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj");
     ModelManager::GetInstance()->LoadModel("axis.obj");
+    ModelManager::GetInstance()->LoadModel("monsterBallUV.obj");
     // 変数に代入
-    ModelPath01 = "plane.obj";
+    ModelPath01 = "monsterBallUV.obj";
     ModelPath02 = "axis.obj";
 
     // 音声ファイルを追加
