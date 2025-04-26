@@ -17,11 +17,12 @@ private: // メンバ変数
 	Matrix4x4 worludMatrix;
 	Matrix4x4 viewMatrix;
 	Matrix4x4 projectionMatrix;
+	Matrix4x4 ViewProjectionMatrix;
+
 	float fovY; // 水平方向視野野角
 	float aspectRatio; // アスペクト比
 	float nearClip; // ニアクリップ距離
 	float farclip; // ファークリップ距離
-	Matrix4x4 ViewProjectionMatrix;
 public:
 	// getter
 	const Matrix4x4& GetWorludMatrix() const { return worludMatrix; }
