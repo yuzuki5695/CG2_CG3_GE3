@@ -84,16 +84,21 @@ void GamePlayScene::Update() {
 
 #pragma region  ImGuiの更新処理開始
     // デモウィンドウの表示
-    //ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();   
+
     // スプライト
     sprite->DebugUpdata();
-    // 
+
+    // object3d
+    object3d->DebugUpdata();
+
+    // Camera
     camera->DebugUpdata();
 
 #pragma endregion ImGuiの更新処理終了
     
     /*-------------------------------------------*/
-    /*--------------カメラの更新処理---------------*/
+    /*--------------Cameraの更新処理---------------*/
     /*------------------------------------------*/
 
     camera->Update();

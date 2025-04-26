@@ -79,3 +79,24 @@ void Object3d::Create(std::string filePath, Transform transform) {
     model = ModelManager::GetInstance()->FindModel(filePath);
     transform_ = transform;
 }
+
+
+
+void Object3d::DebugUpdata() {
+#ifdef USE_IMGUI
+    // ウィンドウサイズを指定
+    ImGui::Begin("Object3d");
+    // オブジェクトの座標
+    ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f);
+    ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
+    ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+    // カラー
+    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&model->GetMaterialData()->color));
+    // ライトの向き
+    ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
+    // ライトの輝度
+    ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
+    ImGui::End();
+#endif // USE_IMGUI
+
+}

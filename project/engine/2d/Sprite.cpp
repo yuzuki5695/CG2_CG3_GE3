@@ -124,10 +124,10 @@ void Sprite::Update() {
 	/*----------------------------------------*/
 	/*---------UVTransform用の行列を作る--------*/
 	/*----------------------------------------*/
-	//Matrix4x4 uvTransformMatrix = MatrixVector::MakeScaleMatrix(uvTransformSprite.scale);
-	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeRotateZMatrix(uvTransformSprite.rotate.z));
-	//uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransformSprite.translate));
-	//materialSpriteDate->uvTransform = uvTransformMatrix;
+	Matrix4x4 uvTransformMatrix = MatrixVector::MakeScaleMatrix(uvTransform.scale);
+	uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransform.translate));
+	materialData->uvTransform = uvTransformMatrix;
 
 	transform.translate = { position_.x,position_.y,0.0f };
 	transform.rotate = { 0.0f,0.0f,rotation_ };
@@ -189,9 +189,21 @@ void Sprite::Create(std::string textureFilePath, Vector2 position, float rotatio
 void Sprite::DebugUpdata() {
 #ifdef USE_IMGUI
 	// ウィンドウサイズを指定
-	ImGui::SetNextWindowSize(ImVec2(500, 100));
 	ImGui::Begin("Sprite");
-	ImGui::SliderFloat2("position", &position_.x, 0.0f, 1000.0f, "%.01f");
+	// 座標
+	ImGui::SliderFloat2("position", &position_.x, 0.0f, 1280.0f, "%.01f");
+	// 回転
+	ImGui::SliderFloat("rotation", &rotation_, -6.2f, 6.2f, "%.01f");
+	// サイズ
+	ImGui::SliderFloat2("size", &size_.x, 0.0f, 1000.0f, "%.01f");
+	// カラー
+	ImGui::ColorEdit4("color", reinterpret_cast<float*>(&materialData->color));
+	// UV座標の変更
+	ImGui::DragFloat2("UVTranslate", &uvTransform.translate.x, 0.01f, -10.0f, 10.0f);
+	// UVの大きさの変更
+	ImGui::DragFloat2("UVScale", &uvTransform.scale.x, 0.01f, -10.0f, 10.0f);
+	// UVの回転の変更
+	ImGui::SliderAngle("UVRotate", &uvTransform.rotate.z);
 	ImGui::End();
 #endif // USE_IMGUI
 }

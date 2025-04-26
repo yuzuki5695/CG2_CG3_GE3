@@ -31,6 +31,9 @@ public: // メンバ関数
 	// 3Dobject作成関数
 	void Create(std::string filePath, Transform transform);
 
+
+	void DebugUpdata();
+
 private:
 	// リソース
 	// トランスフォームマトリックス

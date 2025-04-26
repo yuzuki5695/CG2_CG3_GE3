@@ -67,4 +67,9 @@ private:
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	Material* materialData = nullptr;
+public:
+	// getter
+
+	Material* GetMaterialData() { return materialData; }
+
 };
