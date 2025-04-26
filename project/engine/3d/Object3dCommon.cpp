@@ -3,18 +3,20 @@
 
 using namespace Microsoft::WRL;
 
-Object3dCommon* Object3dCommon::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<Object3dCommon> Object3dCommon::instance = nullptr;
 
+// シングルトンインスタンスの取得
 Object3dCommon* Object3dCommon::GetInstance() {
-    if (instance == nullptr) {
-        instance = new Object3dCommon;
+    if (!instance) {
+        instance = std::make_unique<Object3dCommon>();
     }
-    return instance;
+    return instance.get();
 }
 
+// 終了
 void Object3dCommon::Finalize() {
-    delete instance;
-    instance = nullptr;
+    instance.reset();  // `delete` 不要
 }
 
 void Object3dCommon::Initialize(DirectXCommon* dxCommon) {

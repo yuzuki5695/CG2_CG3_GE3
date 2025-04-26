@@ -31,7 +31,6 @@ void Framework::Finalize() {
     Input::GetInstance()->Finalize();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
-    // ImGuiマネージャの解放
     // 3Dモデルマネージャの終了
     ModelManager::GetInstance()->Finalize();
     // ImGuiマネージャの解放
