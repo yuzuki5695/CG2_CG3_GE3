@@ -37,22 +37,22 @@ public:// メンバ関数
 
 protected:
 	// シーンファクトリー
-	AbstractSceneFactory* sceneFactory_ = nullptr;
+	std::unique_ptr <AbstractSceneFactory> sceneFactory_ = nullptr;
 private: // メンバ変数
 	// ポインタ
 	std::unique_ptr <WinApp> winApp = nullptr;
-	DirectXCommon* dxCommon = nullptr;
-	ModelCommon* modelCommon = nullptr;
-	SrvManager* srvManager = nullptr;
+	std::unique_ptr <DirectXCommon> dxCommon = nullptr;
+	std::unique_ptr <ModelCommon> modelCommon = nullptr;
+	std::unique_ptr <SrvManager> srvManager = nullptr;
 
 	// ゲーム終了フラグ
 	bool endRequst_ = false;
 public:
 	// getter 
 	WinApp* GetWinApp() const { return winApp.get(); }
-	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
+	DirectXCommon* GetDirectXCommon() const { return dxCommon.get(); }
 	//Camera* GetCamera() const { return camera; }
-	SrvManager* GetSrvManager() const { return srvManager; }
+	SrvManager* GetSrvManager() const { return srvManager.get(); }
 	//SceneManeger* GetSceneManeger() const { return sceneManeger_; }
 	// 終了フラグのチェック
 	virtual bool IsEndRequst() { return  endRequst_; }

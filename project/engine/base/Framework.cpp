@@ -20,31 +20,31 @@ void Framework::Run() {
 }
 
 void Framework::Finalize() {
-    // シーンファクトリの解放
-    delete sceneFactory_;
+    // シーンファクトリの解放 
+    sceneFactory_.reset();
     // シーンマネージャの解放
     SceneManager::GetInstance()->Finalize();
     // 基盤システムの解放
     SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
-    delete modelCommon;
     // 入力解放
     Input::GetInstance()->Finalize();
     // テクスチャマネージャーの終了
     TextureManager::GetInstance()->Finalize();
+    // ImGuiマネージャの解放
     // 3Dモデルマネージャの終了
     ModelManager::GetInstance()->Finalize();
     // ImGuiマネージャの解放
     ImGuiManager::GetInstance()->Finalize();
     // SRVマネージャの開放
-    delete srvManager;
+    srvManager.reset();
     // 音声データの解放
     //xAudio2解放
     SoundLoader::GetInstance()->GetIXAudio2();
     SoundLoader::GetInstance()->Finalize();
     SoundPlayer::GetInstance()->Finalize();
     // DirectXの解放
-    delete dxCommon;
+    dxCommon.reset();
     // WindowsAPIの解放
     winApp.reset();
     //リソースリークチェック
@@ -58,21 +58,21 @@ void Framework::Initialize() {
     winApp = std::make_unique <WinApp>();
     winApp->Initialize();
     // DirectXの初期化
-    dxCommon = new DirectXCommon();
+    dxCommon = std::make_unique <DirectXCommon>();
     dxCommon->Initialize(winApp.get());
     // 音声読み込み
     SoundLoader::GetInstance()->Initialize();
     // 音声再生
     SoundPlayer::GetInstance()->Initialize(SoundLoader::GetInstance());
     // SRVマネージャーの初期化
-    srvManager = new SrvManager();
-    srvManager->Initialize(dxCommon);
+    srvManager = std::make_unique <SrvManager>();
+    srvManager->Initialize(dxCommon.get());
     // ImGuiマネージャの初期化
-    ImGuiManager::GetInstance()->Initialize(winApp.get(), dxCommon, srvManager);
+    ImGuiManager::GetInstance()->Initialize(winApp.get(), dxCommon.get(), srvManager.get());
     // テクスチャマネージャーの初期化
-    TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
+    TextureManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
     // 3Dモデルマネージャの初期化
-    ModelManager::GetInstance()->Initialize(dxCommon);
+    ModelManager::GetInstance()->Initialize(dxCommon.get());
 
 #pragma region 基盤システムの初期化
 
@@ -80,10 +80,10 @@ void Framework::Initialize() {
     Input::GetInstance()->Initialize(winApp.get());
 
     // スプライト共通部の初期化
-    SpriteCommon::GetInstance()->Initialize(dxCommon);
+    SpriteCommon::GetInstance()->Initialize(dxCommon.get());
 
     // 3Dオブジェクト共通部の初期化
-    Object3dCommon::GetInstance()->Initialize(dxCommon);
+    Object3dCommon::GetInstance()->Initialize(dxCommon.get());
 
 #pragma endregion 基盤システムの初期化
 }
