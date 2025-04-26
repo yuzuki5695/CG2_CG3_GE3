@@ -28,17 +28,12 @@ void GamePlayScene::Initialize() {
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
-    // 変数に代入
-    TexturePath01 = "Resources/uvChecker.png";
-    TexturePath02 = "Resources/monsterBall.png";
 
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj");
     ModelManager::GetInstance()->LoadModel("axis.obj");
     ModelManager::GetInstance()->LoadModel("monsterBallUV.obj");
-    // 変数に代入
-    ModelPath01 = "monsterBallUV.obj";
-    ModelPath02 = "axis.obj";
+    ModelManager::GetInstance()->LoadModel("fence.obj");
 
     // 音声ファイルを追加
     soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
@@ -46,10 +41,10 @@ void GamePlayScene::Initialize() {
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
-    sprite = Sprite::Create(TexturePath01, Vector2{ 0.0f,0.0f }, 0.0f, Vector2{ 360.0f,360.0f });
+    sprite = Sprite::Create("Resources/uvChecker.png", Vector2{ 0.0f,0.0f }, 0.0f, Vector2{ 360.0f,360.0f });
 
     // オブジェクト作成
-    object3d = Object3d::Create(ModelPath01, Transform({ { 1.0f, 1.0f, 1.0f }, { 0.0f, 4.71f, 0.0f }, { 0.0f, 0.0f, 0.0f } }));
+    object3d = Object3d::Create("fence.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
     // カメラをセット
     object3d->SetCamera(camera.get());
 
