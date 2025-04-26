@@ -46,7 +46,7 @@ void Framework::Finalize() {
     // DirectXの解放
     delete dxCommon;
     // WindowsAPIの解放
-    delete winApp;
+    winApp.reset();
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
 }
@@ -55,11 +55,11 @@ void Framework::Initialize() {
     OutputDebugStringA("Hello,Directx!\n");
     // ウィンドウ作成
     // WindowsAPIの初期化
-    winApp = new WinApp();
+    winApp = std::make_unique <WinApp>();
     winApp->Initialize();
     // DirectXの初期化
     dxCommon = new DirectXCommon();
-    dxCommon->Initialize(winApp);
+    dxCommon->Initialize(winApp.get());
     // 音声読み込み
     SoundLoader::GetInstance()->Initialize();
     // 音声再生
@@ -68,7 +68,7 @@ void Framework::Initialize() {
     srvManager = new SrvManager();
     srvManager->Initialize(dxCommon);
     // ImGuiマネージャの初期化
-    ImGuiManager::GetInstance()->Initialize(winApp, dxCommon, srvManager);
+    ImGuiManager::GetInstance()->Initialize(winApp.get(), dxCommon, srvManager);
     // テクスチャマネージャーの初期化
     TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
     // 3Dモデルマネージャの初期化
@@ -77,7 +77,7 @@ void Framework::Initialize() {
 #pragma region 基盤システムの初期化
 
     // 入力の初期化
-    Input::GetInstance()->Initialize(winApp);
+    Input::GetInstance()->Initialize(winApp.get());
 
     // スプライト共通部の初期化
     SpriteCommon::GetInstance()->Initialize(dxCommon);

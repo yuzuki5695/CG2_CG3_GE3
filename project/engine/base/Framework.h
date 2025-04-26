@@ -14,6 +14,7 @@
 #include<SoundPlayer.h>
 #include<SceneManager.h>
 #include<SceneFactory.h>
+#include<memory>
 
 // ゲーム全体
 class Framework
@@ -39,7 +40,7 @@ protected:
 	AbstractSceneFactory* sceneFactory_ = nullptr;
 private: // メンバ変数
 	// ポインタ
-	WinApp* winApp = nullptr;
+	std::unique_ptr <WinApp> winApp = nullptr;
 	DirectXCommon* dxCommon = nullptr;
 	ModelCommon* modelCommon = nullptr;
 	SrvManager* srvManager = nullptr;
@@ -48,7 +49,7 @@ private: // メンバ変数
 	bool endRequst_ = false;
 public:
 	// getter 
-	WinApp* GetWinApp() const { return winApp; }
+	WinApp* GetWinApp() const { return winApp.get(); }
 	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
 	//Camera* GetCamera() const { return camera; }
 	SrvManager* GetSrvManager() const { return srvManager; }
