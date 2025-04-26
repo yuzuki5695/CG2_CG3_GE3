@@ -112,6 +112,7 @@ void Sprite::Update() {
 	indexData[0] = 0; indexData[1] = 1; indexData[2] = 2;
 	indexData[3] = 1; indexData[4] = 3; indexData[5] = 2;
 
+	/*--------------------------------------------*/
 	/*-------WrldViewProjectionMatrixを作る--------*/
 	/*--------------------------------------------*/
 	Matrix4x4 worludMatrixSprite = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
@@ -142,6 +143,8 @@ void Sprite::Draw() {
 	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixBufferの場所を設定
 	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	//// Spriteの描画は常にuvCheckerにする
+	//spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 	// SRVのDescriptortableの先頭を設定
 	spriteCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureFilePath_));
 	// 描画! (DrawCall/ドローコール) 6個のインデックスを使用し1つのインスタンスを描画、その他は当面０で良い

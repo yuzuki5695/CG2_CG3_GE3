@@ -62,7 +62,7 @@ void GamePlayScene::Initialize() {
     object3d = new Object3d;
     object3d->Initialize(Object3dCommon::GetInstance());
     // オブジェクト作成
-    object3d->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+    object3d->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 4.71f, 0.0f }, { 0.0f, 0.0f, 0.0f } });
     object3d->SetCamera(camera);
 
 #pragma endregion 最初のシーンの初期化
@@ -145,9 +145,6 @@ void GamePlayScene::Draw() {
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理開始----------------------------------------------*/
     /*---------------------------------------------------------------------------------------------------*/
-
-    //// Spriteの描画は常にuvCheckerにする
-    //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
     sprite->Draw();
 

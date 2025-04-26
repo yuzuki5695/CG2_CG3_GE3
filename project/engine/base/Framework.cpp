@@ -98,7 +98,6 @@ void Framework::Update() {
     Input::GetInstance()->Update();
     // ImGuiの受付開始
     ImGuiManager::GetInstance()->Begin();
-
     // シーンマネージャの更新処理
     SceneManager::GetInstance()->Update();
 }
