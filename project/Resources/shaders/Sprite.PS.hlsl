@@ -39,7 +39,7 @@ PixeShaderOutput main(VertexShaderOutput input)
         // half lambert
         float Ndont = dot(normalize(input.normal), -gDirectionalLight.direction);
         float cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
-         
+        
         // 色にはLightingを行い,a値には行わないようにする
         output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         output.color.a = gMaterial.color.a * textureColor.a;
