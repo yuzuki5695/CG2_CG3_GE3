@@ -19,10 +19,12 @@ public: // メンバ関数
     void Draw() override;
 private: // メンバ変数
     // オブジェクトデータ
+    // camera
+    std::unique_ptr <Camera> camera = nullptr;
     // Sprite
     std::unique_ptr<Sprite> sprite = nullptr;
     // Object3d
-    Object3d* object3d = nullptr;
+    std::unique_ptr <Object3d> object3d = nullptr;
     /*-----ファイルデータ----*/
     // Texture
     std::string TexturePath01;
@@ -37,11 +39,7 @@ private: // メンバ変数
     // 音声プレイフラグ
     uint32_t soundfige;
 
-
-    Camera* camera = nullptr;
     // カメラの現在の位置と回転を取得
     Vector3 Cameraposition;
     Vector3 Camerarotation;
-
-
 };

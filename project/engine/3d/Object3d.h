@@ -29,7 +29,7 @@ public: // メンバ関数
 	void Draw();
 
 	// 3Dobject作成関数
-	void Create(std::string filePath, Transform transform);
+	static std::unique_ptr<Object3d> Create(std::string filePath, Transform transform);
 
 
 	void DebugUpdata();

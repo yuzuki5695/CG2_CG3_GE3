@@ -74,13 +74,17 @@ void Object3d::SetModel(const std::string& filePath) {
     model = ModelManager::GetInstance()->FindModel(filePath);
 }
 
-void Object3d::Create(std::string filePath, Transform transform) {
+std::unique_ptr<Object3d> Object3d::Create(std::string filePath, Transform transform) {
+    std::unique_ptr<Object3d> object3d = std::make_unique<Object3d>();   
+    // 初期化
+    object3d->Initialize(Object3dCommon::GetInstance());
     // モデルを検索してセットする
-    model = ModelManager::GetInstance()->FindModel(filePath);
-    transform_ = transform;
+    object3d->model = ModelManager::GetInstance()->FindModel(filePath);
+    // 座標をセット
+    object3d->transform_ = transform;
+  
+    return object3d;
 }
-
-
 
 void Object3d::DebugUpdata() {
 #ifdef USE_IMGUI

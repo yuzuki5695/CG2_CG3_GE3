@@ -10,26 +10,21 @@
 #include<SceneManager.h>
 
 void GamePlayScene::Finalize() {
-    // カメラ
-    delete camera;
-    // 3Dオブジェクトの解放
-    delete  object3d;
     // 音声データ解放
-    SoundPlayer::GetInstance()->SoundUnload(&soundData);
+  //  SoundPlayer::GetInstance()->SoundUnload(&soundData);
 }
 
 void GamePlayScene::Initialize() {
 
     // カメラの初期化
-    camera = new Camera();
+    camera = std::make_unique<Camera>();
     camera->SetRotate(Vector3(0.0f, 0.0f, 0.0f));
     camera->SetTranslate(Vector3(0.0f, 0.0f, -1000.0f));
-    Object3dCommon::GetInstance()->SetDefaultCamera(camera);
+    Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
     // カメラの現在の位置と回転を取得
     Cameraposition = camera->GetTranslate();
     Camerarotation = camera->GetRotate();
-
 
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
@@ -52,14 +47,12 @@ void GamePlayScene::Initialize() {
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
-    sprite = Sprite::Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
+    sprite = Sprite::Create(TexturePath01, { 0.0f,0.0f }, 0.0f, { 360.0f,360.0f });
 
-    // 3Dオブジェクトの初期化
-    object3d = new Object3d;
-    object3d->Initialize(Object3dCommon::GetInstance());
     // オブジェクト作成
-    object3d->Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 4.71f, 0.0f }, { 0.0f, 0.0f, 0.0f } });
-    object3d->SetCamera(camera);
+    object3d = Object3d::Create(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 4.71f, 0.0f }, { 0.0f, 0.0f, 0.0f } });
+    // カメラをセット
+    object3d->SetCamera(camera.get());
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ

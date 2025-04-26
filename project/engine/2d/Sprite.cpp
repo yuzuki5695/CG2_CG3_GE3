@@ -15,6 +15,14 @@ void Sprite::Initialize(SpriteCommon* spriteCommon) {
 	assert(spriteCommon);
 	// 引数で受け取ってメンバ変数に記録する
 	this->spriteCommon_ = spriteCommon;
+	// 頂点データの作成
+	VertexDatacreation();
+	// マテリアルの生成、初期化
+	MaterialGenerate();
+	// テクスチャサイズをイメージに合わせる
+	//AdjustTextureSize();
+	// WVP,World用のリソースの生成、初期化
+	TransformationMatrixGenerate();
 }
 
 void Sprite::VertexDatacreation() {
@@ -67,6 +75,11 @@ void Sprite::TransformationMatrixGenerate() {
 }
 
 void Sprite::Update() {
+	
+	transform.translate = { position_.x,position_.y,0.0f };
+	transform.rotate = { 0.0f,0.0f,rotation_ };
+	transform.scale = { size_.x,size_.y,1.0f };
+
 	// アンカーポイント
 	float left = 0.0f - anchorPoint.x;
 	float right = 1.0f - anchorPoint.x;
@@ -129,10 +142,6 @@ void Sprite::Update() {
 	uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeRotateZMatrix(uvTransform.rotate.z));
 	uvTransformMatrix = MatrixVector::Multiply(uvTransformMatrix, MatrixVector::MakeTranslateMatrix(uvTransform.translate));
 	materialData->uvTransform = uvTransformMatrix;
-
-	transform.translate = { position_.x,position_.y,0.0f };
-	transform.rotate = { 0.0f,0.0f,rotation_ };
-	transform.scale = { size_.x,size_.y,1.0f };
 }
 
 void Sprite::Draw() {
@@ -169,9 +178,6 @@ void Sprite::AdjustTextureSize() {
 
 std::unique_ptr<Sprite> Sprite::Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size) {
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	if (sprite == nullptr) {
-		return nullptr;
-	}
 	sprite->Initialize(SpriteCommon::GetInstance());
 	// 引数で受け取ってメンバ変数に記録する
 	sprite->textureFilePath_ = textureFilePath;
@@ -180,15 +186,7 @@ std::unique_ptr<Sprite> Sprite::Create(std::string textureFilePath, Vector2 posi
 	sprite->position_ = position;
 	sprite->rotation_ = rotation;
 	sprite->size_ = size;
-	// 頂点データの作成
-	sprite->VertexDatacreation();
-	// マテリアルの生成、初期化
-	sprite->MaterialGenerate();
-	// テクスチャサイズをイメージに合わせる
-	//AdjustTextureSize();
-	// WVP,World用のリソースの生成、初期化
-	sprite->TransformationMatrixGenerate();
-	// トランスフォームの初期化
+	// Transformの初期化
 	sprite->transform.translate = { sprite->position_.x,sprite->position_.y,0.0f };
 	sprite->transform.rotate = { 0.0f,0.0f,sprite->rotation_ };
 	sprite->transform.scale = { sprite->size_.x,sprite->size_.y,1.0f };

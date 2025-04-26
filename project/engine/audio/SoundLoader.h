@@ -39,13 +39,14 @@ struct SoundData
 class SoundLoader
 {
 private:
-    static SoundLoader* instance;
+    static std::unique_ptr<SoundLoader> instance;
 
-    SoundLoader() = default;
-    ~SoundLoader() = default;
     SoundLoader(SoundLoader&) = delete;
     SoundLoader& operator=(SoundLoader&) = delete;
 public: // メンバ関数
+    SoundLoader() = default;
+    ~SoundLoader() = default;
+
     // シングルトンインスタンスの取得
     static SoundLoader* GetInstance();
     // 終了

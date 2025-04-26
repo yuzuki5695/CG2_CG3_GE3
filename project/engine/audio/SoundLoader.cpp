@@ -3,18 +3,21 @@
 
 using namespace Microsoft::WRL;
 
-SoundLoader* SoundLoader::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<SoundLoader> SoundLoader::instance = nullptr;
 
+// シングルトンインスタンスの取得
 SoundLoader* SoundLoader::GetInstance() {
-    if (instance == nullptr) {
-        instance = new SoundLoader;
+    if (!instance) {
+        instance = std::make_unique<SoundLoader>();
     }
-    return instance;
+    return instance.get();
 }
 
+// 終了
 void SoundLoader::Finalize() {
-    delete instance;
-    instance = nullptr;
+    GetIXAudio2();
+    instance.reset();
 }
 
 void SoundLoader::Initialize() {
