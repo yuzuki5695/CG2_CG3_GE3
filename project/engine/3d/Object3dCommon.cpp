@@ -151,6 +151,26 @@ void Object3dCommon::GraphicsPipelineGenerate() {
     blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;         // すでに書き込まれている色 (デストカラー)
 
+    //// 加算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
+
+    //// 減算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;         // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;    // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;              // すでに書き込まれている色 (デストカラー)
+
+    //// 乗算合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;           // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;         // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_SRC_COLOR;    // すでに書き込まれている色 (デストカラー)
+
+    //// スクリーン合成
+    //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_INV_DEST_COLOR;    // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
+    //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;             // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;              // すでに書き込まれている色 (デストカラー)
+
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
     // 裏面(時計回り)を表示しない
