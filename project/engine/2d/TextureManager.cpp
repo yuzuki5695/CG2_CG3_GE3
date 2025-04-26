@@ -1,8 +1,10 @@
 #include "TextureManager.h"
 
-TextureManager* TextureManager::instance = nullptr;
+
 // ImGuiで0番目に使用するため、1番から使用
 uint32_t TextureManager::KSRVIndexTop = 1;
+
+TextureManager* TextureManager::instance = nullptr;
 
 TextureManager* TextureManager::GetInstance() {
 	if (instance == nullptr) {

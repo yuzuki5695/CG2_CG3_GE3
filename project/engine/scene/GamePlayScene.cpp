@@ -12,8 +12,6 @@
 void GamePlayScene::Finalize() {
     // カメラ
     delete camera;
-    // 汎用機能の解放
-    delete  sprite;
     // 3Dオブジェクトの解放
     delete  object3d;
     // 音声データ解放
@@ -54,9 +52,7 @@ void GamePlayScene::Initialize() {
 #pragma region 最初のシーンの初期化
 
     // スプライトの初期化
-    sprite = new Sprite;
-    sprite->Initialize(SpriteCommon::GetInstance());
-    sprite->Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
+    sprite = Sprite::Create(TexturePath01, { 100.0f,100.0f }, 0.0f, { 360.0f,360.0f });
 
     // 3Dオブジェクトの初期化
     object3d = new Object3d;

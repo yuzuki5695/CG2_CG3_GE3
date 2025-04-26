@@ -20,7 +20,7 @@ public: // メンバ関数
 private: // メンバ変数
     // オブジェクトデータ
     // Sprite
-    Sprite* sprite = nullptr;
+    std::unique_ptr<Sprite> sprite = nullptr;
     // Object3d
     Object3d* object3d = nullptr;
     /*-----ファイルデータ----*/

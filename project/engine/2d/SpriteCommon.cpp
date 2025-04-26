@@ -2,21 +2,24 @@
 
 using namespace Microsoft::WRL;
 
-SpriteCommon* SpriteCommon::instance = nullptr;
+// 静的メンバ変数の定義
+std::unique_ptr<SpriteCommon> SpriteCommon::instance = nullptr;
 
+// シングルトンインスタンスの取得
 SpriteCommon* SpriteCommon::GetInstance() {
-    if (instance == nullptr) {
-        instance = new SpriteCommon;
+    if (!instance) {
+        instance = std::make_unique<SpriteCommon>();
     }
-    return instance;
+    return instance.get();
 }
 
+// 終了
 void SpriteCommon::Finalize() {
-    delete instance;
-    instance = nullptr;
+    instance.reset();  // `delete` 不要
 }
 
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
+    assert(dxCommon);
     // 引数を受け取ってメンバ変数に記録する
     dxCommon_ = dxCommon;
     // グラフィックスパイプラインの生成

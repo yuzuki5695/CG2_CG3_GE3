@@ -45,7 +45,7 @@ public: // メンバ関数
 	void Draw();
 
 	// スプライト作成関数
-	void Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
+	static std::unique_ptr<Sprite> Create(std::string textureFilePath, Vector2 position, float rotation, Vector2 size);
 
 	// ImGuiの更新
 	void DebugUpdata();

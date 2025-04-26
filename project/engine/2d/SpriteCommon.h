@@ -5,13 +5,14 @@
 class SpriteCommon
 {
 private:
-	static SpriteCommon* instance;
+	static std::unique_ptr<SpriteCommon> instance;
 
-	SpriteCommon() = default;
-	~SpriteCommon() = default;
 	SpriteCommon(SpriteCommon&) = delete;
 	SpriteCommon& operator=(SpriteCommon&) = delete;
 public: // メンバ関数
+	SpriteCommon() = default;
+	~SpriteCommon() = default;
+
 	// シングルトンインスタンスの取得
 	static SpriteCommon* GetInstance();
 	// 終了
@@ -20,8 +21,6 @@ public: // メンバ関数
 	void Initialize(DirectXCommon* dxCommon);
 	// 共通描画設定
 	void Commondrawing();
-
-	DirectXCommon* GetDxCommon() const { return  dxCommon_; }
 
 private:
 	// ルートシグネチャの生成
@@ -33,4 +32,7 @@ private:
 	// RootSignature
 	Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature = nullptr;
 	Microsoft::WRL::ComPtr <ID3D12PipelineState> graphicsPipelineState = nullptr;
+public:
+	// gettre
+	DirectXCommon* GetDxCommon() const { return  dxCommon_; }
 };
