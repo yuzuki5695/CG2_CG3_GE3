@@ -10,8 +10,7 @@
 #include<SceneManager.h>
 
 void GamePlayScene::Finalize() {
-    // 音声データ解放
-  //  SoundPlayer::GetInstance()->SoundUnload(&soundData);
+
 }
 
 void GamePlayScene::Initialize() {

@@ -38,11 +38,6 @@ void Framework::Finalize() {
     ImGuiManager::GetInstance()->Finalize();
     // SRVマネージャの開放
     srvManager.reset();
-    // 音声データの解放
-    //xAudio2解放
-    SoundLoader::GetInstance()->GetIXAudio2();
-    SoundLoader::GetInstance()->Finalize();
-    SoundPlayer::GetInstance()->Finalize();
     // DirectXの解放
     dxCommon.reset();
     // WindowsAPIの解放
