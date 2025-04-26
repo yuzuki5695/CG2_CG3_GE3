@@ -26,6 +26,14 @@ void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
     GraphicsPipelineGenerate();
 }
 
+void SpriteCommon::Commondrawing() {
+    // RootSignatureを設定。PSOに設定しているけど別途設定が必要
+    dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+    // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
+    dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
 void SpriteCommon::RootSignatureGenerate() {
     HRESULT hr;
 
@@ -179,12 +187,4 @@ void SpriteCommon::GraphicsPipelineGenerate() {
     // 実際に生成
     hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
     assert(SUCCEEDED(hr));
-}
-
-void SpriteCommon::Commondrawing() {
-    // RootSignatureを設定。PSOに設定しているけど別途設定が必要
-    dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-    dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-    // 形状を設定。PSOに設定しているものとはまた別。同じものを設定する
-    dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
