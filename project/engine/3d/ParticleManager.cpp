@@ -44,6 +44,7 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
+
 void ParticleManager::Update() {
     Matrix4x4 billboardMatrix;
     Matrix4x4 viewMatrix;
@@ -68,7 +69,22 @@ void ParticleManager::Update() {
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
         for (auto particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
-    
+            // パーティクルの現在の時間を増加させる
+            (*particleIterator).currentTime += 1.0f / 60.0f;  // 60fpsで時間をカウントアップ
+
+            // パーティクルの寿命が尽きたら削除
+            if ((*particleIterator).currentTime >= (*particleIterator).lifetime) {
+                particleIterator = group.particles.erase(particleIterator);  // パーティクル削除
+                continue;
+            }
+
+            // パーティクルの位置や動きを更新
+            (*particleIterator).transform.translate.x += (*particleIterator).Velocity.x * (1.0f / 60.0f);
+
+            // 透明度の更新（時間に基づいてフェード）
+            float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
+            (*particleIterator).color.w = alpha;
+
             // world行列の計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
             Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
@@ -87,6 +103,17 @@ void ParticleManager::Update() {
 
             // 次のパーティクルに進む
             ++particleIterator;
+            group.kNumInstance = counter;
+        }
+
+        // パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
+        if (group.spawnTime >= group.spawnFrequency) {
+            // 新しいパーティクルを発生させる
+            Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 3);  // 実際の発生処理を呼び出す
+            group.spawnTime = 0.0f;  // 発生時間をリセット
+        } else {
+            // 発生時間を増加
+            group.spawnTime += 1.0f / 60.0f;
         }
     }
 }
@@ -274,6 +301,7 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
         // 新しいパーティクルグループにテクスチャパスとインデックスを設定
         newGroup.materialData.textureFilePath = textureFilepath;
         newGroup.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
+        newGroup.kNumInstance = 0;
 
         // インスタンス用のリソースバッファを作成
         newGroup.Resource = dxCommon_->CreateBufferResource(sizeof(InstanceData) * MaxInstanceCount);
@@ -295,47 +323,38 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     }
 }
 
-void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
-    // パーティクルグループが存在しない場合、エラーを発生させる
+void ParticleManager::Emit(const std::string& name, const Vector3& position, uint32_t count) {
     auto it = particleGroups.find(name);
     if (it == particleGroups.end()) {
-        assert(false);
-        return;
+        throw std::runtime_error("Particle group not found: " + name);
     }
 
-    // 既存のパーティクルグループを取得
     ParticleGroup& group = it->second;
-
-    // 現在のパーティクル数がMaxInstanceCountを超えている場合、追加するパーティクル数を調整
+    camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
     size_t currentParticleCount = group.particles.size();
     if (currentParticleCount + count > MaxInstanceCount) {
-        count = static_cast<uint32_t>(MaxInstanceCount - currentParticleCount);  // 型変換
+        count = static_cast<uint32_t>(MaxInstanceCount - currentParticleCount);
     }
 
-    std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
+    if (count == 0) return;
 
-    // count 回のパーティクルを発生させる
+    std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
+    std::uniform_real_distribution<float> velDist(-0.5f, 0.5f);
+
     for (uint32_t i = 0; i < count; ++i) {
-        // ランダムオフセットを適用
         Vector3 offset(dist(randomEngine), dist(randomEngine), dist(randomEngine));
 
-        // パーティクルの位置と色を指定
-        Vector4 color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);  // 初期色は白
-
-        // 新しいパーティクルを生成
         Particle newParticle;
-        newParticle.transform.translate = { position.x + offset.x, position.y + offset.y, position.z + offset.z };
-        newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };  // 回転の初期化（必要に応じて後で変更可能）
-        newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };  // スケールの初期化
-        newParticle.color = color;
-        newParticle.lifetime = 1.0f;  // 新しく発生したパーティクルのライフタイムを設定
-        newParticle.currentTime = 0.0f;  // 寿命の初期化
-        newParticle.Velocity = { 1.0f, 1.0f, 1.0f };
+        newParticle.transform.translate = { position.x + offset.x,position.y + offset.y ,position.z + offset.z };
+        newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };
+        newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };
+        newParticle.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+        newParticle.lifetime = 1.0f;
+        newParticle.currentTime = 0.0f;
+        newParticle.Velocity = { velDist(randomEngine), velDist(randomEngine), velDist(randomEngine) };
 
-        // パーティクルをグループに追加
         group.particles.push_back(newParticle);
     }
 
-    // インスタンシングデータの更新
-    group.kNumInstance += count;  // 新たに追加したインスタンス数を反映
+    group.kNumInstance = static_cast<uint32_t>(group.particles.size());
 }

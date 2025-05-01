@@ -91,7 +91,7 @@ public: // メンバ関数
 
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
 
-	void Emit(const std::string name, const Vector3& position, uint32_t count);
+	void Emit(const std::string& name, const Vector3& position, uint32_t count);
 
 	// .mtlファイルの読み取り
 	static ParticleManager::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);

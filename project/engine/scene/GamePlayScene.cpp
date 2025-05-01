@@ -22,6 +22,7 @@ void GamePlayScene::Initialize() {
     camera->SetRotate(Vector3(0.0f, 0.0f, 0.0f));
     camera->SetTranslate(Vector3(0.0f, 0.0f, -1000.0f));
     Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
+    ParticleCommon::GetInstance()->SetDefaultCamera(camera.get());
 
     // カメラの現在の位置と回転を取得
     Cameraposition = camera->GetTranslate();
@@ -56,8 +57,8 @@ void GamePlayScene::Initialize() {
     // テクスチャ生成
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
     // 発生
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
-    ParticleManager::GetInstance()->SetCamera(camera.get());
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 3);
+   // ParticleManager::GetInstance()->SetCamera(camera.get());
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
