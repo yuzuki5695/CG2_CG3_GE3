@@ -92,24 +92,25 @@ void ParticleManager::Update() {
 }
 
 void ParticleManager::Draw() {
-//    // パーティクルグループごとに描画処理を行う
-//    for (const auto& [name, particleGroup] : particleGroups) {
-//        // インスタンス数が0の場合は描画しない
-//        if (particleGroup.kNumInstance == 0) {
-//            continue;
-//        }
-//        // VertexBufferView を設定
-//        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-//        // マテリアル用の定数バッファを設定
-//        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-//        dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(1, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
-//        // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
-//        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
-//        // SRVで画像を表示
-//        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex); 
-//        // 描画（インスタンシング）を実行
-//        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
-//    }
+
+    // パーティクルグループごとに描画処理を行う
+    for (const auto& [name, particleGroup] : particleGroups) {
+        // インスタンス数が0の場合は描画しない
+        if (particleGroup.kNumInstance == 0) {
+            continue;
+        }
+        // VertexBufferView を設定
+        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+        // マテリアル用の定数バッファを設定
+        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
+        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+       //xCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
+        // SRVで画像を表示
+        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
+        // 描画（インスタンシング）を実行
+        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
+    }
 }
 
 void ParticleManager::SetParticleModel(const std::string& directorypath, const std::string& filename) {

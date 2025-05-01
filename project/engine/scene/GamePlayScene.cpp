@@ -52,12 +52,11 @@ void GamePlayScene::Initialize() {
 
     // パーティクル 
     // モデル生成
-    ParticleManager::GetInstance()->SetParticleModel("Resources", "monsterBallUV.obj");
+    ParticleManager::GetInstance()->SetParticleModel("Resources", "plane.obj");
     // テクスチャ生成
-    ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/monsterBall.png");
+    ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
     // 発生
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 1);
-
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
     ParticleManager::GetInstance()->SetCamera(camera.get());
 
 #pragma endregion 最初のシーンの初期化
@@ -149,7 +148,7 @@ void GamePlayScene::Draw() {
     // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
     SpriteCommon::GetInstance()->Commondrawing();
     
-    sprite->Draw();
+    //sprite->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/

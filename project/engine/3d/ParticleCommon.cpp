@@ -35,6 +35,7 @@ void ParticleCommon::Commondrawing() {
 }
 
 void ParticleCommon::RootSignatureGenerate() {
+
     HRESULT hr;
 
     /*----------------------------------------------------------------------------------*/
@@ -46,6 +47,13 @@ void ParticleCommon::RootSignatureGenerate() {
     descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+    // Instancing作成
+    D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
+    descriptorRangeForInstancing[0].BaseShaderRegister = 0; // 0から始める
+    descriptorRangeForInstancing[0].NumDescriptors = 1; // 数は1つ
+    descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
+    descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
     /*----------------------------------------------------------------------------------*/
     /*---------------------------------RootParameter作成---------------------------------*/
     /*----------------------------------------------------------------------------------*/
@@ -54,9 +62,10 @@ void ParticleCommon::RootSignatureGenerate() {
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
     rootParameters[0].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
 
-    rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// CBVを使う
-    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShaderでを使う
-    rootParameters[1].Descriptor.ShaderRegister = 0;// レジスタ番号0を使う
+    rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // VertexShaderで使う
+    rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing; // Tableの中身の配列を指定
+    rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing); // Tableで利用する数
 
     rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTableを使う
     rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//PixelShaderで使う
@@ -100,7 +109,7 @@ void ParticleCommon::RootSignatureGenerate() {
         Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
         assert(false);
     }
-    //バイナリを元に作成
+    // バイナリを元に作成
     hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
     assert(SUCCEEDED(hr));
 }
@@ -150,7 +159,7 @@ void ParticleCommon::GraphicsPipelineGenerate() {
     //// 加算合成
     //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;       // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
     //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;           // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
-    //blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
+    //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;            // すでに書き込まれている色 (デストカラー)
 
     //// 減算合成
     //blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;         // これから書き込む色。PixeShaderから出力する色 (ソースカラ―)
@@ -167,11 +176,14 @@ void ParticleCommon::GraphicsPipelineGenerate() {
     //blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;             // これから書き込むα。PixeShaderから出力するα値 (ソースアルファ)
     //blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;              // すでに書き込まれている色 (デストカラー)
 
+
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
-    //裏面(時計回り)を表示しない
-    rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-    //三角形の中を塗りつぶす
+    // 裏面(時計回り)を表示しない
+    //rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+    // 裏面(時計回り)を表紙する
+    rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+    // 三角形の中を塗りつぶす
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     /*----------------------------------------------------------------------------------*/
@@ -195,7 +207,7 @@ void ParticleCommon::GraphicsPipelineGenerate() {
     // 書き込むRTVの情報
     graphicsPipelineStateDesc.NumRenderTargets = 1;
     graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-    //利用するトポロジ(形状)のタイプ
+    // 利用するトポロジ(形状)のタイプ
     graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     // どのように画面に色を打ち込むかの設定(気にしなくて良い)
     graphicsPipelineStateDesc.SampleDesc.Count = 1;
