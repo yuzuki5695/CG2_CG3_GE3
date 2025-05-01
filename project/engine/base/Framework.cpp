@@ -25,6 +25,7 @@ void Framework::Finalize() {
     // シーンマネージャの解放
     SceneManager::GetInstance()->Finalize();
     // 基盤システムの解放
+    ParticleCommon::GetInstance()->Finalize();
     SpriteCommon::GetInstance()->Finalize();
     Object3dCommon::GetInstance()->Finalize();
     // 入力解放
@@ -78,6 +79,9 @@ void Framework::Initialize() {
 
     // 3Dオブジェクト共通部の初期化
     Object3dCommon::GetInstance()->Initialize(dxCommon.get());
+
+    // パーティクル共通部の初期化
+    ParticleCommon::GetInstance()->Initialize(dxCommon.get());
 
 #pragma endregion 基盤システムの初期化
 }

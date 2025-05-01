@@ -153,6 +153,9 @@
     <ClCompile Include="engine\scene\SceneFactory.cpp">
       <Filter>ソース ファイル\engine\scene</Filter>
     </ClCompile>
+    <ClCompile Include="engine\3d\ParticleCommon.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\2d\Sprite.h">
@@ -260,15 +263,21 @@
     <ClInclude Include="engine\scene\AbstractSceneFactory.h">
       <Filter>ヘッダー ファイル\engine\scene</Filter>
     </ClInclude>
+    <ClInclude Include="engine\3d\ParticleCommon.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\Object3d.hlsli" />
     <None Include="Resources\shaders\Sprite.hlsli" />
+    <None Include="Resources\shaders\Particle.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\Object3d.PS.hlsl" />
     <FxCompile Include="Resources\shaders\Object3d.VS.hlsl" />
     <FxCompile Include="Resources\shaders\Sprite.PS.hlsl" />
     <FxCompile Include="Resources\shaders\Sprite.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Particle.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Particle.VS.hlsl" />
   </ItemGroup>
 </Project>

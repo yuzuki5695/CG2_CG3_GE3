@@ -6,6 +6,7 @@
 #include<TextureManager.h>
 #include<SpriteCommon.h>
 #include<Object3dCommon.h>
+#include<ParticleCommon.h>
 #include<ModelCommon.h>
 #include<ModelManager.h>
 #include<Camera.h>
