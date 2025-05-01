@@ -34,7 +34,6 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // メンバ変数に記録
     this->dxCommon_ = birectxcommon;
     this->srvmanager_ = srvmanager;
-    camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
     // 乱数エンジンを初期化
     std::random_device rd;// 乱数生成器
     randomEngine = std::mt19937(rd());
@@ -44,7 +43,6 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
-
 void ParticleManager::Update() {
     Matrix4x4 billboardMatrix;
     Matrix4x4 viewMatrix;
@@ -52,7 +50,7 @@ void ParticleManager::Update() {
     // ビルボード行列: パーティクルがカメラに向くように変換
     if (camera_) {
         // カメラのワールド行列を取得し、ビルボード行列を計算
-        billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());  // 修正: GetWorldMatrix
+        billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorldMatrix());  // 修正: GetWorldMatrix
         // カメラからビュー行列とプロジェクション行列を取得
         viewMatrix = camera_->GetViewMatrix();
         projectionMatrix = camera_->GetProjectionMatrix();
@@ -69,21 +67,21 @@ void ParticleManager::Update() {
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
         for (auto particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
-            // パーティクルの現在の時間を増加させる
-            (*particleIterator).currentTime += 1.0f / 60.0f;  // 60fpsで時間をカウントアップ
+            //// パーティクルの現在の時間を増加させる
+            //(*particleIterator).currentTime += 1.0f / 60.0f;  // 60fpsで時間をカウントアップ
 
-            // パーティクルの寿命が尽きたら削除
-            if ((*particleIterator).currentTime >= (*particleIterator).lifetime) {
-                particleIterator = group.particles.erase(particleIterator);  // パーティクル削除
-                continue;
-            }
+            //// パーティクルの寿命が尽きたら削除
+            //if ((*particleIterator).currentTime >= (*particleIterator).lifetime) {
+            //    particleIterator = group.particles.erase(particleIterator);  // パーティクル削除
+            //    continue;
+            //}
 
-            // パーティクルの位置や動きを更新
-            (*particleIterator).transform.translate.x += (*particleIterator).Velocity.x * (1.0f / 60.0f);
+            //// パーティクルの位置や動きを更新
+            //(*particleIterator).transform.translate.x += (*particleIterator).Velocity.x * (1.0f / 60.0f);
 
-            // 透明度の更新（時間に基づいてフェード）
-            float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
-            (*particleIterator).color.w = alpha;
+            //// 透明度の更新（時間に基づいてフェード）
+            //float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
+            //(*particleIterator).color.w = alpha;
 
             // world行列の計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
@@ -91,7 +89,8 @@ void ParticleManager::Update() {
             Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
 
             // worldViewProjection行列の計算
-            Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+            Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
+            Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
             // インスタンスデータに更新した行列を設定
             if (counter < group.kNumInstance) {
@@ -103,22 +102,27 @@ void ParticleManager::Update() {
 
             // 次のパーティクルに進む
             ++particleIterator;
-            group.kNumInstance = counter;
         }
 
-        // パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
-        if (group.spawnTime >= group.spawnFrequency) {
-            // 新しいパーティクルを発生させる
-            Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 3);  // 実際の発生処理を呼び出す
-            group.spawnTime = 0.0f;  // 発生時間をリセット
-        } else {
-            // 発生時間を増加
-            group.spawnTime += 1.0f / 60.0f;
-        }
+        group.kNumInstance = counter; 
+
+        //// パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
+        //if (group.spawnTime >= group.spawnFrequency) {
+        //    // 新しいパーティクルを発生させる
+        //    Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 2);  // 実際の発生処理を呼び出す
+        //    group.spawnTime = 0.0f;  // 発生時間をリセット
+        //} else {
+        //    // 発生時間を増加
+        //    group.spawnTime += 1.0f / 60.0f;
+        //}
     }
 }
 
 void ParticleManager::Draw() {
+    // VertexBufferView を設定
+    dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+    // マテリアル用の定数バッファを設定
+    dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
     // パーティクルグループごとに描画処理を行う
     for (const auto& [name, particleGroup] : particleGroups) {
@@ -126,13 +130,8 @@ void ParticleManager::Draw() {
         if (particleGroup.kNumInstance == 0) {
             continue;
         }
-        // VertexBufferView を設定
-        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-        // マテリアル用の定数バッファを設定
-        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
         srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
-       //xCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
         // SRVで画像を表示
         srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex);
         // 描画（インスタンシング）を実行
@@ -331,6 +330,7 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
 
     ParticleGroup& group = it->second;
     camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
+
     size_t currentParticleCount = group.particles.size();
     if (currentParticleCount + count > MaxInstanceCount) {
         count = static_cast<uint32_t>(MaxInstanceCount - currentParticleCount);
@@ -338,6 +338,7 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
 
     if (count == 0) return;
 
+    // ランダムオフセット
     std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
     std::uniform_real_distribution<float> velDist(-0.5f, 0.5f);
 
@@ -352,9 +353,10 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
         newParticle.lifetime = 1.0f;
         newParticle.currentTime = 0.0f;
         newParticle.Velocity = { velDist(randomEngine), velDist(randomEngine), velDist(randomEngine) };
-
+        
+        // 作成したパーティクルをパーティクルリストに追加
         group.particles.push_back(newParticle);
     }
-
+    // 描画で使用するインスタンス数を更新
     group.kNumInstance = static_cast<uint32_t>(group.particles.size());
 }

@@ -25,7 +25,7 @@ private: // メンバ変数
 	float farclip; // ファークリップ距離
 public:
 	// getter
-	const Matrix4x4& GetWorludMatrix() const { return worludMatrix; }
+	const Matrix4x4& GetWorldMatrix() const { return worludMatrix; }
 	const Matrix4x4& GetViewMatrix() const { return viewMatrix; }
 	const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix; }
 	const Matrix4x4& GetViewProjectionMatrix() const { return ViewProjectionMatrix; }

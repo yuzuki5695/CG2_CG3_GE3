@@ -57,8 +57,7 @@ void GamePlayScene::Initialize() {
     // テクスチャ生成
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
     // 発生
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 3);
-   // ParticleManager::GetInstance()->SetCamera(camera.get());
+    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -149,7 +148,7 @@ void GamePlayScene::Draw() {
     // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
     SpriteCommon::GetInstance()->Commondrawing();
     
-    //sprite->Draw();
+    sprite->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
