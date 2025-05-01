@@ -1,6 +1,14 @@
 #pragma once
 #include<DirectXCommon.h>
 #include<SrvManager.h>
+#include<random>
+#include<Vector2.h>
+#include<Vector3.h>
+#include<Vector4.h>
+#include<Matrix4x4.h>
+#include <Transform.h>
+#include<Camera.h>
+#include<Model.h>
 
 // 3Dオブジェクト共通部
 class ParticleManager
@@ -31,4 +39,6 @@ private: // メンバ変数
 	// ポインタ
 	DirectXCommon* dxCommon_;
 	SrvManager* srvmanager_;
+	// ランダムエンジン
+	std::mt19937 randomEngine;
 };

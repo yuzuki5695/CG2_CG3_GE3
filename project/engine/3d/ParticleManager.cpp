@@ -34,6 +34,10 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // メンバ変数に記録
     this->dxCommon_ = birectxcommon;
     this->srvmanager_ = srvmanager;
+    // 乱数エンジンを初期化
+    std::random_device rd;// 乱数生成器
+    randomEngine = std::mt19937(rd());
+
 
 }
 
