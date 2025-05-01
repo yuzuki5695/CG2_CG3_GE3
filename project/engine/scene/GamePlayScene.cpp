@@ -9,6 +9,7 @@
 #endif // USE_IMGUI
 #include<SceneManager.h>
 #include <ParticleCommon.h>
+#include <ParticleManager.h>
 
 void GamePlayScene::Finalize() {
 
@@ -45,9 +46,13 @@ void GamePlayScene::Initialize() {
     sprite = Sprite::Create("Resources/uvChecker.png", Vector2{ 0.0f,0.0f }, 0.0f, Vector2{ 360.0f,360.0f });
 
     // オブジェクト作成
-    object3d = Object3d::Create("monsterBallUV.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
+    object3d = Object3d::Create("axis.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
     // カメラをセット
     object3d->SetCamera(camera.get());
+
+    // パーティクル 
+    // モデル生成
+    ParticleManager::GetInstance()->SetParticleModel("Resources", "monsterBallUV.obj");
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -71,7 +76,7 @@ void GamePlayScene::Update() {
     //ImGui::ShowDemoWindow();   
 
     // スプライト
-    sprite->DebugUpdata();
+    //sprite->DebugUpdata();
 
     // object3d
     object3d->DebugUpdata();
@@ -94,6 +99,8 @@ void GamePlayScene::Update() {
 
     // 更新処理
     object3d->Update();
+
+    ParticleManager::GetInstance()->Update();
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -145,5 +152,6 @@ void GamePlayScene::Draw() {
     // パーティクルの描画準備。パーティクルの描画に共通のグラフィックスコマンドを積む 
     ParticleCommon::GetInstance()->Commondrawing();
 
+    ParticleManager::GetInstance()->Draw();
 
 }
