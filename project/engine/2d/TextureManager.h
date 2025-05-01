@@ -37,6 +37,12 @@ public: // メンバ関数
 	// CPUハンドルの取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filepath);
 
+	// テクスチャがすでにロードされているか確認
+	bool IsTextureLoaded(const std::string& filepath) const {
+		// textures マップにファイルパスが存在するか確認
+		return textureDatas.find(filepath) != textureDatas.end();
+	}
+
 private: // メンバ変数
 	// テクスチャ1枚分のデータ
 	struct TextureData {

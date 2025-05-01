@@ -88,6 +88,11 @@ public: // メンバ関数
 
 	void SetParticleModel(const std::string& directorypath, const std::string& filename);
 
+
+	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
+
+	void Emit(const std::string name, const Vector3& position, uint32_t count);
+
 	// .mtlファイルの読み取り
 	static ParticleManager::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	// .objファイルの読み取り
@@ -119,7 +124,10 @@ private: // メンバ変数
 	uint32_t MaxInstanceCount = 200;
 	//ビルボード行列
 	Matrix4x4 backToFrontMatrix;
-	
+
+	// パーティクルグループコンテナ
+	std::unordered_map<std::string, ParticleGroup> particleGroups;
+
 public:
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 };

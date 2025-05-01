@@ -38,16 +38,78 @@ void ParticleManager::Initialize(DirectXCommon* birectxcommon, SrvManager* srvma
     // 乱数エンジンを初期化
     std::random_device rd;// 乱数生成器
     randomEngine = std::mt19937(rd());
+    // マテリアルの生成と初期化
+    MaterialGenerate();
     //ビルボード行列作成
     backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 }
 
 void ParticleManager::Update() {
+    Matrix4x4 billboardMatrix;
+    Matrix4x4 viewMatrix;
+    Matrix4x4 projectionMatrix;
+    // ビルボード行列: パーティクルがカメラに向くように変換
+    if (camera_) {
+        // カメラのワールド行列を取得し、ビルボード行列を計算
+        billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorludMatrix());  // 修正: GetWorldMatrix
+        // カメラからビュー行列とプロジェクション行列を取得
+        viewMatrix = camera_->GetViewMatrix();
+        projectionMatrix = camera_->GetProjectionMatrix();
+    } else {
+        // カメラがない場合の処理（必要であれば）
+    }
 
+    // パーティクルの位置をカメラの方向に合わせるために設定
+    billboardMatrix.m[3][0] = 0.0f;
+    billboardMatrix.m[3][1] = 0.0f;
+    billboardMatrix.m[3][2] = 0.0f;
+
+    // 各パーティクルグループの処理
+    for (auto& [name, group] : particleGroups) {
+        uint32_t counter = 0;
+        for (auto particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
+    
+            // world行列の計算
+            Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+            Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+            Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
+
+            // worldViewProjection行列の計算
+            Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+
+            // インスタンスデータに更新した行列を設定
+            if (counter < group.kNumInstance) {
+                group.instanceData[counter].WVP = worldViewProjectionMatrix;
+                group.instanceData[counter].World = worldMatrix;
+                group.instanceData[counter].color = (*particleIterator).color;
+                ++counter;
+            }
+
+            // 次のパーティクルに進む
+            ++particleIterator;
+        }
+    }
 }
 
 void ParticleManager::Draw() {
-
+//    // パーティクルグループごとに描画処理を行う
+//    for (const auto& [name, particleGroup] : particleGroups) {
+//        // インスタンス数が0の場合は描画しない
+//        if (particleGroup.kNumInstance == 0) {
+//            continue;
+//        }
+//        // VertexBufferView を設定
+//        dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+//        // マテリアル用の定数バッファを設定
+//        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+//        dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(1, TextureManager::GetInstance()->GetSrvHandleGPU(particleGroup.materialData.textureFilePath));
+//        // インスタンシングデータの SRV を設定（テクスチャファイルのパスを指定）
+//        srvmanager_->SetGraphicsRootDescriptorTable(1, particleGroup.srvindex);
+//        // SRVで画像を表示
+//        srvmanager_->SetGraphicsRootDescriptorTable(2, particleGroup.materialData.textureindex); 
+//        // 描画（インスタンシング）を実行
+//        dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(modelDate.vertices.size()), static_cast<UINT>(particleGroup.kNumInstance), 0, 0);
+//    }
 }
 
 void ParticleManager::SetParticleModel(const std::string& directorypath, const std::string& filename) {
@@ -182,4 +244,97 @@ ParticleManager::ModelDate ParticleManager::LoadObjFile(const std::string& direc
     }
     // 4. ModelDateを返す
     return modelDate;
+}
+
+void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilepath) {
+    // すでにテクスチャがロードされているか確認
+    if (!TextureManager::GetInstance()->IsTextureLoaded(textureFilepath)) {
+        // マテリアルのテクスチャファイルをロード
+        TextureManager::GetInstance()->LoadTexture(textureFilepath);
+    }
+
+    // パーティクルグループ名が既に存在するかチェック
+    auto it = particleGroups.find(name);
+    if (it != particleGroups.end()) {
+        // 名前が一致するグループが存在する場合、そのグループのテクスチャが一致するか確認
+        if (it->second.materialData.textureFilePath == textureFilepath) {
+            // テクスチャが一致する場合、既存のグループを再利用
+            return;
+        } else {
+            // テクスチャが異なる場合、既存のグループを更新
+            it->second.materialData.textureFilePath = textureFilepath;
+            it->second.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
+            // 必要に応じてリソースの再割り当てなどを行うことができます
+        }
+    } else {
+        // 新しいパーティクルグループを作成
+        ParticleGroup& newGroup = particleGroups[name];
+
+        // 新しいパーティクルグループにテクスチャパスとインデックスを設定
+        newGroup.materialData.textureFilePath = textureFilepath;
+        newGroup.materialData.textureindex = TextureManager::GetInstance()->GetSrvIndex(textureFilepath);
+
+        // インスタンス用のリソースバッファを作成
+        newGroup.Resource = dxCommon_->CreateBufferResource(sizeof(InstanceData) * MaxInstanceCount);
+        newGroup.instanceData = nullptr;
+        newGroup.Resource->Map(0, nullptr, reinterpret_cast<void**>(&newGroup.instanceData));
+
+        // インスタンスデータを初期化
+        for (uint32_t index = 0; index < MaxInstanceCount; ++index) {
+            newGroup.instanceData[index].WVP = MakeIdentity4x4();
+            newGroup.instanceData[index].World = MakeIdentity4x4();
+            newGroup.instanceData[index].color = { 1.0f, 1.0f, 1.0f, 0.0f }; // 透明
+        }
+        // 書き込み後にリソースをアンマップ
+        newGroup.Resource->Unmap(0, nullptr);
+        // インスタンスバッファ用のSRVを割り当て、インデックスを記録
+        newGroup.srvindex = srvmanager_->Allocate();
+        // 構造体バッファ用のSRVを作成
+        srvmanager_->CreateSRVforStructuredBuffer(newGroup.srvindex, newGroup.Resource.Get(), MaxInstanceCount, sizeof(InstanceData));
+    }
+}
+
+void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
+    // パーティクルグループが存在しない場合、エラーを発生させる
+    auto it = particleGroups.find(name);
+    if (it == particleGroups.end()) {
+        assert(false);
+        return;
+    }
+
+    // 既存のパーティクルグループを取得
+    ParticleGroup& group = it->second;
+
+    // 現在のパーティクル数がMaxInstanceCountを超えている場合、追加するパーティクル数を調整
+    size_t currentParticleCount = group.particles.size();
+    if (currentParticleCount + count > MaxInstanceCount) {
+        count = static_cast<uint32_t>(MaxInstanceCount - currentParticleCount);  // 型変換
+    }
+
+    std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
+
+    // count 回のパーティクルを発生させる
+    for (uint32_t i = 0; i < count; ++i) {
+        // ランダムオフセットを適用
+        Vector3 offset(dist(randomEngine), dist(randomEngine), dist(randomEngine));
+
+        // パーティクルの位置と色を指定
+        Vector4 color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);  // 初期色は白
+
+        // 新しいパーティクルを生成
+        Particle newParticle;
+        newParticle.transform.translate = { position.x + offset.x, position.y + offset.y, position.z + offset.z };
+        newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };  // 回転の初期化（必要に応じて後で変更可能）
+        newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };  // スケールの初期化
+        newParticle.color = color;
+        newParticle.lifetime = 1.0f;  // 新しく発生したパーティクルのライフタイムを設定
+        newParticle.currentTime = 0.0f;  // 寿命の初期化
+        newParticle.Velocity = { 1.0f, 1.0f, 1.0f };
+
+        // パーティクルをグループに追加
+        group.particles.push_back(newParticle);
+    }
+
+    // インスタンシングデータの更新
+    group.kNumInstance += count;  // 新たに追加したインスタンス数を反映
 }
