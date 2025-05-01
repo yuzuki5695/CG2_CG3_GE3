@@ -28,11 +28,11 @@ SamplerState gSampler : register(s0);
 
 PixeShaderOutput main(VertexShaderOutput input)
 {
+    PixeShaderOutput output;
+    
     //TextureをSampling
     float4 TransformesUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(gSampler, TransformesUV.xy);
-    
-    PixeShaderOutput output;
     
     // textureのα値が0.5以下のときにpixelを棄却
     if (textureColor.a <= 0.5)

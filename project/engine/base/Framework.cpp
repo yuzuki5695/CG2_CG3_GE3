@@ -101,9 +101,4 @@ void Framework::Draw() {
     srvManager->PreDraw();
     //  DirectXの描画準備。全ての描画に共通のグラフィックスコマンドを積む
     dxCommon->PreDraw();
-    // 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
-    Object3dCommon::GetInstance()->Commondrawing();
-    // Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-    SpriteCommon::GetInstance()->Commondrawing();
-
 }

@@ -1,5 +1,4 @@
 #include "Object3dCommon.h"
-#include <cassert>
 
 using namespace Microsoft::WRL;
 
@@ -20,7 +19,6 @@ void Object3dCommon::Finalize() {
 }
 
 void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
-    // NULL検出
     assert(dxCommon);
     // 引数を受け取ってメンバ変数に記録する
     dxCommon_ = dxCommon;
@@ -29,7 +27,6 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
 }
 
 void Object3dCommon::Commondrawing() {
-
     // RootSignatureを設定。PSOに設定しているけど別途設定が必要
     dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
@@ -38,7 +35,6 @@ void Object3dCommon::Commondrawing() {
 }
 
 void Object3dCommon::RootSignatureGenerate() {
-
     HRESULT hr;
 
     /*----------------------------------------------------------------------------------*/
@@ -104,7 +100,7 @@ void Object3dCommon::RootSignatureGenerate() {
         Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
         assert(false);
     }
-    // バイナリを元に作成
+    //バイナリを元に作成
     hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
     assert(SUCCEEDED(hr));
 }
@@ -142,7 +138,7 @@ void Object3dCommon::GraphicsPipelineGenerate() {
     /*----------------------------------------------------------------------------------*/
     D3D12_BLEND_DESC blendDesc{};
     //全ての色要素を書き込む
-    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
     blendDesc.RenderTarget[0].BlendEnable = TRUE;
     blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
     blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
@@ -173,12 +169,10 @@ void Object3dCommon::GraphicsPipelineGenerate() {
 
     //===== RasterizerStateの設定を行う ======//   
     D3D12_RASTERIZER_DESC rasterizerDesc{};
-    // 裏面(時計回り)を表示しない
-    //rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-    // 裏面(時計回り)を表示する
-    rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-    // 三角形の中を塗りつぶす
-    rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;    
+    //裏面(時計回り)を表示しない
+    rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+    //三角形の中を塗りつぶす
+    rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     /*----------------------------------------------------------------------------------*/
     /*--------------------------------ShaderをCompile-----------------------------------*/
@@ -201,7 +195,7 @@ void Object3dCommon::GraphicsPipelineGenerate() {
     // 書き込むRTVの情報
     graphicsPipelineStateDesc.NumRenderTargets = 1;
     graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-    // 利用するトポロジ(形状)のタイプ
+    //利用するトポロジ(形状)のタイプ
     graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     // どのように画面に色を打ち込むかの設定(気にしなくて良い)
     graphicsPipelineStateDesc.SampleDesc.Count = 1;

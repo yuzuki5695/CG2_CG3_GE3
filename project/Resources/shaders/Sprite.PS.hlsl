@@ -1,4 +1,4 @@
-#include "Object3d.hlsli"
+#include "Sprite.hlsli"
 
 struct Material
 {
@@ -28,18 +28,18 @@ SamplerState gSampler : register(s0);
 
 PixeShaderOutput main(VertexShaderOutput input)
 {
+    PixeShaderOutput output;
+    
     //TextureをSampling
     float4 TransformesUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
-    float4 textureColor = gTexture.Sample(gSampler, TransformesUV.xy);
-    
-    PixeShaderOutput output;
+    float4 textureColor = gTexture.Sample(gSampler, TransformesUV.xy); 
     
     if (gMaterial.endbleLighting != 0)
     { // Linhthingする場合
         // half lambert
         float Ndont = dot(normalize(input.normal), -gDirectionalLight.direction);
         float cos = pow(Ndont * 0.5f + 0.5f, 2.0f);
-        
+         
         // 色にはLightingを行い,a値には行わないようにする
         output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         output.color.a = gMaterial.color.a * textureColor.a;
