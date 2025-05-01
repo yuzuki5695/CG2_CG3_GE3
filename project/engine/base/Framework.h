@@ -15,6 +15,7 @@
 #include<SoundPlayer.h>
 #include<SceneManager.h>
 #include<SceneFactory.h>
+#include<ParticleManager.h>
 
 // ゲーム全体
 class Framework

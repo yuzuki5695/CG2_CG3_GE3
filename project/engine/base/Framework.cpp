@@ -30,7 +30,9 @@ void Framework::Finalize() {
     Object3dCommon::GetInstance()->Finalize();
     // 入力解放
     Input::GetInstance()->Finalize();
-    // テクスチャマネージャーの終了
+    // パーティクルマネージャの終了
+    ParticleManager::GetInstance()->Finalize();
+    // テクスチャマネージャの終了
     TextureManager::GetInstance()->Finalize();
     // 3Dモデルマネージャの終了
     ModelManager::GetInstance()->Finalize();
@@ -64,10 +66,12 @@ void Framework::Initialize() {
     srvManager->Initialize(dxCommon.get());
     // ImGuiマネージャの初期化
     ImGuiManager::GetInstance()->Initialize(winApp.get(), dxCommon.get(), srvManager.get());
-    // テクスチャマネージャーの初期化
+    // テクスチャマネージャの初期化
     TextureManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
     // 3Dモデルマネージャの初期化
     ModelManager::GetInstance()->Initialize(dxCommon.get());
+    // パーティクルマネージャの初期化
+    ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
 
 #pragma region 基盤システムの初期化
 
