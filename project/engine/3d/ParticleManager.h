@@ -86,19 +86,22 @@ public: // メンバ関数
 	// 描画処理
 	void Draw();
 
+	//　パーティクルモデル生成
 	void SetParticleModel(const std::string& directorypath, const std::string& filename);
 
-
+	// パーティクルグループの作成
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
-
+	
+	// 発生
 	void Emit(const std::string& name, const Vector3& position, uint32_t count);
 
+	void DebugUpdata();
+
+private:
 	// .mtlファイルの読み取り
 	static ParticleManager::MaterialDate LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	// .objファイルの読み取り
 	static ParticleManager::ModelDate LoadObjFile(const std::string& directoryPath, const std::string& filename);
-
-private:
 	// 頂点データ作成
 	void VertexDatacreation();
 	// マテリアル

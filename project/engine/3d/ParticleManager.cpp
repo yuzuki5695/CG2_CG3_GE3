@@ -4,9 +4,11 @@
 #include <ModelManager.h>
 #include <TextureManager.h>
 #include <numbers>
-#include<ImGuiManager.h>
 #include <externals/DirectXTex/d3dx12.h>
 #include <Object3dCommon.h>
+#ifdef USE_IMGUI
+#include<ImGuiManager.h>
+#endif // USE_IMGUI
 
 using namespace MatrixVector;
 using namespace Microsoft::WRL;
@@ -341,6 +343,7 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
     // ランダムオフセット
     std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
     std::uniform_real_distribution<float> velDist(-0.5f, 0.5f);
+    std::uniform_real_distribution<float> colorDist(0.0f, 1.0f);
 
     for (uint32_t i = 0; i < count; ++i) {
         Vector3 offset(dist(randomEngine), dist(randomEngine), dist(randomEngine));
@@ -349,7 +352,7 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
         newParticle.transform.translate = { position.x + offset.x,position.y + offset.y ,position.z + offset.z };
         newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };
         newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };
-        newParticle.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+        newParticle.color = { colorDist(randomEngine),  colorDist(randomEngine),  colorDist(randomEngine),1.0f };
         newParticle.lifetime = 1.0f;
         newParticle.currentTime = 0.0f;
         newParticle.Velocity = { velDist(randomEngine), velDist(randomEngine), velDist(randomEngine) };
@@ -359,4 +362,14 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
     }
     // 描画で使用するインスタンス数を更新
     group.kNumInstance = static_cast<uint32_t>(group.particles.size());
+}
+
+void ParticleManager::DebugUpdata() {
+#ifdef USE_IMGUI
+    // ウィンドウサイズを指定
+    ImGui::Begin("Particle");
+
+
+    ImGui::End();
+#endif // USE_IMGUI
 }

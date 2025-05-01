@@ -31,7 +31,8 @@ void GamePlayScene::Initialize() {
     // テクスチャを読み込む
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
-
+    TextureManager::GetInstance()->LoadTexture("Resources/circle.png");
+    
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj");
     ModelManager::GetInstance()->LoadModel("axis.obj");
@@ -55,7 +56,7 @@ void GamePlayScene::Initialize() {
     // モデル生成
     ParticleManager::GetInstance()->SetParticleModel("Resources", "plane.obj");
     // テクスチャ生成
-    ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
+    ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/circle.png");
     // 発生
     ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
 
@@ -88,6 +89,8 @@ void GamePlayScene::Update() {
 
     // Camera
     camera->DebugUpdata();
+
+    ParticleManager::GetInstance()->DebugUpdata();
 
 #pragma endregion ImGuiの更新処理終了
     
