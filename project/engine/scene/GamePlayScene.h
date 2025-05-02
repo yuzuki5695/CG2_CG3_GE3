@@ -4,6 +4,7 @@
 #include<Model.h>
 #include<SoundPlayer.h>
 #include<BaseScene.h>
+#include <ParticleEmitter.h>
 
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
@@ -33,4 +34,8 @@ private: // メンバ変数
     SoundData soundData;
     // 音声プレイフラグ
     uint32_t soundfige;
+
+    // エミッター生成
+    std::unique_ptr <ParticleEmitter> emitter;
+    Vector3 windPower;
 };

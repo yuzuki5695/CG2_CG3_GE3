@@ -103,17 +103,25 @@ void ParticleManager::Update() {
             ++particleIterator;
         }
 
+        // 描画で使用するインスタンス数を更新
         group.kNumInstance = counter; 
 
-        // パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
-        if (group.spawnTime >= group.spawnFrequency) {
-            // 新しいパーティクルを発生させる
-            Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 3);  // 実際の発生処理を呼び出す
-            group.spawnTime = 0.0f;  // 発生時間をリセット
-        } else {
-            // 発生時間を増加
-            group.spawnTime += 1.0f / 60.0f;
-        }
+        //// パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
+        //if (group.spawnTime >= group.spawnFrequency) {
+        //    uint32_t newCount = 3; // Emitで生成するパーティクル数
+        //    size_t currentCount = group.particles.size();
+
+        //    // 発生可能な最大数を計算
+        //    if (currentCount < MaxInstanceCount) {
+        //        uint32_t emitCount = static_cast<uint32_t>(std::min<size_t>(newCount, MaxInstanceCount - currentCount));
+        //        Emit(name, Vector3{ 0.0f, 0.0f, 0.0f }, emitCount);
+        //    }
+
+        //    group.spawnTime = 0.0f;
+        //} else {
+        //    group.spawnTime += 1.0f / 60.0f;
+        //}
+
     }
 }
 
@@ -365,8 +373,22 @@ void ParticleManager::DebugUpdata() {
 #ifdef USE_IMGUI
     // ウィンドウサイズを指定
     ImGui::Begin("Particle");
+    // 全パーティクルグループの合計数を表示
+    int totalCount = 0;
+    for (const auto& [name, group] : particleGroups) {
+        totalCount += static_cast<int>(group.particles.size());
+    }
+    ImGui::SliderInt("MaxInstanceCount", (int*)&MaxInstanceCount, 0, 1000);
+    ImGui::Text("Max Particles: %u", MaxInstanceCount);
+    ImGui::Text("Current Total Particles: %d", totalCount);
 
-
+    // 各グループごとの詳細も表示（任意）
+    for (const auto& [name, group] : particleGroups) {
+        ImGui::Separator();
+        ImGui::Text("Group: %s", name.c_str());
+        ImGui::Text("  Particles: %zu", group.particles.size());
+        ImGui::Text("  Instances: %u", group.kNumInstance);
+    }
     ImGui::End();
 #endif // USE_IMGUI
 }

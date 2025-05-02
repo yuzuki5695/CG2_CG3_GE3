@@ -57,8 +57,20 @@ void GamePlayScene::Initialize() {
     ParticleManager::GetInstance()->SetParticleModel("Resources", "plane.obj");
     // テクスチャ生成
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
+
     // 発生
-    ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
+    //ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
+    
+    emitter = std::make_unique <ParticleEmitter>(
+        Vector3{ 0.0f, -0.5f, 0.0f }, // 位置
+        3.0f,                         // 発生周期 or 寿命（自由に定義可能）
+        0.0f,                         // 経過時間（基本は0から開始）
+        3,                           // 発生数
+        "Particles",                  // パーティクルグループ名
+        Vector3{ 0.1f, 0.0f, 0.0f }  // ← 風
+    );
+
+    emitter->Emit();
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -90,7 +102,7 @@ void GamePlayScene::Update() {
     // Camera
     camera->DebugUpdata();
 
-    //ParticleManager::GetInstance()->DebugUpdata();
+    ParticleManager::GetInstance()->DebugUpdata();
 
 #pragma endregion ImGuiの更新処理終了
     
@@ -109,7 +121,7 @@ void GamePlayScene::Update() {
     object3d->Update();
 
     ParticleManager::GetInstance()->Update();
-
+    
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
     /*------------------------------------------------------------------------------------------------------*/
