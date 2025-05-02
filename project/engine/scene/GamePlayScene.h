@@ -29,7 +29,9 @@ private: // メンバ変数
     std::unique_ptr<Sprite> sprite = nullptr;
     // Object3d
     std::unique_ptr <Object3d> object3d = nullptr;
-    
+    // 地面
+    std::unique_ptr <Object3d> grass = nullptr;
+
     // 音声ファイル
     SoundData soundData;
     // 音声プレイフラグ

@@ -32,12 +32,14 @@ void GamePlayScene::Initialize() {
     TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
     TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
     TextureManager::GetInstance()->LoadTexture("Resources/circle.png");
+    TextureManager::GetInstance()->LoadTexture("Resources/grass.png");
     
     // .objファイルからモデルを読み込む
     ModelManager::GetInstance()->LoadModel("plane.obj");
     ModelManager::GetInstance()->LoadModel("axis.obj");
     ModelManager::GetInstance()->LoadModel("monsterBallUV.obj");
     ModelManager::GetInstance()->LoadModel("fence.obj");
+    ModelManager::GetInstance()->LoadModel("terrain.obj");
 
     // 音声ファイルを追加
     soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
@@ -51,8 +53,10 @@ void GamePlayScene::Initialize() {
 
     // オブジェクト作成
     object3d = Object3d::Create("monsterBallUV.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
+    grass = Object3d::Create("terrain.obj", Transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f} }));
     // カメラをセット
     object3d->SetCamera(camera.get());
+    grass->SetCamera(camera.get());
 
     // パーティクル 
     // モデル生成
@@ -114,6 +118,8 @@ void GamePlayScene::Update() {
     // 更新処理
     object3d->Update();
 
+    grass->Update();
+
     ParticleManager::GetInstance()->Update();
     
     emitter->Update();
@@ -142,8 +148,7 @@ void GamePlayScene::Draw() {
 
     object3d->Draw();
 
-
-
+    grass->Draw();
 
     // パーティクルの描画準備。パーティクルの描画に共通のグラフィックスコマンドを積む 
     ParticleCommon::GetInstance()->Commondrawing();
