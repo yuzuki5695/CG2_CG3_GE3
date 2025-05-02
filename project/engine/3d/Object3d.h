@@ -37,7 +37,7 @@ public: // メンバ関数
 	static std::unique_ptr<Object3d> Create(std::string filePath, Transform transform);
 
 
-	void DebugUpdata();
+	void DebugUpdata(const std::string& name);
 
 private:
 	// リソース

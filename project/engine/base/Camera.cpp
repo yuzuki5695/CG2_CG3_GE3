@@ -19,9 +19,16 @@ Camera::Camera()
 }
 
 void Camera::Update() {
+	// カメラの位置を斜め上に設定（例: 位置を(5.0f, 5.0f, -5.0f)に変更）
+	//transform.translate = { 5.0f, 5.0f, -5.0f };
+
+	// ワールド行列の作成
 	worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+	// ビュー行列の計算
 	viewMatrix = Inverse(worludMatrix);
+	// プロジェクション行列の計算
 	projectionMatrix = MakePerspectiveFovMatrix(fovY, aspectRatio, nearClip, farclip);
+	// ビュー・プロジェクション行列の計算
 	ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 }
 

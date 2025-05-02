@@ -98,7 +98,8 @@ void GamePlayScene::Update() {
     //sprite->DebugUpdata();
 
     // object3d
-    object3d->DebugUpdata();
+    object3d->DebugUpdata("Object3d");
+    grass->DebugUpdata("Grass");
 
     // Camera
     camera->DebugUpdata();

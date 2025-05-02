@@ -105,10 +105,10 @@ std::unique_ptr<Object3d> Object3d::Create(std::string filePath, Transform trans
     return object3d;
 }
 
-void Object3d::DebugUpdata() {
+void Object3d::DebugUpdata(const std::string& name) {
 #ifdef USE_IMGUI
-    // ウィンドウサイズを指定
-    ImGui::Begin("Object3d");
+    // 引数で受け取った name を使ってウィンドウを作成
+    ImGui::Begin(name.c_str());  // 渡された名前を使ってウィンドウを表示
     // オブジェクトの座標
     ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f);
     ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
