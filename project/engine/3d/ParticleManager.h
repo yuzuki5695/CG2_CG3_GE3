@@ -63,8 +63,7 @@ public:
 		InstanceData* instanceData = nullptr;                  // インスタンシングデータを書き込むためのポインタ
 		// 発生間隔管理用のメンバー
 		float spawnTime = 0.0f;  // 現在の発生までの経過時間
-		float spawnFrequency = 0.5f;  // 0.5秒ごとに発生
-
+		float spawnFrequency = 2.0f;  // 2.0秒ごとに発生
 	};
 private:
 	static std::unique_ptr<ParticleManager> instance;

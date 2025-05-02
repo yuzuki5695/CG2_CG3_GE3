@@ -48,7 +48,7 @@ void GamePlayScene::Initialize() {
     sprite = Sprite::Create("Resources/uvChecker.png", Vector2{ 0.0f,0.0f }, 0.0f, Vector2{ 360.0f,360.0f });
 
     // オブジェクト作成
-    object3d = Object3d::Create("axis.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
+    object3d = Object3d::Create("monsterBallUV.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
     // カメラをセット
     object3d->SetCamera(camera.get());
 
@@ -56,7 +56,7 @@ void GamePlayScene::Initialize() {
     // モデル生成
     ParticleManager::GetInstance()->SetParticleModel("Resources", "plane.obj");
     // テクスチャ生成
-    ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/circle.png");
+    ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
     // 発生
     ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
 
@@ -90,7 +90,7 @@ void GamePlayScene::Update() {
     // Camera
     camera->DebugUpdata();
 
-    ParticleManager::GetInstance()->DebugUpdata();
+    //ParticleManager::GetInstance()->DebugUpdata();
 
 #pragma endregion ImGuiの更新処理終了
     
@@ -144,6 +144,10 @@ void GamePlayScene::Draw() {
     /*-----------------------------------------------------------------------------------------------------*/
 
 
+    // パーティクルの描画準備。パーティクルの描画に共通のグラフィックスコマンドを積む 
+    ParticleCommon::GetInstance()->Commondrawing();
+
+    ParticleManager::GetInstance()->Draw();
 
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理開始----------------------------------------------*/
@@ -156,10 +160,4 @@ void GamePlayScene::Draw() {
     /*----------------------------------------------------------------------------------------------------*/
     /*------------------------------------Spriteの描画処理終了----------------------------------------------*/
     /*---------------------------------------------------------------------------------------------------*/
-
-    // パーティクルの描画準備。パーティクルの描画に共通のグラフィックスコマンドを積む 
-    ParticleCommon::GetInstance()->Commondrawing();
-
-    ParticleManager::GetInstance()->Draw();
-
 }

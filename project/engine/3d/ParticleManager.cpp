@@ -69,21 +69,18 @@ void ParticleManager::Update() {
     for (auto& [name, group] : particleGroups) {
         uint32_t counter = 0;
         for (auto particleIterator = group.particles.begin(); particleIterator != group.particles.end();) {
-            //// パーティクルの現在の時間を増加させる
-            //(*particleIterator).currentTime += 1.0f / 60.0f;  // 60fpsで時間をカウントアップ
+            // パーティクルの現在の時間を増加させる
+            (*particleIterator).currentTime += 1.0f / 60.0f;  // 60fpsで時間をカウントアップ
 
-            //// パーティクルの寿命が尽きたら削除
-            //if ((*particleIterator).currentTime >= (*particleIterator).lifetime) {
-            //    particleIterator = group.particles.erase(particleIterator);  // パーティクル削除
-            //    continue;
-            //}
+            // パーティクルの寿命が尽きたら削除
+            if ((*particleIterator).currentTime >= (*particleIterator).lifetime) {
+                particleIterator = group.particles.erase(particleIterator);  // パーティクル削除
+                continue;
+            }
 
-            //// パーティクルの位置や動きを更新
-            //(*particleIterator).transform.translate.x += (*particleIterator).Velocity.x * (1.0f / 60.0f);
-
-            //// 透明度の更新（時間に基づいてフェード）
-            //float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
-            //(*particleIterator).color.w = alpha;
+            // 透明度の更新（時間に基づいてフェード）
+            float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
+            (*particleIterator).color.w = alpha;
 
             // world行列の計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
@@ -108,15 +105,15 @@ void ParticleManager::Update() {
 
         group.kNumInstance = counter; 
 
-        //// パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
-        //if (group.spawnTime >= group.spawnFrequency) {
-        //    // 新しいパーティクルを発生させる
-        //    Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 2);  // 実際の発生処理を呼び出す
-        //    group.spawnTime = 0.0f;  // 発生時間をリセット
-        //} else {
-        //    // 発生時間を増加
-        //    group.spawnTime += 1.0f / 60.0f;
-        //}
+        // パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
+        if (group.spawnTime >= group.spawnFrequency) {
+            // 新しいパーティクルを発生させる
+            Emit("Particles", Vector3{ 0.0f, 0.0f, 0.0f }, 3);  // 実際の発生処理を呼び出す
+            group.spawnTime = 0.0f;  // 発生時間をリセット
+        } else {
+            // 発生時間を増加
+            group.spawnTime += 1.0f / 60.0f;
+        }
     }
 }
 
@@ -353,10 +350,10 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
         newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };
         newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };
         newParticle.color = { colorDist(randomEngine),  colorDist(randomEngine),  colorDist(randomEngine),1.0f };
-        newParticle.lifetime = 1.0f;
+        newParticle.lifetime = 3.0f;
         newParticle.currentTime = 0.0f;
-        newParticle.Velocity = { velDist(randomEngine), velDist(randomEngine), velDist(randomEngine) };
-        
+        newParticle.Velocity = { velDist(randomEngine), velDist(randomEngine), velDist(randomEngine) };        
+
         // 作成したパーティクルをパーティクルリストに追加
         group.particles.push_back(newParticle);
     }
