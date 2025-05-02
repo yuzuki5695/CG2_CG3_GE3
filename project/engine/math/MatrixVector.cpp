@@ -224,4 +224,37 @@ namespace MatrixVector {
 
         return result;
     };
+
+    Matrix4x4 Transpose(const Matrix4x4& mat) {
+        Matrix4x4 transposed;
+
+        // 各要素を転置
+        transposed.m[0][0] = mat.m[0][0];
+        transposed.m[0][1] = mat.m[1][0];
+        transposed.m[0][2] = mat.m[2][0];
+        transposed.m[0][3] = mat.m[3][0];
+
+        transposed.m[1][0] = mat.m[0][1];
+        transposed.m[1][1] = mat.m[1][1];
+        transposed.m[1][2] = mat.m[2][1];
+        transposed.m[1][3] = mat.m[3][1];
+
+        transposed.m[2][0] = mat.m[0][2];
+        transposed.m[2][1] = mat.m[1][2];
+        transposed.m[2][2] = mat.m[2][2];
+        transposed.m[2][3] = mat.m[3][2];
+
+        transposed.m[3][0] = mat.m[0][3];
+        transposed.m[3][1] = mat.m[1][3];
+        transposed.m[3][2] = mat.m[2][3];
+        transposed.m[3][3] = mat.m[3][3];
+
+        return transposed;
+    }
+
+    Matrix4x4 InverseTranspose(const Matrix4x4& mat) {
+        Matrix4x4 inverseMat = Inverse(mat); // 逆行列
+        return Transpose(inverseMat);         // 転置行列
+    }
+
 };

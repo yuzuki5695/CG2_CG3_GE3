@@ -13,6 +13,7 @@ public: // メンバ関数
 	struct TransformationMatrix {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
+		Matrix4x4 WorldInverseTranspose;
 	};
 	// 平行光源データ
 	struct DirectionalLight {
@@ -44,6 +45,8 @@ private:
 	void TransformationMatrixGenerate();
 	// 平行光源リソース
 	void DirectionalLightGenerate();
+	// カメラリソース
+	void CameraForGPUGenerate();
 private:
 	// ポインタ
 	Object3dCommon* object3dCommon = nullptr;

@@ -47,4 +47,9 @@ namespace MatrixVector
 
 	// 3次元アフィン変換
 	Matrix4x4 MakeAftineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
+
+	Matrix4x4 Transpose(const Matrix4x4& mat);
+
+	// 逆行列を計算して転置する処理
+	Matrix4x4 InverseTranspose(const Matrix4x4& mat);
 };

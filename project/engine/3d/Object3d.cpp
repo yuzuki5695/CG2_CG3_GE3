@@ -21,23 +21,14 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
     TransformationMatrixGenerate();
     // 平行光源の生成,初期化
     DirectionalLightGenerate();
-    // カメラ用リソースを作る
-    cameraResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(Object3d::CameraForGPU));
-    // 書き込むためのアドレスを取得
-    cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData));
-    // 単位行列を書き込んでおく
-    // cameraForGPUDataがnullptrでないことを確認
-    if (cameraForGPUData) {
-        // 単位行列を書き込んでおく
-        cameraForGPUData->worldPosition = { 0.0f, 0.0f, -500.0f };
-    } else {
-        // マッピングに失敗した場合のエラーハンドリング
-        assert(false && "Failed to map camera resource.");
-    }
+    // カメラリソースの生成、初期化
+    CameraForGPUGenerate();
 }
 
 void Object3d::Update() {
+    // ワールド行列の作成
     Matrix4x4 worldMatrix = MakeAftineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+    // ワールド・ビュー・プロジェクション行列
     Matrix4x4 worldViewProjectionMatrix;
     if (camera) {
         const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
@@ -47,6 +38,8 @@ void Object3d::Update() {
     }
     transformationMatrixData->WVP = worldViewProjectionMatrix;
     transformationMatrixData->World = worldMatrix;
+    // WorldInverseTranspose行列を再計算
+    transformationMatrixData->WorldInverseTranspose = InverseTranspose(worldMatrix);
 }
 
 void Object3d::Draw() {
@@ -71,6 +64,8 @@ void Object3d::TransformationMatrixGenerate() {
     // 単位行列を書き込んでおく
     transformationMatrixData->WVP = MakeIdentity4x4();
     transformationMatrixData->World = MakeIdentity4x4();
+    // WorldInverseTransposeを計算してセット
+    transformationMatrixData->WorldInverseTranspose = InverseTranspose(transformationMatrixData->World);
 }
 
 void Object3d::DirectionalLightGenerate() {
@@ -82,6 +77,15 @@ void Object3d::DirectionalLightGenerate() {
     directionalLightDate->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     directionalLightDate->direction = { 0.0f,-1.0f,0.0f };
     directionalLightDate->intensity = 1.0f;
+}
+
+void Object3d::CameraForGPUGenerate(){
+    // カメラ用リソースを作る
+    cameraResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(Object3d::CameraForGPU));
+    // 書き込むためのアドレスを取得
+    cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData));
+    // 単位行列を書き込んでおく
+    cameraForGPUData->worldPosition = { 0.0f, 0.0f, -500.0f };
 }
 
 void Object3d::SetModel(const std::string& filePath) {
