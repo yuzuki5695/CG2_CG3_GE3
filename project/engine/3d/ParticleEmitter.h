@@ -13,6 +13,9 @@ public:
 	void Update();
 	// パーティクル発生
 	void Emit();
+	// imgui
+	void DebugUpdata();
+
 private:
 	// 名前
 	std::string name_;
@@ -26,6 +29,6 @@ private:
 	float frequency;
 	// 現在の寿命
 	float frequencyTime;
-	// 自動発生するかどうかのフラグ
+	// 自動発生するかどうかの
 	bool isAutoEmit_ = true;
 };

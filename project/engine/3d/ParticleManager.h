@@ -92,7 +92,7 @@ public: // メンバ関数
 	void CreateParticleGroup(const std::string& name, const std::string& textureFilepath);
 	
 	// 発生
-	void Emit(const std::string& name, const Vector3& position, uint32_t count);
+	void Emit(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity, float lifetime);
 
 	void DebugUpdata();
 
@@ -123,12 +123,20 @@ private: // メンバ変数
 	// バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	//最大インスタンス
-	uint32_t MaxInstanceCount = 10;
+	uint32_t MaxInstanceCount = 200;
 	//ビルボード行列
 	Matrix4x4 backToFrontMatrix;
 	// パーティクルグループコンテナ
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 
 public:
+	// getter
+	ParticleGroup& GetGroup(const std::string& name) {
+		assert(particleGroups.count(name));
+		return particleGroups[name];
+	}
+	uint32_t GetMaxInstanceCount() const { return MaxInstanceCount; }
+
+	// setter
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 };

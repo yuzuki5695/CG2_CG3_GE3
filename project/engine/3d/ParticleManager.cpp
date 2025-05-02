@@ -82,6 +82,9 @@ void ParticleManager::Update() {
             float alpha = 1.0f - (*particleIterator).currentTime / (*particleIterator).lifetime;
             (*particleIterator).color.w = alpha;
 
+
+            particleIterator->transform.translate.x += particleIterator->Velocity.x;
+
             // world行列の計算
             Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
             Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
@@ -105,23 +108,6 @@ void ParticleManager::Update() {
 
         // 描画で使用するインスタンス数を更新
         group.kNumInstance = counter; 
-
-        //// パーティクル発生の処理（一定時間ごとに新しいパーティクルを生成）
-        //if (group.spawnTime >= group.spawnFrequency) {
-        //    uint32_t newCount = 3; // Emitで生成するパーティクル数
-        //    size_t currentCount = group.particles.size();
-
-        //    // 発生可能な最大数を計算
-        //    if (currentCount < MaxInstanceCount) {
-        //        uint32_t emitCount = static_cast<uint32_t>(std::min<size_t>(newCount, MaxInstanceCount - currentCount));
-        //        Emit(name, Vector3{ 0.0f, 0.0f, 0.0f }, emitCount);
-        //    }
-
-        //    group.spawnTime = 0.0f;
-        //} else {
-        //    group.spawnTime += 1.0f / 60.0f;
-        //}
-
     }
 }
 
@@ -329,7 +315,8 @@ void ParticleManager::CreateParticleGroup(const std::string& name, const std::st
     }
 }
 
-void ParticleManager::Emit(const std::string& name, const Vector3& position, uint32_t count) {
+void ParticleManager::Emit(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity, float lifetime) {
+
     auto it = particleGroups.find(name);
     if (it == particleGroups.end()) {
         throw std::runtime_error("Particle group not found: " + name);
@@ -347,7 +334,6 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
 
     // ランダムオフセット
     std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
-    std::uniform_real_distribution<float> velDist(-0.5f, 0.5f);
     std::uniform_real_distribution<float> colorDist(0.0f, 1.0f);
 
     for (uint32_t i = 0; i < count; ++i) {
@@ -358,9 +344,10 @@ void ParticleManager::Emit(const std::string& name, const Vector3& position, uin
         newParticle.transform.rotate = { 0.0f, 0.0f, 0.0f };
         newParticle.transform.scale = { 1.0f, 1.0f, 1.0f };
         newParticle.color = { colorDist(randomEngine),  colorDist(randomEngine),  colorDist(randomEngine),1.0f };
-        newParticle.lifetime = 3.0f;
+        newParticle.lifetime = lifetime;
         newParticle.currentTime = 0.0f;
-        newParticle.Velocity = { velDist(randomEngine), velDist(randomEngine), velDist(randomEngine) };        
+        newParticle.Velocity = velocity;  // 渡されたベロシティを使う
+
 
         // 作成したパーティクルをパーティクルリストに追加
         group.particles.push_back(newParticle);

@@ -42,7 +42,9 @@ void GamePlayScene::Initialize() {
     // 音声ファイルを追加
     soundData = SoundLoader::GetInstance()->SoundLoadWave("Resources/Alarm01.wav");
 
-#pragma region 最初のシーンの初期化
+    // 音声プレイフラグ
+    soundfige = 0;
+
 
     // スプライトの初期化
     sprite = Sprite::Create("Resources/uvChecker.png", Vector2{ 0.0f,0.0f }, 0.0f, Vector2{ 360.0f,360.0f });
@@ -57,24 +59,19 @@ void GamePlayScene::Initialize() {
     ParticleManager::GetInstance()->SetParticleModel("Resources", "plane.obj");
     // テクスチャ生成
     ParticleManager::GetInstance()->CreateParticleGroup("Particles", "Resources/uvChecker.png");
+    ParticleManager::GetInstance()->CreateParticleGroup("Circle", "Resources/circle.png");
 
     // 発生
-    //ParticleManager::GetInstance()->Emit("Particles", Vector3{ 0.0f, -0.5f, 0.0f }, 5);
-    
     emitter = std::make_unique <ParticleEmitter>(
         Vector3{ 0.0f, -0.5f, 0.0f }, // 位置
         3.0f,                         // 発生周期 or 寿命（自由に定義可能）
         0.0f,                         // 経過時間（基本は0から開始）
-        3,                           // 発生数
+        3,                            // 発生数
         "Particles",                  // パーティクルグループ名
-        Vector3{ 0.1f, 0.0f, 0.0f }  // ← 風
+        Vector3{ 0.001f, 0.0f, 0.0f }  // ← 風
     );
 
     emitter->Emit();
-
-#pragma endregion 最初のシーンの初期化
-    // 音声プレイフラグ
-    soundfige = 0;
 }
 
 void GamePlayScene::Update() {
@@ -104,6 +101,8 @@ void GamePlayScene::Update() {
 
     ParticleManager::GetInstance()->DebugUpdata();
 
+    emitter->DebugUpdata();
+
 #pragma endregion ImGuiの更新処理終了 
     /*-------------------------------------------*/
     /*--------------Cameraの更新処理---------------*/
@@ -116,6 +115,8 @@ void GamePlayScene::Update() {
     object3d->Update();
 
     ParticleManager::GetInstance()->Update();
+    
+    emitter->Update();
 
 
 #pragma endregion 全てのObject3d個々の更新処理
