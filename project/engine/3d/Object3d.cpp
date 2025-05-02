@@ -115,6 +115,8 @@ void Object3d::DebugUpdata() {
     ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
     // ライトの輝度
     ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
+    // 光沢度
+    ImGui::DragFloat("Shinimess", &model->GetMaterialData()->shinimess, 0.01f);
     ImGui::End();
 #endif // USE_IMGUI
 

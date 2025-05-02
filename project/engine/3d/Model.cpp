@@ -69,7 +69,7 @@ void Model::MaterialGenerate() {
     materialData->endbleLighting = true;
     // 単位行列を書き込んでおく
     materialData->uvTransform = MakeIdentity4x4();
-    //光沢度を書き込む
+    // 光沢度を書き込む
     materialData->shinimess = 70;
 }
 
