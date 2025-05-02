@@ -30,5 +30,5 @@ private:
 	// 現在の寿命
 	float frequencyTime;
 	// 自動発生するかどうかの
-	bool isAutoEmit_ = true;
+	bool isAutoEmit_ = false;
 };
