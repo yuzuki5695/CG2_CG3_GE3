@@ -28,6 +28,7 @@ public:
 		int32_t endbleLighting;
 		float padding[3];
 		Matrix4x4 uvTransform;
+		float shinimess;
 	};
 	struct MaterialDate {
 		std::string textureFilePath;

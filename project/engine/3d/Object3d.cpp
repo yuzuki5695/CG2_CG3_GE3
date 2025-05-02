@@ -21,6 +21,19 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
     TransformationMatrixGenerate();
     // 平行光源の生成,初期化
     DirectionalLightGenerate();
+    // カメラ用リソースを作る
+    cameraResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(Object3d::CameraForGPU));
+    // 書き込むためのアドレスを取得
+    cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData));
+    // 単位行列を書き込んでおく
+    // cameraForGPUDataがnullptrでないことを確認
+    if (cameraForGPUData) {
+        // 単位行列を書き込んでおく
+        cameraForGPUData->worldPosition = { 0.0f, 0.0f, -500.0f };
+    } else {
+        // マッピングに失敗した場合のエラーハンドリング
+        assert(false && "Failed to map camera resource.");
+    }
 }
 
 void Object3d::Update() {
@@ -41,6 +54,8 @@ void Object3d::Draw() {
     object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
     // 平行光源用のCBufferの場所を設定 
     object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+    // カメラの場所を設定 
+    object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
 
     // 3Dモデルが割り当てられていれば描画する
     if (model) {
