@@ -8,6 +8,7 @@
 #ifdef USE_IMGUI
 #include<ImGuiManager.h>
 #endif // USE_IMGUI
+#include <numbers>
 
 using namespace MatrixVector;
 
@@ -23,6 +24,10 @@ void Object3d::Initialize(Object3dCommon* object3dCommon) {
     DirectionalLightGenerate();
     // カメラリソースの生成、初期化
     CameraForGPUGenerate();
+    // 点光源リソースの生成、初期化
+    PointlightSourceGenerate();
+    // スポットライトリソースの生成、初期化
+    SpotlightGenerate();
 }
 
 void Object3d::Update() {
@@ -53,6 +58,10 @@ void Object3d::Draw() {
     object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
     // カメラの場所を設定 
     object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
+    // 点光源を設定 
+    object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+    // スポットライトを設定 
+    object3dCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
     // 3Dモデルが割り当てられていれば描画する
     if (model) {
@@ -92,6 +101,37 @@ void Object3d::CameraForGPUGenerate(){
     cameraForGPUData->worldPosition = { 0.0f, 0.0f, -1000.0f };
 }
 
+void Object3d::PointlightSourceGenerate() {
+    // 点光源用リソースを作る
+    pointLightResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(Object3d::PointLight));
+    // 書き込むためのアドレスを取得
+    pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
+    // デフォルト値
+    pointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+    pointLightData->position = { 0.0f,2.0f,0.0f };
+    pointLightData->intensity = 0.0f;
+    pointLightData->radius = 10.0f;
+    pointLightData->decay = 1.0f;
+}
+
+void Object3d::SpotlightGenerate() {
+    // スポットライトリソースを作る
+    spotLightResource = object3dCommon->GetDxCommon()->CreateBufferResource(sizeof(Object3d::SpotLight));
+    // 書き込むためのアドレスを取得
+    spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+    // デフォルト値
+    spotLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+    spotLightData->position = { 2.0f,1.25f,0.0f };
+    spotLightData->distance = 7.0f;
+    spotLightData->direction =
+        Normalize({ -1.0f,-1.0f,0.0f });
+    spotLightData->intensity = 4.0f;
+    spotLightData->decay = 2.0f;
+    spotLightData->cosFalloffStart = 1.0f;
+    spotLightData->cosAngle =
+        std::cos(std::numbers::pi_v<float> / 3.0f);
+}
+
 void Object3d::SetModel(const std::string& filePath) {
     // モデルを検索してセットする
     model = ModelManager::GetInstance()->FindModel(filePath);
@@ -112,21 +152,39 @@ std::unique_ptr<Object3d> Object3d::Create(std::string filePath, Transform trans
 
 void Object3d::DebugUpdata(const std::string& name) {
 #ifdef USE_IMGUI
-    // 引数で受け取った name を使ってウィンドウを作成
-    ImGui::Begin(name.c_str());  // 渡された名前を使ってウィンドウを表示
-    // オブジェクトの座標
-    ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f);
-    ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
-    ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-    // カラー
-    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&model->GetMaterialData()->color));
-    // ライトの向き
-    ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
-    // ライトの輝度
-    ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
-    // 光沢度
-    ImGui::DragFloat("Shinimess", &model->GetMaterialData()->shinimess, 0.01f);
+    ImGui::Begin(name.c_str());
+    // 座標セクション
+    if (ImGui::CollapsingHeader("Transform")) {
+        ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f);
+        ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
+        ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+    }
+    // カラーセクション
+    if (ImGui::CollapsingHeader("Material Color")) {
+        ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&model->GetMaterialData()->color));
+        ImGui::DragFloat("Shininess", &model->GetMaterialData()->shinimess, 0.01f);
+    }
+    // ライトセクション
+    if (ImGui::CollapsingHeader("Directional Light")) {
+        ImGui::DragFloat3("Direction", &directionalLightDate->direction.x, 0.01f);
+        ImGui::DragFloat("Intensity", &directionalLightDate->intensity, 0.01f);
+        // ポイントライト
+        if (ImGui::CollapsingHeader("Point Light")) {
+            ImGui::DragFloat3("Position", &pointLightData->position.x, 0.01f);
+            ImGui::DragFloat("Intensity", &pointLightData->intensity, 0.01f);
+            ImGui::DragFloat("Radius", &pointLightData->radius, 0.01f);
+            ImGui::DragFloat("Decay", &pointLightData->decay, 0.01f);
+        }
+        // スポットライト
+        if (ImGui::CollapsingHeader("Spot Light")) {
+            ImGui::DragFloat3("Position", &spotLightData->position.x, 0.01f);
+            ImGui::DragFloat("Intensity", &spotLightData->intensity, 0.01f);
+            ImGui::DragFloat3("Direction", &spotLightData->direction.x, 0.01f);
+            ImGui::DragFloat("Decay", &spotLightData->decay, 0.01f);
+            ImGui::DragFloat("CosAngle", &spotLightData->cosAngle, 0.01f);
+            ImGui::DragFloat("CosFalloffStart", &spotLightData->cosFalloffStart, 0.01f);
+        }
+    }
     ImGui::End();
 #endif // USE_IMGUI
-
 }

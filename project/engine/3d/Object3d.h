@@ -25,6 +25,29 @@ public: // メンバ関数
 	{
 		Vector3 worldPosition;
 	};
+
+	struct PointLight
+	{
+		Vector4 color; //!< ライトの色
+		Vector3 position; //!< ライトの位置
+		float intensity; //!< 輝度
+		float radius; //!< ライトの届く最大距離
+		float decay; //!< 減衰率
+		float padding[2];
+	};
+
+	struct SpotLight
+	{
+		Vector4 color; //!< ライトの色
+		Vector3 position; //!< ライトの位置
+		float intensity; //!< 輝度
+		Vector3 direction; //!< スポットライトの向き
+		float distance; //!< ライトの届く最大距離
+		float decay; //!< 減衰率
+		float cosAngle;  //!< スポットライトの余弦
+		float cosFalloffStart;
+		float padding[2];
+	};
 public: // メンバ関数
 	// 初期化
 	void Initialize(Object3dCommon* object3dCommon);
@@ -47,6 +70,11 @@ private:
 	void DirectionalLightGenerate();
 	// カメラリソース
 	void CameraForGPUGenerate();
+	// 点光源リソース
+	void PointlightSourceGenerate();
+	// スポットライトリソース
+	void SpotlightGenerate();
+
 private:
 	// ポインタ
 	Object3dCommon* object3dCommon = nullptr;
@@ -56,10 +84,14 @@ private:
 	Microsoft::WRL::ComPtr <ID3D12Resource> transformationMatrixResource;
 	Microsoft::WRL::ComPtr <ID3D12Resource> directionalLightResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource;
 	// バッファリソース内のデータを指すポインタ
 	TransformationMatrix* transformationMatrixData = nullptr;
 	DirectionalLight* directionalLightDate = nullptr;
 	CameraForGPU* cameraForGPUData = nullptr;
+	PointLight* pointLightData = nullptr;
+	SpotLight* spotLightData = nullptr;
 
 	Transform transform_;
 public:
