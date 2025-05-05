@@ -11,10 +11,10 @@ public: // メンバ関数
 	// 更新処理
 	void Update();
 	// ImGuiの更新
-	void DebugUpdata();
+	void DebugUpdate();
 private: // メンバ変数
 	Transform  transform;
-	Matrix4x4 worludMatrix;
+	Matrix4x4 worldMatrix;
 	Matrix4x4 viewMatrix;
 	Matrix4x4 projectionMatrix;
 	Matrix4x4 ViewProjectionMatrix;
@@ -25,7 +25,7 @@ private: // メンバ変数
 	float farclip; // ファークリップ距離
 public:
 	// getter
-	const Matrix4x4& GetWorldMatrix() const { return worludMatrix; }
+	const Matrix4x4& GetWorldMatrix() const { return worldMatrix; }
 	const Matrix4x4& GetViewMatrix() const { return viewMatrix; }
 	const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix; }
 	const Matrix4x4& GetViewProjectionMatrix() const { return ViewProjectionMatrix; }

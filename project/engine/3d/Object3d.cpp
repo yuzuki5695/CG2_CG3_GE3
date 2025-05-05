@@ -85,7 +85,7 @@ void Object3d::CameraForGPUGenerate(){
     // 書き込むためのアドレスを取得
     cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData));
     // 単位行列を書き込んでおく
-    cameraForGPUData->worldPosition = { 0.0f, 0.0f, -500.0f };
+    cameraForGPUData->worldPosition = { 0.0f, 0.0f, -1000.0f };
 }
 
 void Object3d::SetModel(const std::string& filePath) {
@@ -99,7 +99,7 @@ std::unique_ptr<Object3d> Object3d::Create(std::string filePath, Transform trans
     object3d->Initialize(Object3dCommon::GetInstance());
     // モデルを検索してセットする
     object3d->model = ModelManager::GetInstance()->FindModel(filePath);
-    object3d->camera = Object3dCommon::GetInstance()->GetDefaultCamera();
+    object3d->SetCamera(Object3dCommon::GetInstance()->GetDefaultCamera());
     // 座標をセット
     object3d->transform_ = transform;
   

@@ -51,8 +51,8 @@ void GamePlayScene::Initialize() {
     sprite = Sprite::Create("Resources/uvChecker.png", Vector2{ 0.0f,0.0f }, 0.0f, Vector2{ 360.0f,360.0f });
 
     // オブジェクト作成
-    object3d = Object3d::Create("monsterBallUV.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
-    grass = Object3d::Create("terrain.obj", Transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f} }));
+    object3d = Object3d::Create("monsterBallUV.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
+    grass = Object3d::Create("terrain.obj", Transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }));
 
     // パーティクル 
     // モデル生成
@@ -91,14 +91,14 @@ void GamePlayScene::Update() {
     //ImGui::ShowDemoWindow();   
 
     // スプライト
-    //sprite->DebugUpdata();
-
+    //sprite->DebugUpdate();
+    
     // object3d
     object3d->DebugUpdata("Object3d");
     grass->DebugUpdata("Grass");
 
     // Camera
-    camera->DebugUpdata();
+    camera->DebugUpdate();
 
     ParticleManager::GetInstance()->DebugUpdata();
 
@@ -116,6 +116,7 @@ void GamePlayScene::Update() {
     object3d->Update();
 
     grass->Update();
+
 
    // ParticleManager::GetInstance()->Update();
     

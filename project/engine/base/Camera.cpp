@@ -6,13 +6,13 @@
 using namespace MatrixVector;
 
 Camera::Camera()
-	: transform({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} })
+	: transform({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
 	, fovY(0.45f)
 	, aspectRatio(float(WinApp::kClientWidth) / float(WinApp::kClientHeight))
 	, nearClip(0.1f)
 	, farclip(100.0f)
-	, worludMatrix(MakeAftineMatrix(transform.scale, transform.rotate, transform.translate))
-	, viewMatrix(Inverse(worludMatrix))
+	, worldMatrix(MakeAftineMatrix(transform.scale, transform.rotate, transform.translate))
+	, viewMatrix(Inverse(worldMatrix))
 	, projectionMatrix(MakePerspectiveFovMatrix(fovY, aspectRatio, nearClip, farclip))
 	, ViewProjectionMatrix(Multiply(viewMatrix, projectionMatrix))
 {
@@ -20,16 +20,16 @@ Camera::Camera()
 
 void Camera::Update() {
 	// ワールド行列の作成
-	worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
+	worldMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
 	// ビュー行列の計算
-	viewMatrix = Inverse(worludMatrix);
+	viewMatrix = Inverse(worldMatrix);
 	// プロジェクション行列の計算
 	projectionMatrix = MakePerspectiveFovMatrix(fovY, aspectRatio, nearClip, farclip);
 	// ビュー・プロジェクション行列の計算
 	ViewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 }
 
-void Camera::DebugUpdata() {
+void Camera::DebugUpdate() {
 #ifdef USE_IMGUI
 	// 開発用UIの処理
 	ImGui::Begin("Camera");
