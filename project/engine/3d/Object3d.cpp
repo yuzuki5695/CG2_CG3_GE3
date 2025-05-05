@@ -33,8 +33,12 @@ void Object3d::Update() {
     if (camera) {
         const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
         worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+        // ✅ カメラのワールド座標をGPU用に渡す
+        cameraForGPUData->worldPosition = camera->GetTranslate();
     } else {
         worldViewProjectionMatrix = worldMatrix;
+        // カメラがない場合もデフォルト位置にしておく
+        cameraForGPUData->worldPosition = { 0.0f, 0.0f, -1000.0f };
     }
     transformationMatrixData->WVP = worldViewProjectionMatrix;
     transformationMatrixData->World = worldMatrix;
@@ -99,7 +103,7 @@ std::unique_ptr<Object3d> Object3d::Create(std::string filePath, Transform trans
     object3d->Initialize(Object3dCommon::GetInstance());
     // モデルを検索してセットする
     object3d->model = ModelManager::GetInstance()->FindModel(filePath);
-    object3d->SetCamera(Object3dCommon::GetInstance()->GetDefaultCamera());
+   // object3d->SetCamera(Object3dCommon::GetInstance()->GetDefaultCamera());
     // 座標をセット
     object3d->transform_ = transform;
   
