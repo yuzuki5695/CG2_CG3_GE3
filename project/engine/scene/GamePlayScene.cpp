@@ -22,7 +22,6 @@ void GamePlayScene::Initialize() {
     camera->SetRotate(Vector3(0.0f, 0.0f, 0.0f));
     camera->SetTranslate(Vector3(0.0f, 0.0f, -1000.0f));
     Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
-    ParticleCommon::GetInstance()->SetDefaultCamera(camera.get());
 
     // カメラの現在の位置と回転を取得
     Cameraposition = camera->GetTranslate();
@@ -54,9 +53,6 @@ void GamePlayScene::Initialize() {
     // オブジェクト作成
     object3d = Object3d::Create("monsterBallUV.obj", Transform({{1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f}}));
     grass = Object3d::Create("terrain.obj", Transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 4.71f, 0.0f}, {0.0f, 0.0f, 0.0f} }));
-    // カメラをセット
-    object3d->SetCamera(camera.get());
-    grass->SetCamera(camera.get());
 
     // パーティクル 
     // モデル生成
@@ -121,9 +117,9 @@ void GamePlayScene::Update() {
 
     grass->Update();
 
-    ParticleManager::GetInstance()->Update();
+   // ParticleManager::GetInstance()->Update();
     
-    emitter->Update();
+    //emitter->Update();
 
 
 #pragma endregion 全てのObject3d個々の更新処理

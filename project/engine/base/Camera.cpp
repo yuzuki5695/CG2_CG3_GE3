@@ -6,7 +6,7 @@
 using namespace MatrixVector;
 
 Camera::Camera()
-	: transform({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
+	: transform({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} })
 	, fovY(0.45f)
 	, aspectRatio(float(WinApp::kClientWidth) / float(WinApp::kClientHeight))
 	, nearClip(0.1f)
@@ -19,9 +19,6 @@ Camera::Camera()
 }
 
 void Camera::Update() {
-	// カメラの位置を斜め上に設定（例: 位置を(5.0f, 5.0f, -5.0f)に変更）
-	//transform.translate = { 5.0f, 5.0f, -5.0f };
-
 	// ワールド行列の作成
 	worludMatrix = MakeAftineMatrix(transform.scale, transform.rotate, transform.translate);
 	// ビュー行列の計算

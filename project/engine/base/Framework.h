@@ -52,7 +52,6 @@ public:
 	// getter 
 	WinApp* GetWinApp() const { return winApp.get(); }
 	DirectXCommon* GetDirectXCommon() const { return dxCommon.get(); }
-	//Camera* GetCamera() const { return camera; }
 	SrvManager* GetSrvManager() const { return srvManager.get(); }
 	//SceneManeger* GetSceneManeger() const { return sceneManeger_; }
 	// 終了フラグのチェック
