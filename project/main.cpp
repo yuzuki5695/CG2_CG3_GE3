@@ -103,6 +103,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // オブジェクト作成
     object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
+    // カメラの初期化
+    Camera* camera = new Camera();
+    camera->SetRotate({ 0.0f,0.0f,0.0f });
+    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    object3dCommon->SetDefaultCamera(camera);
+
 #pragma endregion 最初のシーンの初期化
 
     //リソースリークチェック
@@ -176,20 +182,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         // 開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
         ImGui::ShowDemoWindow();
 
-        //ImGui::Begin("Sprite");
-       /* ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
-        ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
-        ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-        ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
-        ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-        ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
-        ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
-        ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
-        //  ImGui::End();
-
+        ImGui::Begin("object");
+        if (!objects.empty()) {
+            ImGui::DragFloat3("translate", &objects[0]->GetTranslate().x, 0.01f);
+        }
+        //ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
+        //ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
+        //ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
+        //ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+        //ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
+        //ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
+        //ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+        ImGui::End();
 
         //ImGuiの描画コマンドを生成
         ImGui::Render();
+        
+        /*-------------------------------------------*/
+        /*--------------カメラの更新処理---------------*/
+        /*------------------------------------------*/
+        camera->Update();
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
