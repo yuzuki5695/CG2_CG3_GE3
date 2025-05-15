@@ -88,6 +88,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 最初のシーンの初期化
 
+    // カメラの初期化
+    Camera* camera = new Camera();
+    camera->SetRotate({ 0.0f,0.0f,0.0f });
+    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    object3dCommon->SetDefaultCamera(camera);
+
     // スプライトの初期化
     Sprite* sprite = new Sprite;
     sprite->Initialize(spriteCommon);
@@ -102,12 +108,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     object3d->Initialize(object3dCommon);
     // オブジェクト作成
     object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+    object3d->SetCamera(camera);
 
-    // カメラの初期化
-    Camera* camera = new Camera();
-    camera->SetRotate({ 0.0f,0.0f,0.0f });
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
-    object3dCommon->SetDefaultCamera(camera);
+    // 3Dオブジェクトの初期化
+    Object3d* object3d2 = new Object3d;
+    object3d2->Initialize(object3dCommon);
+    // オブジェクト作成
+    object3d2->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
+    object3d2->SetCamera(camera);
+
 
 #pragma endregion 最初のシーンの初期化
 
@@ -154,6 +163,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         position.x = objectsPosition[i];
         // 変更した座標を設定
         object3d->SetTranslate(position);
+        object3d->SetCamera(camera);
         // 情報を転送
         objects.push_back(object3d);
     }
@@ -184,8 +194,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         ImGui::Begin("object");
         if (!objects.empty()) {
-            ImGui::DragFloat3("translate", &objects[0]->GetTranslate().x, 0.01f);
+            ImGui::DragFloat3("translates", &objects[0]->GetTranslate().x, 0.01f);
         }
+
+        ImGui::DragFloat3("translate_1", &object3d->GetTranslate().x, 0.01f);
+        ImGui::DragFloat3("translate_2", &object3d2->GetTranslate().x, 0.01f);
+
         //ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
         //ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
         //ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
@@ -209,25 +223,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
         // 更新処理
-       // object3d->Update();
+       object3d->Update();
+       object3d2->Update();
 
-        size_t index = 0;
-        size_t maxIterations = 2;
-        for (Object3d* object3d : objects) {
-            if (index >= maxIterations) {
-                break; // 指定回数を超えたらループを終了
-            }
-            object3d->Update();
-            Vector3 rotation = object3d->GetRotate();
-            if (index == 0) {
-                rotation.z += 0.01f;
-            } else if (index == 1) {
-                rotation.y += 0.01f;
-            }
-            object3d->SetRotate(rotation);
-            // インクリメントして次へ
-            ++index;
-        }
+        //size_t index = 0;
+        //size_t maxIterations = 2;
+        //for (Object3d* object3d : objects) {
+        //    if (index >= maxIterations) {
+        //        break; // 指定回数を超えたらループを終了
+        //    }
+        //    object3d->Update();
+        //    Vector3 rotation = object3d->GetRotate();
+        //    if (index == 0) {
+        //        rotation.z += 0.01f;
+        //    } else if (index == 1) {
+        //        rotation.y += 0.01f;
+        //    }
+        //    object3d->SetRotate(rotation);
+        //    // インクリメントして次へ
+        //    ++index;
+        //}
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -266,11 +281,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 全てのObject3d個々の描画
       
-       // object3d->Draw();
+        object3d->Draw();
+        object3d2->Draw();
 
-        for (Object3d* object3d : objects) {
+     /*   for (Object3d* object3d : objects) {
             object3d->Draw();
-        }
+        }*/
 
 #pragma endregion 全てのObject3d個々の描画
 
@@ -322,6 +338,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     
     // 3Dオブジェクトの解放
     delete  object3d;
+    delete object3d2;
+
     for (Object3d* object3d : objects) {
         delete object3d;
     }
