@@ -90,9 +90,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // カメラの初期化
     Camera* camera = new Camera();
-    camera->SetRotate({ 0.0f,0.0f,0.0f });
     camera->SetTranslate({ 0.0f,0.0f,-700.0f });
     object3dCommon->SetDefaultCamera(camera);
+    
+    // カメラの現在の位置と回転を取得
+    Vector3 Cameraposition = camera->GetTranslate();
+    Vector3 Camerarotation = camera->GetRotate();
+
 
     // スプライトの初期化
     Sprite* sprite = new Sprite;
@@ -104,69 +108,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     model->Initialize(ModelManager::GetInstance()->GetModelCommon(), "Resources", ModelPath01);
 
     // 3Dオブジェクトの初期化
-    Object3d* object3d = new Object3d;
-    object3d->Initialize(object3dCommon);
+    Object3d* object_1 = new Object3d;
+    object_1->Initialize(object3dCommon);
     // オブジェクト作成
-    object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
-    object3d->SetCamera(camera);
+    object_1->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
     // 3Dオブジェクトの初期化
-    Object3d* object3d2 = new Object3d;
-    object3d2->Initialize(object3dCommon);
+    Object3d* object_2 = new Object3d;
+    object_2->Initialize(object3dCommon);
     // オブジェクト作成
-    object3d2->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
-    object3d2->SetCamera(camera);
+    object_2->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
 
 
 #pragma endregion 最初のシーンの初期化
 
     //リソースリークチェック
     D3DResourceLeakChecker leakCheck;
-
-    std::vector<Sprite*> sprites;
-    const uint32_t spritesize = 6;
-    float Position[spritesize]{};
-    for (uint32_t i = 0; i < spritesize; ++i) {
-        Position[i] = 180.0f * i;
-        Sprite* sprite = new Sprite();
-        sprite->Initialize(spriteCommon);
-        sprite->Crrate(TexturePath01,{ 0.0f,0.0f }, 0.0f, { 90.0f ,90.0f });
-        if (i % 2 == 1) {
-            sprite->SetTexture(TexturePath02);
-        }
-        // 現在の位置を取得
-        Vector2 position = sprite->GetPosition();
-        // 位置を変更する
-        position.x = Position[i];
-        position.y = 100.0f;
-        // 変更した座標を設定
-        sprite->SetPosition(position);
-        // 情報を転送
-        sprites.push_back(sprite);
-    }
-
-    std::vector<Object3d*> objects;
-    const uint32_t objectize = 2;
-    float objectsPosition[spritesize]{};
-    objectsPosition[0] = 2.0f;
-    objectsPosition[1] = -2.0f;
-    for (uint32_t i = 0; i < objectize; ++i) {
-        Object3d* object3d = new Object3d();
-        object3d->Initialize(object3dCommon);
-        if (i % 2 == 0) {
-            object3d->Crrate(ModelPath02, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
-        } else {
-            object3d->Crrate(ModelPath01, { { 1.0f, 1.0f, 1.0f }, { 0.0f, 3.0f, 0.0f }, { 0.0f, -0.5f, 0.0f } });
-        }
-        // 現在の位置を取得
-        Vector3 position = object3d->GetTranslate();
-        position.x = objectsPosition[i];
-        // 変更した座標を設定
-        object3d->SetTranslate(position);
-        object3d->SetCamera(camera);
-        // 情報を転送
-        objects.push_back(object3d);
-    }
 
     // ウィンドウの×ボタンが押されるまでループ
     while (true) {
@@ -193,21 +150,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         ImGui::ShowDemoWindow();
 
         ImGui::Begin("object");
-        if (!objects.empty()) {
-            ImGui::DragFloat3("translates", &objects[0]->GetTranslate().x, 0.01f);
-        }
-
-        ImGui::DragFloat3("translate_1", &object3d->GetTranslate().x, 0.01f);
-        ImGui::DragFloat3("translate_2", &object3d2->GetTranslate().x, 0.01f);
-
-        //ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
-        //ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-        //ImGui::ColorEdit3("colorSprite", reinterpret_cast<float*>(materialSpriteDate));
-        //ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-        //ImGui::DragFloat3("LightDirection", &directionalLightDate->direction.x, 0.01f);
-        //ImGui::DragFloat("LightIntensity", &directionalLightDate->intensity, 0.01f);
-        //ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+        ImGui::DragFloat3("translate_1", &object_1->GetTranslate().x, 0.01f);
+        ImGui::DragFloat3("translate_2", &object_2->GetTranslate().x, 0.01f);
+        ImGui::DragFloat3("Rotate_1", &object_1->GetRotate().x, 0.01f);
+        ImGui::DragFloat3("Rotate_2", &object_2->GetRotate().x, 0.01f);
         ImGui::End();
+
+        ImGui::Begin("Camera");
+        // カメラの位置を編集
+        ImGui::Text("Camera Transform");
+        ImGui::DragFloat3("Position", &Cameraposition.x, 0.1f);
+        ImGui::DragFloat("rotateX", &Camerarotation.x, 0.0001f, -0.01f, 0.01f, "%.6f");
+        ImGui::DragFloat("rotateY", &Camerarotation.y, 0.0001f, -0.01f, 0.01f, "%.6f");
+        ImGui::DragFloat("rotateZ", &Camerarotation.z, 0.0001f, -0.01f, 0.01f, "%.6f");;
+        ImGui::End();
+
 
         //ImGuiの描画コマンドを生成
         ImGui::Render();
@@ -215,7 +172,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*-------------------------------------------*/
         /*--------------カメラの更新処理---------------*/
         /*------------------------------------------*/
+        
+
+        camera->SetTranslate(Cameraposition);
+        camera->SetRotate(Camerarotation);
         camera->Update();
+
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の開始------------------------------------------*/
@@ -223,26 +185,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
         // 更新処理
-       object3d->Update();
-       object3d2->Update();
-
-        //size_t index = 0;
-        //size_t maxIterations = 2;
-        //for (Object3d* object3d : objects) {
-        //    if (index >= maxIterations) {
-        //        break; // 指定回数を超えたらループを終了
-        //    }
-        //    object3d->Update();
-        //    Vector3 rotation = object3d->GetRotate();
-        //    if (index == 0) {
-        //        rotation.z += 0.01f;
-        //    } else if (index == 1) {
-        //        rotation.y += 0.01f;
-        //    }
-        //    object3d->SetRotate(rotation);
-        //    // インクリメントして次へ
-        //    ++index;
-        //}
+       object_1->Update();
+       object_2->Update();
 
         /*-------------------------------------------------------------------------------------------------------*/
         /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -254,9 +198,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         /*---------------------------------------------------------------------------------------------------*/
        
         
-        // 更新処理
-        sprite->Update();
-
 
         /*----------------------------------------------------------------------------------------------------*/
         /*-------------------------------------Spriteの更新処理終了----------------------------------------------*/
@@ -281,12 +222,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 全てのObject3d個々の描画
       
-        object3d->Draw();
-        object3d2->Draw();
-
-     /*   for (Object3d* object3d : objects) {
-            object3d->Draw();
-        }*/
+        object_1->Draw();
+        object_2->Draw();
 
 #pragma endregion 全てのObject3d個々の描画
 
@@ -304,7 +241,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         //// Spriteの描画は常にuvCheckerにする
         //dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-        sprite->Draw();
+        //sprite->Draw();
      
 #pragma endregion 全てのSprite個々の描画
 
@@ -329,20 +266,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     //sprites.clear();
 
-    for (Sprite* sprite : sprites) {
-        delete sprite;
-    }
-    
     // 3Dモデルの解放
     delete model;
     
     // 3Dオブジェクトの解放
-    delete  object3d;
-    delete object3d2;
+    delete  object_1;
+    delete object_2;
 
-    for (Object3d* object3d : objects) {
-        delete object3d;
-    }
 
     // 入力解放
     delete input;
