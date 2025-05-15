@@ -25,6 +25,7 @@ private: // メンバ変数
     std::unique_ptr<Sprite> sprite = nullptr;
     // Object3d
     std::unique_ptr <Object3d> object3d = nullptr;
+    std::unique_ptr <Object3d> object3d2 = nullptr;
     /*-----ファイルデータ----*/
     // Texture
     std::string TexturePath01;

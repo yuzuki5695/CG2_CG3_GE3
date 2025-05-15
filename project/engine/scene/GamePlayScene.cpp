@@ -18,7 +18,7 @@ void GamePlayScene::Initialize() {
     // カメラの初期化
     camera = std::make_unique<Camera>();
     camera->SetRotate(Vector3(0.0f, 0.0f, 0.0f));
-    camera->SetTranslate(Vector3(0.0f, 0.0f, -1000.0f));
+    camera->SetTranslate(Vector3(0.0f, 0.0f, -100.0f));
     Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
     // カメラの現在の位置と回転を取得
@@ -52,6 +52,10 @@ void GamePlayScene::Initialize() {
     object3d = Object3d::Create(ModelPath01, Transform({ { 1.0f, 1.0f, 1.0f }, { 0.0f, 4.71f, 0.0f }, { 0.0f, 0.0f, 0.0f } }));
     // カメラをセット
     object3d->SetCamera(camera.get());
+    // オブジェクト作成
+    object3d2 = Object3d::Create(ModelPath01, Transform({ { 1.0f, 1.0f, 1.0f }, { 0.0f, 4.71f, 0.0f }, { 0.0f, 0.0f, 0.0f } }));
+    // カメラをセット
+    object3d2->SetCamera(camera.get());
 
 #pragma endregion 最初のシーンの初期化
     // 音声プレイフラグ
@@ -98,6 +102,7 @@ void GamePlayScene::Update() {
 
     // 更新処理
     object3d->Update();
+    object3d2->Update();
 
     /*-------------------------------------------------------------------------------------------------------*/
     /*-----------------------------------3Dオブジェクトの更新処理の終了------------------------------------------*/
@@ -125,6 +130,7 @@ void GamePlayScene::Draw() {
 
 
     object3d->Draw();
+    object3d2->Draw();
 
     /*------------------------------------------------------------------------------------------------------*/
     /*----------------------------------3Dオブジェクトの描画処理終了--------------------------------------------*/
