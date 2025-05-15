@@ -125,7 +125,7 @@ namespace MatrixVector {
     Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farclip) {
         Matrix4x4 result{};
 
-        float f = 1.0f / tanf(fovY * 0.5f * (float)M_PI / 180.0f);
+        float f = 1.0f / tanf(fovY * 0.5f); // ← ラジアン前提
         float zn = nearClip;
         float zf = farclip;
 

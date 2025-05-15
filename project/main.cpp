@@ -90,7 +90,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     // カメラの初期化
     Camera* camera = new Camera();
-    camera->SetTranslate({ 0.0f,0.0f,-700.0f });
+    //camera->SetTranslate({ 0.0f,0.0f,-700.0f });
     object3dCommon->SetDefaultCamera(camera);
     
     // カメラの現在の位置と回転を取得
